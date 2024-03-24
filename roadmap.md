@@ -1,5 +1,6 @@
 ## TODO:
 
+- add authorizer to api gateway
 - convert to monorepo
 - ensure terraform still works
 - add deploy workflows
