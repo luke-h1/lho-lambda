@@ -43,7 +43,7 @@ resource "aws_lambda_function" "lambda" {
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
   timeout          = 30
   memory_size      = 128
-
+  architectures    = ["arm64"]
   environment {
     variables = var.env_vars
   }

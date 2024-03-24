@@ -8,6 +8,7 @@ resource "aws_apigatewayv2_api" "lambda" {
     allow_methods  = ["*"]
     expose_headers = ["*"]
   }
+
 }
 
 resource "aws_apigatewayv2_domain_name" "domain_name" {
@@ -30,6 +31,11 @@ resource "aws_apigatewayv2_stage" "lambda" {
   api_id      = aws_apigatewayv2_api.lambda.id
   name        = var.env
   auto_deploy = true
+  default_route_settings {
+    throttling_burst_limit   = 100
+    throttling_rate_limit    = 100
+    detailed_metrics_enabled = true
+  }
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gw.arn
     format = jsonencode({
@@ -58,11 +64,10 @@ resource "aws_apigatewayv2_integration" "lambda" {
 # ROUTES 
 ##############################################################################
 resource "aws_apigatewayv2_route" "lambda_route_health" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/health"
-  api_key_required = false
-  operation_name   = "health"
+  api_id         = aws_apigatewayv2_api.lambda.id
+  target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key      = "GET /api/health"
+  operation_name = "health"
 }
 resource "aws_apigatewayv2_route" "lambda_route_health_head" {
   api_id           = aws_apigatewayv2_api.lambda.id
