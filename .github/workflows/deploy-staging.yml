@@ -197,7 +197,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':white_check_mark: prerelease of lho-lambda - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
+            args: ':white_check_mark: release of lho-lambda (staging) - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
 
   discord-fail-message:
     runs-on: ubuntu-latest
@@ -215,4 +215,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':red_circle: Build of prerelease lho-lambda - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            args: ':red_circle: Build of release lho-lambda (staging) - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
