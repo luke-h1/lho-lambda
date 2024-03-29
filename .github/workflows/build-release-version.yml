@@ -10,6 +10,7 @@ concurrency:
 permissions:
   issues: write
   contents: write
+  pull-requests: write
 
 env:
   PNPM_VERSION: 8.15.5
