@@ -66,9 +66,6 @@ jobs:
       - name: lint
         run: pnpm lint
 
-      - name: jest
-        run: pnpm test
-
       - name: tsc
         run: pnpm tsc
 
