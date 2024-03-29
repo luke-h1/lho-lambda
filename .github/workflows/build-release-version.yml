@@ -182,9 +182,9 @@ jobs:
         working-directory: terraform
         run: terraform plan -out=tfplan -no-color
 
-      - name: Terraform apply
-        working-directory: terraform
-        run: terraform apply -auto-approve tfplan
+    #   - name: Terraform apply
+    #     working-directory: terraform
+    #     run: terraform apply -auto-approve tfplan
 #   deploy:
 #     name: Deploy
 #     runs-on: ubuntu-latest
