@@ -9,6 +9,8 @@ concurrency:
   cancel-in-progress: false
 permissions:
   issues: write  
+env:
+  PNPM_VERSION: 8.15.5
 jobs:
   build:
     name: Build
