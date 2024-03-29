@@ -49,5 +49,8 @@
     "hooks": {
       "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
     }
+  },
+  "dependencies": {
+    "lerna": "^8.1.2"
   }
 }
