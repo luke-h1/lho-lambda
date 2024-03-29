@@ -172,7 +172,7 @@ jobs:
       - name: Get body
         id: get-body
         working-directory: terraform
-        run: cat tfplan
+        run: echo tfplan
 
       - uses: trstringer/manual-approval@v1
         timeout-minutes: 10
