@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.7"></a>
+
+## [0.1.7](https://github.com/luke-h1/lho-lambda/compare/v0.1.6...v0.1.7) (2024-03-29)
+
+### Chores
+
+- **ci:** update discord text ([93b1889](https://github.com/luke-h1/lho-lambda/commit/93b1889))
+
 <a name="0.1.6"></a>
 
 ## [0.1.6](https://github.com/luke-h1/lho-lambda/compare/v0.1.5...v0.1.6) (2024-03-29)
