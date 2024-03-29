@@ -170,7 +170,6 @@ jobs:
         timeout-minutes: 10
         with:
            secret: ${{ secrets.GITHUB_TOKEN }}
-           issue-body: tfplan
            approvers: luke-h1
            minimum-approvals: 1
            issue-title: "Approve terraform for ${{ github.head_ref }}-${{ github.sha }} release"
