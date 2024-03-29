@@ -309,4 +309,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':red-circle: Build of project lho-lambda - ${{ github.head_ref }} failed :red-circle: . URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            args: ':red_check_mark: Build of project lho-lambda - ${{ github.head_ref }} failed :red_check_mark: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
