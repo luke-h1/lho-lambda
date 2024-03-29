@@ -270,6 +270,15 @@ jobs:
     if: success()
     needs: release
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Fetch latest commits 
+        run: git fetch && git pull
+
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@main
@@ -281,7 +290,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':white_check_mark: Release ${{steps.package-version.outputs.current-version}} successful :white_check_mark:'
+            args: ':white_check_mark: Release of ${{steps.package-version.outputs.current-version}} successful :white_check_mark:'
 
   discord-fail-message:
     runs-on: ubuntu-latest
