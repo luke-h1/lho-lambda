@@ -8,7 +8,9 @@ concurrency:
   group: build-release-version
   cancel-in-progress: false
 permissions:
-  issues: write  
+  issues: write
+  contents: write
+
 env:
   PNPM_VERSION: 8.15.5
   # terraform variables; TODO: move to secretmanager
