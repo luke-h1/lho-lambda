@@ -169,12 +169,17 @@ jobs:
     #     env:
     #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get body
+        id: get-body
+        run: cat tfplan
+
+
       - uses: trstringer/manual-approval@v1
         timeout-minutes: 10
         with:
            secret: ${{ secrets.GITHUB_TOKEN }}
            approvers: luke-h1
-           issue-body: cat tfplan | grep -A 10000 "Terraform will perform the following actions:"
+           issue-body: ${{ steps.get-body.outputs.body }}
            minimum-approvals: 1
            issue-title: "Approve terraform for ${{ github.head_ref }}-${{ github.sha }} release"
            exclude-workflow-initiator-as-approver: false
