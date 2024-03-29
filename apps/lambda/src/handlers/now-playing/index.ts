@@ -1,8 +1,8 @@
-import spotifyService from "@lambda/services/spotifyService";
-import { Song, SongItem } from "@lambda/types/spotify";
+import spotifyService from '@lambda/services/spotifyService';
+import { Song, SongItem } from '@lambda/types/spotify';
 
 const nowPlayingHandler = async (): Promise<Song | string> => {
-  if (process.env.SHOULD_CALL_SPOTIFY === "false") {
+  if (process.env.SHOULD_CALL_SPOTIFY === 'false') {
     return JSON.stringify({
       isPlaying: false,
       status: 200,
@@ -31,10 +31,10 @@ const nowPlayingHandler = async (): Promise<Song | string> => {
   const title = song.item.name;
   const artist = song.item.artists
     .map((_artist: { name: string }) => _artist.name)
-    .join(", ");
+    .join(', ');
   const album = song.item.album.name;
 
-  // @ts-expect-error
+  // @ts-expect-error album images are optional
   const albumImageUrl = song.item.album.images[0].url;
   const songUrl = song.item.external_urls.spotify;
 

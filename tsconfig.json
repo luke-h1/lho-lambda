@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@lambda/*": ["./apps/lambda/src/*"],
+      "@lambda-test/*": ["./apps/lambda/src/test/*"]
+    },
+    "incremental": true
+  },
+  "exclude": ["node_modules"]
+}
