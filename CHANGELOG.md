@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.1"></a>
+
+## [0.1.1](https://github.com/luke-h1/lho-lambda/compare/v0.1.0...v0.1.1) (2024-03-29)
+
+### Bug Fixes
+
+- **ci:** github token ([4c4164e](https://github.com/luke-h1/lho-lambda/commit/4c4164e))
+- **ci:** pull before notifcation ([7c3fa78](https://github.com/luke-h1/lho-lambda/commit/7c3fa78))
+- **ci:** pull-requests write ([9cbde5d](https://github.com/luke-h1/lho-lambda/commit/9cbde5d))
+- **ci:** red check mark ([f01bae5](https://github.com/luke-h1/lho-lambda/commit/f01bae5))
+
+### Chores
+
+- **ci:** force version ([d645c66](https://github.com/luke-h1/lho-lambda/commit/d645c66))
+- **lambda:** update discord notifications ([7704e3b](https://github.com/luke-h1/lho-lambda/commit/7704e3b))
+
+### Features
+
+- **ci:** add discord notifications ([accca46](https://github.com/luke-h1/lho-lambda/commit/accca46))
+- **ci:** apply on release ([12cf2b8](https://github.com/luke-h1/lho-lambda/commit/12cf2b8))
+- **ci:** cat tfplan ([a0754be](https://github.com/luke-h1/lho-lambda/commit/a0754be))
+
 <a name="0.1.0"></a>
 
 # 0.1.0 (2024-03-29)
