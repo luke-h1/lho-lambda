@@ -42,8 +42,13 @@ resource "aws_lambda_function" "lambda" {
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
   timeout          = 30
-  memory_size      = 128
-  architectures    = ["arm64"]
+  tags = {
+    Environment = var.env
+    Service     = "nowplaying"
+  }
+  description   = "Now playing Lambda ${var.env}"
+  memory_size   = 128
+  architectures = ["arm64"]
   environment {
     variables = var.env_vars
   }
