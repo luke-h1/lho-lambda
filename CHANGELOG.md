@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.2"></a>
+
+## [0.1.2](https://github.com/luke-h1/lho-lambda/compare/v0.1.1...v0.1.2) (2024-03-29)
+
+### Bug Fixes
+
+- **ci:** cat tfplan on approval ([c262319](https://github.com/luke-h1/lho-lambda/commit/c262319))
+- **ci:** fix red circle displaying in discord ([d4509b4](https://github.com/luke-h1/lho-lambda/commit/d4509b4))
+- **ci:** fix work dir ([ada0b5e](https://github.com/luke-h1/lho-lambda/commit/ada0b5e))
+- **ci:** test echo body ([211ec29](https://github.com/luke-h1/lho-lambda/commit/211ec29))
+
 <a name="0.1.1"></a>
 
 ## [0.1.1](https://github.com/luke-h1/lho-lambda/compare/v0.1.0...v0.1.1) (2024-03-29)
