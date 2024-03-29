@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.4"></a>
+
+## [0.1.4](https://github.com/luke-h1/lho-lambda/compare/v0.1.3...v0.1.4) (2024-03-29)
+
+### Chores
+
+- **ci:** ensure branch is rebased from main ([9b36ae7](https://github.com/luke-h1/lho-lambda/commit/9b36ae7))
+
 <a name="0.1.3"></a>
 
 ## [0.1.3](https://github.com/luke-h1/lho-lambda/compare/v0.1.2...v0.1.3) (2024-03-29)
