@@ -3,9 +3,6 @@
   "packages": ["apps/*"],
   "command": {
     "version": {
-      "exact": true
-    },
-    "publish": {
       "conventionalCommits": true,
       "message": "chore(release): publish [skip ci]",
       "allowBranch": ["main"]

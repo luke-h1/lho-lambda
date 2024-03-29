@@ -238,7 +238,7 @@ jobs:
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
-          pnpm lerna publish --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --force-publish --no-push
+          pnpm lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push
           git push -u origin/main --force --no-verify --follow-tags
 
       - name: Terraform init
