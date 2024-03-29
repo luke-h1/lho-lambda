@@ -100,13 +100,16 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Terraform init
+        working-directory: terraform
         run: | 
           terraform init -backend-config="key=vpc/live.tfstate" -backend-config="bucket=nowplaying-live-terraform-state" -input=false
 
       - name: Terraform lint
+        working-directory: terraform
         run: terraform fmt -check
      
-      - name: Terraform plan 
+      - name: Terraform plan
+        working-directory: terraform
         run: terraform plan -out=tfplan -no-color
         
     #   - name: Comment Terraform Plan on PR
@@ -167,16 +170,20 @@ jobs:
           git push -u origin/main --force --no-verify --follow-tags
 
       - name: Terraform init
+        working-directory: terraform
         run: | 
           terraform init -backend-config="key=vpc/live.tfstate" -backend-config="bucket=nowplaying-live-terraform-state" -input=false
 
       - name: Terraform lint
+        working-directory: terraform
         run: terraform fmt -check
      
-      - name: Terraform plan 
+      - name: Terraform plan
+        working-directory: terraform
         run: terraform plan -out=tfplan -no-color
 
       - name: Terraform apply
+        working-directory: terraform
         run: terraform apply -auto-approve tfplan
 #   deploy:
 #     name: Deploy
@@ -184,4 +191,3 @@ jobs:
 #     needs: build
 #     timeout-minutes: 10
 #     steps:
-    
