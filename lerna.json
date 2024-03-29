@@ -4,6 +4,11 @@
   "command": {
     "version": {
       "exact": true
+    },
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish [skip ci]",
+      "allowBranch": ["main"]
     }
   },
   "version": "0.0.1"
