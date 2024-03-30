@@ -164,14 +164,6 @@ jobs:
       - name: Terraform plan
         working-directory: terraform
         run: terraform plan -out=tfplan -no-color
-        
-    #   - name: Comment Terraform Plan on PR
-    #     uses: blinqas/tf-plan-pr-comment@v1
-    #     with:
-    #       output_file: 'tfplan'
-    #       headline: "### Terraform Plan"
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get body
         id: get-body
@@ -302,7 +294,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':white_check_mark: Build of release lho-lambda - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
+            args: ':white_check_mark: Build of lho-lambda ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
 
   discord-fail-message:
     runs-on: ubuntu-latest
@@ -320,4 +312,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':red_circle: Build of release lho-lambda - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            args: ':red_circle: Build of lho-lambda ${{ steps.package-version.outputs.current-version }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
