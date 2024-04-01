@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.10"></a>
+
+## [0.1.10](https://github.com/luke-h1/lho-lambda/compare/v0.1.9...v0.1.10) (2024-04-01)
+
+### Chores
+
+- **ci:** add manual deploy ci ([48222e3](https://github.com/luke-h1/lho-lambda/commit/48222e3))
+
 <a name="0.1.9"></a>
 
 ## [0.1.9](https://github.com/luke-h1/lho-lambda/compare/v0.1.8...v0.1.9) (2024-04-01)
