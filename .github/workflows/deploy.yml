@@ -1,28 +1,34 @@
-name: Build pre-release version
+name: Deploy
 on:
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, edited, reopened]
-  issue_comment:
-    types: [created]
+    inputs:
+      env:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - live
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
   PNPM_VERSION: 8.15.5
   # terraform variables; TODO: move to secretmanager
-  TF_VAR_env: staging
+  TF_VAR_env: ${{ github.event.inputs.env  == 'staging' && 'staging' || 'live' }}
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
   TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
   TF_VAR_root_domain: lhowsam.com
   TF_VAR_sub_domain: nowplaying.lhowsam.com
-  TF_VAR_private_key: ${{ secrets.STAGING_PRIVATE_KEY }}
-  TF_VAR_certificate_body: ${{ secrets.STAGING_CERTIFICATE_BODY }}
-  TF_VAR_certificate_chain: ${{ secrets.STAGING_CERTIFICATE_CHAIN }}
+  TF_VAR_private_key: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_PRIVATE_KEY || secrets.LIVE_PRIVATE_KEY }}
+  TF_VAR_certificate_body: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_BODY || secrets.LIVE_CERTIFICATE_BODY }}
+  TF_VAR_certificate_chain: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_CHAIN || secrets.LIVE_CERTIFICATE_CHAIN }}
 
 jobs:
-  build:
-    name: Build
+  deploy:
+    name: Deploy ${{ github.event.inputs.env }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -40,7 +46,18 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Ensure branch is rebased with main
-        run: git pull --rebase
+        run: git pull --rebase          
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+          mask-aws-account-id: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -69,27 +86,41 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
-      - name: Check commit message
-        run: pnpm commitlint --from=HEAD^1
+      - name: Terraform init
+        working-directory: terraform
+        run: |
+          terraform init -backend-config="key=vpc/${{ github.event.inputs.env }}.tfstate" -backend-config="bucket=nowplaying-${{ github.event.inputs.env }}-terraform-state" -input=false
 
-      - name: format:check
-        run: pnpm format:check
-
-      - name: lint
-        run: pnpm lint
-
-      - name: tsc
-        run: pnpm tsc
+      - name: Terraform lint
+        working-directory: terraform
+        run: terraform fmt -check
 
       - name: build lambda
         run: | 
           cd apps/lambda
           pnpm build
 
+      - name: Terraform plan
+        id: plan
+        working-directory: terraform
+        run: terraform plan -no-color -out=tfplan
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: get package version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+        with:
+            path: apps/lambda
+
+      - name: Terraform apply
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan
 
   discord-message:
     runs-on: ubuntu-latest
-    needs: build
     if: success()
     steps:
       - name: Checkout repository
@@ -112,11 +143,10 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':white_check_mark: build of lho-lambda ${{ github.head_ref }} successful :white_check_mark:'
+            args: ':white_check_mark: release of lho-lambda (${{ github.event.inputs.env }}) - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
 
   discord-fail-message:
     runs-on: ubuntu-latest
-    needs: build
     if: failure()
     steps:
       - name: get package version
@@ -130,4 +160,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':red_circle: Build of lho-lambda ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            args: ':red_circle: Build of release lho-lambda (${{ github.event.inputs.env }}) - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
