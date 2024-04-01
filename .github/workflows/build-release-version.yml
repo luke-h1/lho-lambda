@@ -90,8 +90,8 @@ jobs:
           cd apps/lambda
           pnpm build
 
-  validate-infra:
-    name: Validate infra
+  validate:
+    name: Validate
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 10
@@ -183,7 +183,7 @@ jobs:
   release:
     name: Release packages
     runs-on: ubuntu-latest
-    needs: validate-infra
+    needs: validate
     timeout-minutes: 10
     steps:
       - name: Install moreutils
@@ -280,7 +280,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
-      - name: Fetch latest commits 
+      - name: Fetch latest commits
         run: git fetch && git pull
 
       - name: get package version
