@@ -173,15 +173,6 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - uses: trstringer/manual-approval@v1
-        timeout-minutes: 10
-        with:
-           secret: ${{ secrets.GH_TOKEN }}
-           approvers: luke-h1
-           minimum-approvals: 1
-           issue-title: "Approve terraform for ${{ github.head_ref }} prerelease"
-           exclude-workflow-initiator-as-approver: false
-
       - name: get package version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@main
