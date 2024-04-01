@@ -1,33 +1,35 @@
-name: Deploy staging
+name: Deploy
 on:
-  issue_comment:
-    types: [created]
   workflow_dispatch:
-    # inputs:
-    #   env:
-    #     description: 'Environment to deploy to'
-    #     required: true
-    #     default: 'staging'
+    inputs:
+      env:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - live
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
   PNPM_VERSION: 8.15.5
   # terraform variables; TODO: move to secretmanager
-  TF_VAR_env: staging
+  TF_VAR_env: ${{ github.event.inputs.env  == 'staging' && 'staging' || 'live' }}
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
   TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
   TF_VAR_root_domain: lhowsam.com
   TF_VAR_sub_domain: nowplaying.lhowsam.com
-  TF_VAR_private_key: ${{ secrets.STAGING_PRIVATE_KEY }}
-  TF_VAR_certificate_body: ${{ secrets.STAGING_CERTIFICATE_BODY }}
-  TF_VAR_certificate_chain: ${{ secrets.STAGING_CERTIFICATE_CHAIN }}
+  TF_VAR_private_key: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_PRIVATE_KEY || secrets.LIVE_PRIVATE_KEY }}
+  TF_VAR_certificate_body: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_BODY || secrets.LIVE_CERTIFICATE_BODY }}
+  TF_VAR_certificate_chain: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_CHAIN || secrets.LIVE_CERTIFICATE_CHAIN }}
 
 jobs:
   deploy:
-    name: Deploy to staging
+    name: Deploy ${{ github.event.inputs.env }}
     runs-on: ubuntu-latest
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, '/deploy-staging') || contains(fromJSON('["/deploy-staging"]'), github.event.comment.body)) }} || github.event_name == 'workflow_dispatch'
     timeout-minutes: 10
     steps:
       - name: Install moreutils
@@ -42,6 +44,9 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
+
+      - name: Ensure branch is rebased with main
+        run: git pull --rebase          
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -83,8 +88,8 @@ jobs:
 
       - name: Terraform init
         working-directory: terraform
-        run: | 
-          terraform init -backend-config="key=vpc/staging.tfstate" -backend-config="bucket=nowplaying-staging-terraform-state" -input=false
+        run: |
+          terraform init -backend-config="key=vpc/${{ github.event.inputs.env }}.tfstate" -backend-config="bucket=nowplaying-${{ github.event.inputs.env }}-terraform-state" -input=false
 
       - name: Terraform lint
         working-directory: terraform
@@ -94,7 +99,7 @@ jobs:
         run: | 
           cd apps/lambda
           pnpm build
-     
+
       - name: Terraform plan
         id: plan
         working-directory: terraform
@@ -138,7 +143,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':white_check_mark: release of lho-lambda (staging) - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
+            args: ':white_check_mark: release of lho-lambda (${{ github.event.inputs.env }}) - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
 
   discord-fail-message:
     runs-on: ubuntu-latest
@@ -155,4 +160,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-            args: ':red_circle: Build of release lho-lambda (staging) - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            args: ':red_circle: Build of release lho-lambda (${{ github.event.inputs.env }}) - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
