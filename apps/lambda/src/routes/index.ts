@@ -4,7 +4,8 @@ import versionHandler from '@lambda/handlers/version';
 
 const routes = async (path: string) => {
   let response: unknown;
-  const includeCacheHeader = path === 'now-playing';
+  const includeCacheHeader =
+    path === 'now-playing' || path === '/api/now-playing';
   const revalidate = 6;
 
   switch (path) {
