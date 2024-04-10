@@ -267,7 +267,7 @@ jobs:
 
       - name: Terraform apply
         working-directory: terraform
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve tfplan -lock=true
 
   discord-message:
     runs-on: ubuntu-latest
