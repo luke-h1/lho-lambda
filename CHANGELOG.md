@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.12"></a>
+
+## [0.1.12](https://github.com/luke-h1/lho-lambda/compare/v0.1.11...v0.1.12) (2024-04-10)
+
+### Bug Fixes
+
+- **infrastructure:** lock tf applies ([5a3ec92](https://github.com/luke-h1/lho-lambda/commit/5a3ec92))
+- **infrastructure:** remove tf locks ([ef39daa](https://github.com/luke-h1/lho-lambda/commit/ef39daa))
+
 <a name="0.1.11"></a>
 
 ## [0.1.11](https://github.com/luke-h1/lho-lambda/compare/v0.1.10...v0.1.11) (2024-04-04)
