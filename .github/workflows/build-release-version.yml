@@ -165,11 +165,6 @@ jobs:
         working-directory: terraform
         run: terraform plan -out=tfplan -no-color
 
-      - name: Get body
-        id: get-body
-        working-directory: terraform
-        run: echo tfplan
-
       - uses: trstringer/manual-approval@v1
         timeout-minutes: 10
         with:
