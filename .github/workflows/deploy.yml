@@ -121,6 +121,7 @@ jobs:
 
   discord-message:
     runs-on: ubuntu-latest
+    needs: deploy
     if: success()
     steps:
       - name: Checkout repository
