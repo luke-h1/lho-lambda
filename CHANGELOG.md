@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.20"></a>
+
+## [0.1.20](https://github.com/luke-h1/lho-lambda/compare/v0.1.19...v0.1.20) (2024-04-16)
+
+### Chores
+
+- **infrastructure:** deploy test tag ([782b220](https://github.com/luke-h1/lho-lambda/commit/782b220))
+
 <a name="0.1.19"></a>
 
 ## [0.1.19](https://github.com/luke-h1/lho-lambda/compare/v0.1.18...v0.1.19) (2024-04-16)
