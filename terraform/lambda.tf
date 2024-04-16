@@ -31,7 +31,6 @@ resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-
 }
 
 resource "aws_lambda_function" "lambda" {
@@ -60,4 +59,9 @@ resource "aws_lambda_function" "lambda" {
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
   retention_in_days = 3
+  tags = {
+    Environment = var.env
+    Service     = "nowplaying"
+    s3_sync     = "true"
+  }
 }
