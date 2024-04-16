@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.18"></a>
+
+## [0.1.18](https://github.com/luke-h1/lho-lambda/compare/v0.1.17...v0.1.18) (2024-04-16)
+
+### Chores
+
+- **lambda:** enable log export for lambda cw ([a6dcd49](https://github.com/luke-h1/lho-lambda/commit/a6dcd49))
+
 <a name="0.1.17"></a>
 
 ## [0.1.17](https://github.com/luke-h1/lho-lambda/compare/v0.1.16...v0.1.17) (2024-04-16)
