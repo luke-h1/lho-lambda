@@ -44,6 +44,7 @@ resource "aws_lambda_function" "lambda" {
   tags = {
     Environment = var.env
     Service     = "nowplaying"
+    s3export    = var.env == "live" ? "true" : "false"
   }
   description   = "Now playing Lambda ${var.env}"
   memory_size   = 128
