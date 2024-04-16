@@ -62,6 +62,6 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   tags = {
     Environment = var.env
     Service     = "nowplaying"
-    s3_sync     = "true"
+    s3export    = var.env == "live" ? "true" : "false"
   }
 }
