@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.17"></a>
+
+## [0.1.17](https://github.com/luke-h1/lho-lambda/compare/v0.1.16...v0.1.17) (2024-04-16)
+
+### Chores
+
+- **lambda:** reduce cw retention to 3 days ([f4bcfdf](https://github.com/luke-h1/lho-lambda/commit/f4bcfdf))
+
 <a name="0.1.16"></a>
 
 ## [0.1.16](https://github.com/luke-h1/lho-lambda/compare/v0.1.15...v0.1.16) (2024-04-15)
