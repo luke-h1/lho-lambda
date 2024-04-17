@@ -34,7 +34,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
   default_route_settings {
     throttling_burst_limit   = 100
     throttling_rate_limit    = 100
-    detailed_metrics_enabled = true
+    detailed_metrics_enabled = false
   }
   # access_log_settings {
   #   destination_arn = aws_cloudwatch_log_group.api_gw.arn
