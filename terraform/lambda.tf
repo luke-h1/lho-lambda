@@ -52,9 +52,6 @@ resource "aws_lambda_function" "lambda" {
   environment {
     variables = var.env_vars
   }
-  tracing_config {
-    mode = "Active"
-  }
 }
 
 # resource "aws_cloudwatch_log_group" "lambda_logs" {
