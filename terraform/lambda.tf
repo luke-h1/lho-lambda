@@ -49,12 +49,13 @@ resource "aws_lambda_function" "lambda" {
   }
 }
 
-# resource "aws_cloudwatch_log_group" "lambda_logs" {
-#   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
-#   retention_in_days = 1
-#   tags = {
-#     Environment = var.env
-#     Service     = "nowplaying"
-#     s3export    = var.env == "live" ? "true" : "false"
-#   }
-# }
+resource "aws_cloudwatch_log_group" "lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
+  retention_in_days = 1
+  log_group_class   = "INFREQUENT_ACCESS"
+  tags = {
+    Environment = var.env
+    Service     = "nowplaying"
+    s3export    = "true"
+  }
+}
