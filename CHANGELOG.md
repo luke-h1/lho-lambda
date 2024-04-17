@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.23"></a>
+
+## [0.1.23](https://github.com/luke-h1/lho-lambda/compare/v0.1.21...v0.1.23) (2024-04-17)
+
+### Bug Fixes
+
+- **lambda:** cw ([b27bb5f](https://github.com/luke-h1/lho-lambda/commit/b27bb5f))
+
+### Chores
+
+- **lambda:** release ([552fd25](https://github.com/luke-h1/lho-lambda/commit/552fd25))
+- **lambda:** remove cloudwatch ([1e21186](https://github.com/luke-h1/lho-lambda/commit/1e21186))
+- **release:** publish [skip ci] ([250becd](https://github.com/luke-h1/lho-lambda/commit/250becd))
+
 <a name="0.1.22"></a>
 
 ## [0.1.22](https://github.com/luke-h1/lho-lambda/compare/v0.1.21...v0.1.22) (2024-04-17)
