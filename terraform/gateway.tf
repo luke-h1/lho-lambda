@@ -95,10 +95,10 @@ resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
 ##############################################################################
 
 
-# resource "aws_cloudwatch_log_group" "api_gw" {
-#   name              = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
-#   retention_in_days = 3
-# }
+resource "aws_cloudwatch_log_group" "api_gw" {
+  name              = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
+  retention_in_days = 3
+}
 
 resource "aws_lambda_permission" "api_gw" {
   statement_id  = "AllowExecutionFromAPIGateway"
