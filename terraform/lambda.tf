@@ -40,6 +40,9 @@ resource "aws_lambda_function" "lambda" {
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
   timeout          = 30
+  snap_start {
+    apply_on = "PublishedVersions"
+  }
 
   tags = {
     Environment = var.env
