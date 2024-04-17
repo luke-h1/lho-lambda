@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.27"></a>
+
+## [0.1.27](https://github.com/luke-h1/lho-lambda/compare/v0.1.25...v0.1.27) (2024-04-17)
+
+### Chores
+
+- **release:** publish [skip ci] ([d6c4243](https://github.com/luke-h1/lho-lambda/commit/d6c4243))
+
 <a name="0.1.26"></a>
 
 ## [0.1.26](https://github.com/luke-h1/lho-lambda/compare/v0.1.25...v0.1.26) (2024-04-17)
