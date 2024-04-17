@@ -19,6 +19,10 @@ resource "aws_iam_role" "lambda_exec" {
     ]
   })
 }
+resource "aws_iam_role_policy_attachment" "lambda_policy" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
 
 # data "aws_iam_policy" "aws_xray_write_only_access" {
 #   arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
@@ -36,6 +40,7 @@ resource "aws_lambda_function" "lambda" {
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
   timeout          = 30
+
   tags = {
     Environment = var.env
     Service     = "nowplaying"
