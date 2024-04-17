@@ -1,6 +1,6 @@
 {
   "name": "lambda",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "scripts": {
     "tsc": "tsc --noEmit",
     "clean": "rm -rf ./dist",
