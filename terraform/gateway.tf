@@ -8,7 +8,6 @@ resource "aws_apigatewayv2_api" "lambda" {
     allow_methods  = ["*"]
     expose_headers = ["*"]
   }
-
 }
 
 resource "aws_apigatewayv2_domain_name" "domain_name" {

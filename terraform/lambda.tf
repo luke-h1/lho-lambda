@@ -20,18 +20,13 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-data "aws_iam_policy" "aws_xray_write_only_access" {
-  arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
-}
-resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = data.aws_iam_policy.aws_xray_write_only_access.arn
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
+# data "aws_iam_policy" "aws_xray_write_only_access" {
+#   arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+# }
+# resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
+#   role       = aws_iam_role.lambda_exec.name
+#   policy_arn = data.aws_iam_policy.aws_xray_write_only_access.arn
+# }
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "nowplaying-lambda-${var.env}"
