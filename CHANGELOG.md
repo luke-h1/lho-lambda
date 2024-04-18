@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.31"></a>
+
+## [0.1.31](https://github.com/luke-h1/lho-lambda/compare/v0.1.30...v0.1.31) (2024-04-18)
+
+### Chores
+
+- **infrastructure:** disable cloudwatch ([4fce693](https://github.com/luke-h1/lho-lambda/commit/4fce693))
+
 <a name="0.1.30"></a>
 
 ## [0.1.30](https://github.com/luke-h1/lho-lambda/compare/v0.1.29...v0.1.30) (2024-04-17)
