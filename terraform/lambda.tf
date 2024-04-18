@@ -19,10 +19,10 @@ resource "aws_iam_role" "lambda_exec" {
     ]
   })
 }
-resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
+# resource "aws_iam_role_policy_attachment" "lambda_policy" {
+#   role       = aws_iam_role.lambda_exec.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+# }
 
 # data "aws_iam_policy" "aws_xray_write_only_access" {
 #   arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
@@ -54,13 +54,13 @@ resource "aws_lambda_function" "lambda" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "lambda_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
-  retention_in_days = 1
-  log_group_class   = "INFREQUENT_ACCESS"
-  tags = {
-    Environment = var.env
-    Service     = "nowplaying"
-    s3export    = "true"
-  }
-}
+# resource "aws_cloudwatch_log_group" "lambda_logs" {
+#   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
+#   retention_in_days = 1
+#   log_group_class   = "INFREQUENT_ACCESS"
+#   tags = {
+#     Environment = var.env
+#     Service     = "nowplaying"
+#     s3export    = "true"
+#   }
+# }
