@@ -1,0 +1,164 @@
+name: Destroy
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'Environment to destroy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - live
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  PNPM_VERSION: 8.15.5
+  # terraform variables; TODO: move to secretmanager
+  TF_VAR_env: ${{ github.event.inputs.env  == 'staging' && 'staging' || 'live' }}
+  TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
+  TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
+  TF_VAR_root_domain: lhowsam.com
+  TF_VAR_sub_domain: nowplaying.lhowsam.com
+  TF_VAR_private_key: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_PRIVATE_KEY || secrets.LIVE_PRIVATE_KEY }}
+  TF_VAR_certificate_body: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_BODY || secrets.LIVE_CERTIFICATE_BODY }}
+  TF_VAR_certificate_chain: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_CHAIN || secrets.LIVE_CERTIFICATE_CHAIN }}
+
+jobs:
+  destroy:
+    name: Destroy ${{ github.event.inputs.env }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install moreutils
+        run: sudo apt install moreutils
+
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Ensure branch is rebased with main
+        run: git pull --rebase          
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+          mask-aws-account-id: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm i
+
+      - name: Terraform init
+        working-directory: terraform
+        run: |
+          terraform init -backend-config="key=vpc/${{ github.event.inputs.env }}.tfstate" -backend-config="bucket=nowplaying-${{ github.event.inputs.env }}-terraform-state" -input=false
+
+      - name: Terraform lint
+        working-directory: terraform
+        run: terraform fmt -check
+
+      - name: build lambda
+        run: | 
+          cd apps/lambda
+          pnpm build
+
+      - name: Terraform plan
+        id: plan
+        working-directory: terraform
+        run: terraform plan -no-color -out=tfplan
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: get package version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+        with:
+            path: apps/lambda
+
+      - name: Terraform apply
+        working-directory: terraform
+        run: terraform destroy -no-input -auto-approve tfplan
+
+  discord-message:
+    runs-on: ubuntu-latest
+    needs: destroy
+    if: success()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Fetch latest commits 
+        run: git fetch && git pull
+
+      - name: get package version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+        with:
+            path: apps/lambda
+
+      - name: Discord success notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: Ilshidur/action-discord@master
+        with:
+            args: ':white_check_mark: release of lho-lambda (${{ github.event.inputs.env }}) - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
+
+  discord-fail-message:
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: get package version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+        with:
+            path: apps/lambda
+
+      - name: Discord fail notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: Ilshidur/action-discord@master
+        with:
+            args: ':red_circle: Build of release lho-lambda (${{ github.event.inputs.env }}) - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
