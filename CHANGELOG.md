@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.38"></a>
+
+## [0.1.38](https://github.com/luke-h1/lho-lambda/compare/v0.1.37...v0.1.38) (2024-04-19)
+
+### Bug Fixes
+
+- **infrastructure:** destroy ([e99ab2f](https://github.com/luke-h1/lho-lambda/commit/e99ab2f))
+- **infrastructure:** destroy ([128e588](https://github.com/luke-h1/lho-lambda/commit/128e588))
+- **infrastructure:** destroy workflow ([81d39c0](https://github.com/luke-h1/lho-lambda/commit/81d39c0))
+
 <a name="0.1.37"></a>
 
 ## [0.1.37](https://github.com/luke-h1/lho-lambda/compare/v0.1.36...v0.1.37) (2024-04-19)
