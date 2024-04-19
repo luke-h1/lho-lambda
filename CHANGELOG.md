@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.39"></a>
+
+## [0.1.39](https://github.com/luke-h1/lho-lambda/compare/v0.1.38...v0.1.39) (2024-04-19)
+
+### Bug Fixes
+
+- **infrastructure:** certs ([d61f009](https://github.com/luke-h1/lho-lambda/commit/d61f009))
+- **infrastructure:** new certs ([6d1fc84](https://github.com/luke-h1/lho-lambda/commit/6d1fc84))
+
 <a name="0.1.38"></a>
 
 ## [0.1.38](https://github.com/luke-h1/lho-lambda/compare/v0.1.37...v0.1.38) (2024-04-19)
