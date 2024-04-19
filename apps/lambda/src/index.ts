@@ -23,6 +23,8 @@ export const handler: Handler = async (
 
   AWSXRay.enableAutomaticMode();
 
+  console.log('path is', path);
+
   try {
     return await Promise.race([routes(path), lambdaTimeout(context)]).then(
       value => value,
