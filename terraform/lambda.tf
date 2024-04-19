@@ -40,10 +40,9 @@ resource "aws_lambda_function" "lambda" {
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
   timeout          = 10
-  tracing_config {
-    mode = "PassThrough"
-  }
-
+  # tracing_config {
+  #   mode = ""
+  # }
   tags = {
     Environment = var.env
     Service     = "nowplaying"
@@ -60,8 +59,8 @@ resource "aws_lambda_function" "lambda" {
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
   retention_in_days = 1
-  log_group_class   = "INFREQUENT_ACCESS"
-  skip_destroy      = false
+  # log_group_class   = "INFREQUENT_ACCESS"
+  skip_destroy = false
 
   tags = {
     Environment = var.env
