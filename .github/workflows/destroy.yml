@@ -115,7 +115,7 @@ jobs:
         with:
             path: apps/lambda
 
-      - name: Terraform apply
+      - name: Terraform destroy
         working-directory: terraform
         run: terraform destroy -auto-approve
 
