@@ -117,7 +117,7 @@ jobs:
 
       - name: Terraform apply
         working-directory: terraform
-        run: terraform destroy -no-input -auto-approve tfplan
+        run: terraform destroy -auto-approve
 
   discord-message:
     runs-on: ubuntu-latest
