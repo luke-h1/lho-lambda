@@ -186,4 +186,4 @@ certs
 dist
 .terraform.lock.hcl
 .terraform
-*.zip
+*.zip.DS_Store
