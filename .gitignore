@@ -187,3 +187,4 @@ dist
 .terraform.lock.hcl
 .terraform
 *.zip.DS_Store
+lambda.zip
