@@ -36,22 +36,22 @@ resource "aws_apigatewayv2_stage" "lambda" {
     detailed_metrics_enabled = false
     data_trace_enabled       = false
   }
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gw.arn
-    format = jsonencode({
-      requestId               = "$context.requestId"
-      sourceIp                = "$context.identity.sourceIp"
-      requestTime             = "$context.requestTime"
-      protocol                = "$context.protocol"
-      httpMethod              = "$context.httpMethod"
-      resourcePath            = "$context.resourcePath"
-      routeKey                = "$context.routeKey"
-      status                  = "$context.status"
-      responseLength          = "$context.responseLength"
-      integrationErrorMessage = "$context.integrationErrorMessage"
-      }
-    )
-  }
+  # access_log_settings {
+  #   destination_arn = aws_cloudwatch_log_group.api_gw.arn
+  #   format = jsonencode({
+  #     requestId               = "$context.requestId"
+  #     sourceIp                = "$context.identity.sourceIp"
+  #     requestTime             = "$context.requestTime"
+  #     protocol                = "$context.protocol"
+  #     httpMethod              = "$context.httpMethod"
+  #     resourcePath            = "$context.resourcePath"
+  #     routeKey                = "$context.routeKey"
+  #     status                  = "$context.status"
+  #     responseLength          = "$context.responseLength"
+  #     integrationErrorMessage = "$context.integrationErrorMessage"
+  #     }
+  #   )
+  # }
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
