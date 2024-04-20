@@ -24,7 +24,6 @@ resource "aws_apigatewayv2_api_mapping" "lambda" {
   api_id      = aws_apigatewayv2_api.lambda.id
   domain_name = aws_apigatewayv2_domain_name.domain_name.domain_name
   stage       = aws_apigatewayv2_stage.lambda.id
-
 }
 
 resource "aws_apigatewayv2_stage" "lambda" {
@@ -99,7 +98,7 @@ resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
 resource "aws_cloudwatch_log_group" "api_gw" {
   name              = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
   retention_in_days = 1
-  log_group_class   = "STANDARD"
+  log_group_class   = "INFREQUENT_ACCESS"
   tags = {
     Environment = var.env
     Service     = "nowplaying"
