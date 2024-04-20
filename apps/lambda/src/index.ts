@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, Context, Handler } from 'aws-lambda';
-import AWSXRay from 'aws-xray-sdk';
+// import AWSXRay from 'aws-xray-sdk';
 import routes from './routes';
 import buildPath from './utils/buildPath';
 import isErrorLike from './utils/isErrorLike';
@@ -21,7 +21,7 @@ export const handler: Handler = async (
     // @ts-expect-error fix typings for path
     event.rawPath;
 
-  AWSXRay.enableAutomaticMode();
+  // AWSXRay.enableAutomaticMode();
 
   console.log('path is', path);
 
