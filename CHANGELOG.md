@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.1.40"></a>
+
+## [0.1.40](https://github.com/luke-h1/lho-lambda/compare/v0.1.39...v0.1.40) (2024-04-20)
+
+### Chores
+
+- **infrastructure:** disable logging ([840cc33](https://github.com/luke-h1/lho-lambda/commit/840cc33))
+- **infrastructure:** disable logging ([b8ae9d3](https://github.com/luke-h1/lho-lambda/commit/b8ae9d3))
+
 <a name="0.1.39"></a>
 
 ## [0.1.39](https://github.com/luke-h1/lho-lambda/compare/v0.1.38...v0.1.39) (2024-04-19)
