@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.2.1"></a>
+
+## [0.2.1](https://github.com/luke-h1/lho-lambda/compare/v0.2.0...v0.2.1) (2024-04-24)
+
+### Bug Fixes
+
+- **lambda:** fix version endpoint ([7f843ab](https://github.com/luke-h1/lho-lambda/commit/7f843ab))
+
 <a name="0.2.0"></a>
 
 # [0.2.0](https://github.com/luke-h1/lho-lambda/compare/v0.1.43...v0.2.0) (2024-04-24)
