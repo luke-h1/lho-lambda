@@ -16,9 +16,9 @@ export const handler: Handler = async (
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     event.requestContext?.path?.split('/').pop() ??
-    // @ts-expect-error fix typings for path
+    // @ts-expect-error missing aws-lambda types
     event.routeKey ??
-    // @ts-expect-error fix typings for path
+    // @ts-expect-error missing aws-lambda types
     event.rawPath;
 
   // AWSXRay.enableAutomaticMode();

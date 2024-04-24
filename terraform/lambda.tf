@@ -53,7 +53,10 @@ resource "aws_lambda_function" "lambda" {
   memory_size   = 128
   architectures = ["arm64"]
   environment {
-    variables = var.env_vars
+    variables = merge(var.env_vars, {
+      DEPLOYED_AT = timestamp()
+      DEPLOYED_BY = var.deployed_by
+    })
   }
 }
 

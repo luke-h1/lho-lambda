@@ -42,3 +42,8 @@ variable "certificate_chain" {
   type        = string
   description = "The certificate chain for the certificate"
 }
+
+variable "deployed_by" {
+  type        = string
+  description = "The user who deployed the lambda"
+}
