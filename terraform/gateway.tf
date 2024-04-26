@@ -12,7 +12,6 @@ resource "aws_apigatewayv2_api" "lambda" {
 
 resource "aws_apigatewayv2_domain_name" "domain_name" {
   domain_name = var.env == "live" ? "nowplaying.${var.root_domain}" : "nowplaying-${var.env}.${var.root_domain}"
-
   domain_name_configuration {
     certificate_arn = aws_acm_certificate.cert.arn
     endpoint_type   = "REGIONAL"
@@ -76,11 +75,13 @@ resource "aws_apigatewayv2_route" "lambda_route_health_head" {
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_version" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/version"
-  api_key_required = false
-  operation_name   = "version"
+  api_id             = aws_apigatewayv2_api.lambda.id
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key          = "GET /api/version"
+  api_key_required   = false
+  operation_name     = "version"
+  authorization_type = "CUSTOM"
+  authorizer_id      = aws_lambda_function.authorizer.id
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_now_playing" {

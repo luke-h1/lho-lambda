@@ -47,3 +47,9 @@ variable "deployed_by" {
   type        = string
   description = "The user who deployed the lambda"
 }
+
+variable "jwt_secret" {
+  type        = string
+  description = "The secret to use for the authorizer"
+  default     = "123"
+}
