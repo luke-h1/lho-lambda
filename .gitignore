@@ -188,3 +188,4 @@ dist
 .terraform
 *.zip.DS_Store
 lambda.zip
+.DS_Store
