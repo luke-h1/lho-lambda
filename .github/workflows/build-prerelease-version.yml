@@ -84,7 +84,10 @@ jobs:
         run: | 
           cd apps/lambda
           pnpm build
-          cd ../authorizer
+
+      - name: build auth lambda
+        run: |
+          cd apps/authorizer
           pnpm build
 
   deploy:
@@ -165,6 +168,11 @@ jobs:
       - name: build lambda
         run: | 
           cd apps/lambda
+          pnpm build
+
+      - name: build auth lambda
+        run: | 
+          cd apps/authorizer
           pnpm build
      
       - name: Terraform plan
