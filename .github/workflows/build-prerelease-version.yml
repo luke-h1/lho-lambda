@@ -84,6 +84,8 @@ jobs:
         run: | 
           cd apps/lambda
           pnpm build
+          cd ../authorizer
+          pnpm build
 
   deploy:
     name: Deploy to staging
