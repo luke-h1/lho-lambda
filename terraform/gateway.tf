@@ -30,8 +30,8 @@ resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
   name   = var.env
   default_route_settings {
-    throttling_burst_limit = 100
-    throttling_rate_limit  = 100
+    throttling_burst_limit = 5000
+    throttling_rate_limit  = 10000
     logging_level          = "OFF"
   }
   # access_log_settings {
