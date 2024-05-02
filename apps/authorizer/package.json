@@ -1,6 +1,6 @@
 {
   "name": "authorizer",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "scripts": {
     "tsc": "tsc --noEmit",
     "clean": "rm -rf ./dist",
