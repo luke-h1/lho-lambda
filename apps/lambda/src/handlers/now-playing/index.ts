@@ -3,28 +3,40 @@ import { Song, SongItem } from '@lambda/types/spotify';
 
 const nowPlayingHandler = async (): Promise<Song | string> => {
   if (process.env.SHOULD_CALL_SPOTIFY === 'false') {
-    return JSON.stringify({
-      isPlaying: false,
-      status: 200,
-      maintenance: true,
-    });
+    return JSON.stringify(
+      {
+        isPlaying: false,
+        status: 200,
+        maintenance: true,
+      },
+      null,
+      2,
+    );
   }
 
   const res = await spotifyService.getNowPlaying();
   if (res.status === 204 || res.status > 400) {
-    return JSON.stringify({
-      isPlaying: false,
-      status: 200,
-    });
+    return JSON.stringify(
+      {
+        isPlaying: false,
+        status: 200,
+      },
+      null,
+      2,
+    );
   }
 
   const song = (await res.json()) as SongItem;
 
   if (!song.item) {
-    return JSON.stringify({
-      isPlaying: false,
-      status: 200,
-    });
+    return JSON.stringify(
+      {
+        isPlaying: false,
+        status: 200,
+      },
+      null,
+      2,
+    );
   }
 
   const isPlaying = song.is_playing;
@@ -38,13 +50,17 @@ const nowPlayingHandler = async (): Promise<Song | string> => {
   const albumImageUrl = song.item.album.images[0].url;
   const songUrl = song.item.external_urls.spotify;
 
-  return JSON.stringify({
-    album,
-    albumImageUrl,
-    artist,
-    isPlaying,
-    songUrl,
-    title,
-  });
+  return JSON.stringify(
+    {
+      album,
+      albumImageUrl,
+      artist,
+      isPlaying,
+      songUrl,
+      title,
+    },
+    null,
+    2,
+  );
 };
 export default nowPlayingHandler;

@@ -22,7 +22,7 @@ const routes = async (path: string) => {
       break;
 
     default:
-      response = JSON.stringify({ message: 'route not found' });
+      response = JSON.stringify({ message: 'route not found' }, null, 2);
       break;
   }
 
