@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.2.8"></a>
+
+## [0.2.8](https://github.com/luke-h1/lho-lambda/compare/v0.2.7...v0.2.8) (2024-05-04)
+
+### Chores
+
+- **infrastructure:** update pnpm ([28844aa](https://github.com/luke-h1/lho-lambda/commit/28844aa))
+
 <a name="0.2.7"></a>
 
 ## [0.2.7](https://github.com/luke-h1/lho-lambda/compare/v0.2.6...v0.2.7) (2024-05-04)
