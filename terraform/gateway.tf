@@ -33,10 +33,12 @@ locals {
       method = "GET"
     },
     version = {
+      key    = "version"
       path   = "/api/version",
       method = "GET"
     },
     now_playing = {
+      key    = "now-playing"
       path   = "/api/now-playing",
       method = "GET"
     }
@@ -54,13 +56,40 @@ resource "aws_apigatewayv2_stage" "lambda" {
 
   dynamic "route_settings" {
     for_each = local.routes
+    iterator = route
     content {
-      route_key              = "${route_settings.value.method} ${route_settings.value.path}"
+      route_key              = route.key
       throttling_burst_limit = 10000
       throttling_rate_limit  = 20000
       logging_level          = "OFF"
     }
   }
+
+  # dynamic "route_settings" {
+  #   for_each = local.routes
+  #   content {
+  #     throttling_burst_limit = 10000
+  #     throttling_rate_limit  = 20000
+  #     logging_level          = "OFF"
+  #   }
+  # }
+  # route_settings = {
+  #   for key, route in local.routes : key => {
+  #     throttling_burst_limit = 10000
+  #     throttling_rate_limit  = 20000
+  #     logging_level          = "OFF"
+  #   }
+  # # }
+  # dynamic "route_settings" {
+  #   for_each = local.routes
+  #   content {
+  #     # route_key              = route.value.path
+  #     # for each routes in local.routes set the key 
+  #     route_key              = for key, route in local.routes : key,      throttling_burst_limit = 10000
+  #     throttling_rate_limit  = 20000
+  #     logging_level          = "OFF"
+  #   }
+  # }
 }
 # access_log_settings {
 #   destination_arn = aws_cloudwatch_log_group.api_gw.arn
