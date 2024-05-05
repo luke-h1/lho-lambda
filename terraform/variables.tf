@@ -46,17 +46,11 @@ variable "certificate_chain" {
 variable "deployed_by" {
   type        = string
   description = "The user who deployed the lambda"
+  default     = "luke-h1"
 }
 
 
 variable "routes" {
-  type = map(object({
-    data_trace_enabled       = bool
-    logging_level            = string
-    detailed_metrics_enabled = bool
-    throttling_burst_limit   = number
-    throttling_rate_limit    = number
-  }))
   description = "The route settings for the api gateway"
   default = {
     "GET /api/health" = {
@@ -65,6 +59,7 @@ variable "routes" {
       data_trace_enabled       = false
       detailed_metrics_enabled = false
       logging_level            = "OFF"
+      route_key                = "HEAD /api/health"
 
     },
     "HEAD /api/health" = {
@@ -73,6 +68,7 @@ variable "routes" {
       data_trace_enabled       = false
       detailed_metrics_enabled = false
       logging_level            = "OFF"
+      route_key                = "HEAD /api/health"
     }
   }
 }

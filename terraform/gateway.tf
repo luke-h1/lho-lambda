@@ -38,7 +38,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
   dynamic "route_settings" {
     for_each = { for k, v in var.routes : k => v }
     content {
-      route_key          = route_settings.key
+      route_key          = route_settings.value.route_key
       data_trace_enabled = try(route_settings.value.data_trace_enabled, false)
       logging_level      = try(route_settings.value.logging_level, null)
 
@@ -75,6 +75,25 @@ resource "aws_apigatewayv2_integration" "lambda" {
   integration_type   = "AWS_PROXY"
   integration_method = "POST"
 }
+
+resource "aws_apigatewayv2_route" "this" {
+  for_each = { for k, v in var.routes : k => v }
+
+  api_id    = aws_apigatewayv2_api.lambda.id
+  route_key = each.key
+
+  api_key_required                    = try(each.value.api_key_required, null)
+  authorization_scopes                = try(split(",", each.value.authorization_scopes), null)
+  authorization_type                  = try(each.value.authorization_type, "NONE")
+  model_selection_expression          = try(each.value.model_selection_expression, null)
+  operation_name                      = try(each.value.operation_name, null)
+  route_response_selection_expression = try(each.value.route_response_selection_expression, null)
+  target                              = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+
+  # Have been added to the docs. But is WEBSOCKET only(not yet supported)
+  # request_models  = try(each.value.request_models, null)
+}
+
 
 # ROUTES 
 ##############################################################################
