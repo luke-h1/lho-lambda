@@ -47,3 +47,25 @@ variable "deployed_by" {
   type        = string
   description = "The user who deployed the lambda"
 }
+
+
+variable "routes" {
+  type = map(object({
+    data_trace_enabled       = bool
+    logging_level            = string
+    detailed_metrics_enabled = bool
+    throttling_burst_limit   = number
+    throttling_rate_limit    = number
+  }))
+  description = "The route settings for the api gateway"
+  default = {
+    "GET /api/health" = {
+      throttling_burst_limit = 10000
+      throttling_rate_limit  = 20000
+    },
+    "GET /api/health" = {
+      throttling_burst_limit = 10000
+      throttling_rate_limit  = 20000
+    }
+  }
+}

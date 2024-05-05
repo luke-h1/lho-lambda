@@ -34,6 +34,22 @@ resource "aws_apigatewayv2_stage" "lambda" {
     throttling_rate_limit  = 20000
     logging_level          = "OFF"
   }
+
+  dynamic "route_settings" {
+    for_each = { for k, v in var.routes : k => v }
+    content {
+      route_key          = route_settings.key
+      data_trace_enabled = try(route_settings.value.data_trace_enabled, false)
+      logging_level      = try(route_settings.value.logging_level, null)
+
+      detailed_metrics_enabled = try(route_settings.value.detailed_metrics_enabled, false)
+      throttling_burst_limit   = try(route_settings.value.throttling_burst_limit, null)
+      throttling_rate_limit    = try(route_settings.value.throttling_rate_limit, null)
+    }
+  }
+
+
+
   # access_log_settings {
   #   destination_arn = aws_cloudwatch_log_group.api_gw.arn
   #   format = jsonencode({
@@ -50,6 +66,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
   #     }
   #   )
   # }
+
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
@@ -61,19 +78,19 @@ resource "aws_apigatewayv2_integration" "lambda" {
 
 # ROUTES 
 ##############################################################################
-resource "aws_apigatewayv2_route" "lambda_route_health" {
-  api_id         = aws_apigatewayv2_api.lambda.id
-  target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key      = "GET /api/health"
-  operation_name = "health"
-}
-resource "aws_apigatewayv2_route" "lambda_route_health_head" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "HEAD /api/health"
-  api_key_required = false
-  operation_name   = "head health"
-}
+# resource "aws_apigatewayv2_route" "lambda_route_health" {
+#   api_id         = aws_apigatewayv2_api.lambda.id
+#   target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+#   route_key      = "GET /api/health"
+#   operation_name = "health"
+# # }
+# resource "aws_apigatewayv2_route" "lambda_route_health_head" {
+#   api_id           = aws_apigatewayv2_api.lambda.id
+#   target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+#   route_key        = "HEAD /api/health"
+#   api_key_required = false
+#   operation_name   = "head health"
+# }
 
 resource "aws_apigatewayv2_route" "lambda_route_version" {
   api_id           = aws_apigatewayv2_api.lambda.id
