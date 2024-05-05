@@ -8,7 +8,7 @@ module "apigateway" {
   fail_on_warnings                      = false
   create_api_domain_name                = false
   create_default_stage                  = false
-  target                                = aws_lambda_function.lambda.arn
+  target                                = aws_lambda_function.lambda_function.arn
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
     allow_methods = ["*"]
@@ -18,11 +18,11 @@ module "apigateway" {
   domain_name_certificate_arn = aws_acm_certificate.cert.arn
   integrations = {
     "GET /api/health" = {
-      lambda_arn             = aws_lambda_function.lambda.arn
+      lambda_arn             = aws_lambda_function.arn
       payload_format_version = "2.0"
     },
     "$default" = {
-      lambda_arn = aws_lambda_function.lambda.arn
+      lambda_arn = aws_lambda_function.lambda_function.arn
       tls_config = jsonencode({
         server_name_to_verify = local.domain_name
       })
@@ -48,7 +48,7 @@ module "apigateway" {
 }
 # resource "aws_apigatewayv2_integration" "lambda" {
 #   api_id             = aws_apigatewayv2_api.lambda.id
-#   integration_uri    = aws_lambda_function.lambda.invoke_arn
+#   integration_uri    = aws_lambda_function.lambda_function.invoke_arn
 #   integration_type   = "AWS_PROXY"
 #   integration_method = "POST"
 # }
@@ -126,7 +126,7 @@ module "apigateway" {
 
 # resource "aws_apigatewayv2_integration" "lambda" {
 #   api_id             = aws_apigatewayv2_api.lambda.id
-#   integration_uri    = aws_lambda_function.lambda.invoke_arn
+#   integration_uri    = aws_lambda_function.lambda_function.invoke_arn
 #   integration_type   = "AWS_PROXY"
 #   integration_method = "POST"
 # }
@@ -195,7 +195,7 @@ module "apigateway" {
 # resource "aws_lambda_permission" "api_gw" {
 #   statement_id  = "AllowExecutionFromAPIGateway"
 #   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.lambda.function_name
+#   function_name = aws_lambda_function.lambda_function.function_name
 #   principal     = "apigateway.amazonaws.com"
 #   source_arn    = "${aws_apigatewayv2_api.lambda.execution_arn}/*/*"
 # }

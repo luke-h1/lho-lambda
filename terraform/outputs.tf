@@ -1,6 +1,6 @@
 # output "function_name" {
 #   description = "value of the lambda function name"
-#   value       = aws_lambda_function.lambda.function_name
+#   value       = aws_lambda_function.lambda_function.function_name
 # }
 
 # output "base_url" {

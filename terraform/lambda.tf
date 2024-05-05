@@ -94,7 +94,7 @@ module "aws_lambda_function" {
 }
 
 # resource "aws_cloudwatch_log_group" "lambda_logs" {
-#   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
+#   name              = "/aws/lambda/${aws_lambda_function.lambda_function.function_name}"
 #   retention_in_days = 1
 #   log_group_class   = "STANDARD"
 
