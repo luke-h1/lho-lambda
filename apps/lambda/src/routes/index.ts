@@ -11,7 +11,7 @@ const routes = async (path: string) => {
   console.log('path passed to routes:', path);
 
   switch (path) {
-    case 'health' || '/api/health':
+    case '/api/health':
       console.log('hit');
       response = await healthHandler();
       break;
