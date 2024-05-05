@@ -81,9 +81,10 @@ module "aws_lambda_function" {
   allowed_triggers = {
     AllowExecutionFromAPIGateway = {
       service    = "apigateway"
-      source_arn = "${apigateway.apigatewayv2_api_execution_arn}/*/*"
+      source_arn = "${apigateway.apigatewayv2_api.execution_arn}/*/*"
     }
   }
+
   #   envi {
   #   variables = merge(var.env_vars, {
   #     DEPLOYED_AT = timestamp()
