@@ -6,7 +6,6 @@ module "apigateway-v2" {
   protocol_type                         = "HTTP"
   create_default_stage_access_log_group = false
   create                                = true
-  create_default_stage_api_mapping      = true
   create_api_gateway                    = true
   create_api_domain_name                = true
   fail_on_warnings                      = false
