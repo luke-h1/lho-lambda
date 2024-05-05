@@ -97,17 +97,6 @@ resource "aws_apigatewayv2_stage" "lambda" {
     throttling_rate_limit  = 20000
     logging_level          = "OFF"
   }
-  depends_on = [aws_apigatewayv2_route.lambda_route_health, aws_apigatewayv2_route.lambda_route_health_head, aws_apigatewayv2_route.lambda_route_version, aws_apigatewayv2_route.lambda_route_now_playing]
-  dynamic "route_settings" {
-    for_each = local.routes
-    iterator = route
-    content {
-      route_key              = route.value.key
-      throttling_burst_limit = 10000
-      throttling_rate_limit  = 20000
-      logging_level          = "OFF"
-    }
-  }
 
   # dynamic "route_settings" {
   #   for_each = local.routes
