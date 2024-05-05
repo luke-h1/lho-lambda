@@ -10,17 +10,7 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent,
   context: Context,
 ) => {
-  const path =
-    // path can either be the last part of the path or the routeKey
-    // depending on whether the function is executed from aws or a http call comes thru from the http gateway
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    event.requestContext?.path?.split('/').pop() ??
-    // @ts-expect-error missing aws-lambda types
-    event.routeKey ??
-    // @ts-expect-error missing aws-lambda types
-    event.rawPath ??
-    event.path;
+  const path = event.path.split('/') as unknown as string;
 
   // AWSXRay.enableAutomaticMode();
 
