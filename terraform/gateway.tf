@@ -5,9 +5,6 @@ module "apigateway-v2" {
   description                           = "API Gateway for Now Playing"
   protocol_type                         = "HTTP"
   create_default_stage_access_log_group = false
-  create                                = true
-  create_api_gateway                    = true
-  create_api_domain_name                = true
   fail_on_warnings                      = false
   target                                = aws_lambda_function.lambda.arn
 
