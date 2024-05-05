@@ -36,13 +36,13 @@ locals {
     version = {
       path   = "/api/version",
       method = "GET"
-      key = "GET /api/version"
+      key    = "GET /api/version"
     },
     now_playing = {
       key    = "now-playing"
       path   = "/api/now-playing",
       method = "GET"
-      key = "GET /api/now-playing"
+      key    = "GET /api/now-playing"
     }
   }
 }
