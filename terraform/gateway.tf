@@ -7,7 +7,7 @@ module "api_gateway" {
   create_default_stage_access_log_group = false
   fail_on_warnings                      = false
   create_api_domain_name                = false
-  create_default_stage                  = false
+  create_default_stage                  = true
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
     allow_methods = ["*"]
