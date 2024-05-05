@@ -59,7 +59,7 @@ resource "aws_iam_role" "lambda_exec" {
 #     })
 #   }
 # }
-module "lambda_function" {
+module "aws_lambda_function" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "~> 3.0"
 
