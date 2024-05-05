@@ -102,7 +102,7 @@ resource "aws_apigatewayv2_stage" "lambda" {
     for_each = local.routes
     iterator = route
     content {
-      route_key              = route.key
+      route_key              = route.value.key
       throttling_burst_limit = 10000
       throttling_rate_limit  = 20000
       logging_level          = "OFF"
