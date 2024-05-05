@@ -7,8 +7,8 @@ module "apigateway-v2" {
   create_default_stage_access_log_group = false
   fail_on_warnings                      = false
   create_api_domain_name                = false
-
-  target = aws_lambda_function.lambda.arn
+  create_default_stage                  = false
+  target                                = aws_lambda_function.lambda.arn
 
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
