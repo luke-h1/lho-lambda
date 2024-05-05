@@ -53,10 +53,11 @@ resource "aws_apigatewayv2_stage" "lambda" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
-  api_id             = aws_apigatewayv2_api.lambda.id
-  integration_uri    = aws_lambda_function.lambda.invoke_arn
-  integration_type   = "AWS_PROXY"
-  integration_method = "POST"
+  api_id               = aws_apigatewayv2_api.lambda.id
+  integration_uri      = aws_lambda_function.lambda.invoke_arn
+  integration_type     = "AWS_PROXY"
+  integration_method   = "POST"
+  passthrough_behavior = "WHEN_NO_MATCH"
 }
 
 # ROUTES 
