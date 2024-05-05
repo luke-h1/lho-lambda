@@ -10,6 +10,7 @@ module "apigateway-v2" {
   create_api_gateway                    = true
   create_api_domain_name                = true
   fail_on_warnings                      = false
+  target                                = aws_lambda_function.lambda.arn
 
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
@@ -25,6 +26,12 @@ module "apigateway-v2" {
     }
   }
 }
+# resource "aws_apigatewayv2_integration" "lambda" {
+#   api_id             = aws_apigatewayv2_api.lambda.id
+#   integration_uri    = aws_lambda_function.lambda.invoke_arn
+#   integration_type   = "AWS_PROXY"
+#   integration_method = "POST"
+# }
 
 # resource "aws_apigatewayv2_api" "lambda" {
 #   name                         = "now-playing-gw-${var.env}"
