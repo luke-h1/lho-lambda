@@ -10,7 +10,7 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent,
   context: Context,
 ) => {
-  const path = event.path.split('/') as unknown as string;
+  const path = event.path.split('/')[3] as unknown as string;
 
   // AWSXRay.enableAutomaticMode();
 
