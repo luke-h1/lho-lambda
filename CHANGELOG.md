@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.2.9"></a>
+
+## [0.2.9](https://github.com/luke-h1/lho-lambda/compare/v0.2.8...v0.2.9) (2024-05-05)
+
+### Bug Fixes
+
+- **ci:** fix destroy workflow ([7aa74a3](https://github.com/luke-h1/lho-lambda/commit/7aa74a3))
+- **lambda:** routes ([ca60747](https://github.com/luke-h1/lho-lambda/commit/ca60747))
+
 <a name="0.2.8"></a>
 
 ## [0.2.8](https://github.com/luke-h1/lho-lambda/compare/v0.2.7...v0.2.8) (2024-05-04)
