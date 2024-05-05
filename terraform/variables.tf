@@ -63,9 +63,12 @@ variable "routes" {
       throttling_burst_limit = 10000
       throttling_rate_limit  = 20000
     },
-    "GET /api/health" = {
-      throttling_burst_limit = 10000
-      throttling_rate_limit  = 20000
+    "HEAD /api/health" = {
+      throttling_burst_limit   = 10000
+      throttling_rate_limit    = 20000
+      data_trace_enabled       = false
+      detailed_metrics_enabled = false
+      logging_level            = "OFF"
     }
   }
 }
