@@ -62,7 +62,7 @@ resource "aws_iam_role" "lambda_exec" {
 
 module "lambda" {
   source  = "terraform-aws-modules/lambda/aws"
-  version = "3.0"
+  version = "7.4.0"
 
   function_name = "nowplaying-lambda-${var.env}"
   description   = "Now playing Lambda ${var.env}"
