@@ -60,8 +60,12 @@ variable "routes" {
   description = "The route settings for the api gateway"
   default = {
     "GET /api/health" = {
-      throttling_burst_limit = 10000
-      throttling_rate_limit  = 20000
+      throttling_burst_limit   = 10000
+      throttling_rate_limit    = 20000
+      data_trace_enabled       = false
+      detailed_metrics_enabled = false
+      logging_level            = "OFF"
+
     },
     "HEAD /api/health" = {
       throttling_burst_limit   = 10000
