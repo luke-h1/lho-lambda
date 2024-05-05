@@ -1,7 +1,7 @@
 resource "aws_apigatewayv2_api" "lambda" {
   name                         = "now-playing-gw-${var.env}"
   protocol_type                = "HTTP"
-  disable_execute_api_endpoint = false
+  disable_execute_api_endpoint = true
   cors_configuration {
     allow_headers  = ["*"]
     allow_origins  = ["*"]
@@ -27,8 +27,15 @@ resource "aws_apigatewayv2_api_mapping" "lambda" {
 }
 
 resource "aws_apigatewayv2_stage" "lambda" {
-  api_id = aws_apigatewayv2_api.lambda.id
-  name   = var.env
+  api_id      = aws_apigatewayv2_api.lambda.id
+  name        = var.env
+  auto_deploy = true
+  route_settings {
+    route_key              = "$default"
+    throttling_burst_limit = 10000
+    throttling_rate_limit  = 20000
+    logging_level          = "OFF"
+  }
   default_route_settings {
     throttling_burst_limit = 10000
     throttling_rate_limit  = 20000
