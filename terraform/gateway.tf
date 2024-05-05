@@ -1,4 +1,4 @@
-module "apigateway-v2" {
+module "apigateway" {
   source                                = "terraform-aws-modules/apigateway-v2/aws"
   version                               = "4.0.0"
   name                                  = "now-playing-gw-${var.env}"
