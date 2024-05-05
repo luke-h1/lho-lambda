@@ -10,10 +10,12 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent,
   context: Context,
 ) => {
-  const { path } = event;
+  const { path, requestContext, pathParameters } = event;
   // AWSXRay.enableAutomaticMode();
 
   console.log('path is', path);
+  console.log('rc is', requestContext);
+  console.log('pathParameters is', pathParameters);
 
   try {
     return await Promise.race([routes(path), lambdaTimeout(context)]).then(

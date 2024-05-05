@@ -8,8 +8,11 @@ const routes = async (path: string) => {
     path === 'now-playing' || path === '/api/now-playing';
   const revalidate = 6;
 
+  console.log('path passed to routes:', path);
+
   switch (path) {
     case 'health' || '/api/health':
+      console.log('hit');
       response = await healthHandler();
       break;
 
@@ -22,7 +25,7 @@ const routes = async (path: string) => {
       break;
 
     default:
-      response = JSON.stringify({ message: 'route not found' }, null, 2);
+      response = JSON.stringify({ message: 'Route not found' }, null, 2);
       break;
   }
 
