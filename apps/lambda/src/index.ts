@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import { APIGatewayProxyEvent, Context, Handler } from 'aws-lambda';
 // import AWSXRay from 'aws-xray-sdk';
 import routes from './routes';
@@ -10,12 +11,10 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent,
   context: Context,
 ) => {
-  const { path, requestContext, pathParameters } = event;
   // AWSXRay.enableAutomaticMode();
-
-  console.log('path is', path);
-  console.log('rc is', requestContext);
-  console.log('pathParameters is', pathParameters);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const path = event.rawPath;
 
   try {
     return await Promise.race([routes(path), lambdaTimeout(context)]).then(
