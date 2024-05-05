@@ -59,38 +59,34 @@ resource "aws_apigatewayv2_integration" "lambda" {
   integration_method = "POST"
 }
 
-# ROUTES 
-##############################################################################
-resource "aws_apigatewayv2_route" "lambda_route_health" {
+locals {
+  routes = {
+    head_health = {
+      path   = "/api/health",
+      method = "HEAD"
+    }
+    health = {
+      path   = "/api/health",
+      method = "GET"
+    },
+    version = {
+      path   = "/api/version",
+      method = "GET"
+    },
+    now_playing = {
+      path   = "/api/now-playing",
+      method = "GET"
+    }
+  }
+}
+
+resource "aws_apigatewayv2_route" "lambda_routes" {
+  for_each       = local.routes
   api_id         = aws_apigatewayv2_api.lambda.id
+  route_key      = "${each.value.method} ${each.value.path}"
   target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key      = "GET /api/health"
-  operation_name = "health"
+  operation_name = each.key
 }
-resource "aws_apigatewayv2_route" "lambda_route_health_head" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "HEAD /api/health"
-  api_key_required = false
-  operation_name   = "head health"
-}
-
-resource "aws_apigatewayv2_route" "lambda_route_version" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/version"
-  api_key_required = false
-  operation_name   = "version"
-}
-
-resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/now-playing"
-  api_key_required = false
-  operation_name   = "now-playing"
-}
-##############################################################################
 
 
 resource "aws_cloudwatch_log_group" "api_gw" {
