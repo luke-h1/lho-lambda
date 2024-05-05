@@ -6,14 +6,16 @@ module "apigateway-v2" {
   protocol_type                         = "HTTP"
   create_default_stage_access_log_group = false
   fail_on_warnings                      = false
-  target                                = aws_lambda_function.lambda.arn
+  create_api_domain_name                = false
+
+  target = aws_lambda_function.lambda.arn
 
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
     allow_methods = ["*"]
     allow_origins = ["*"]
   }
-  domain_name                 = local.domain_name
+  domain_name                 = var.env == "live" ? "nowplaying.${var.root_domain}" : "nowplaying-staging.${var.root_domain}"
   domain_name_certificate_arn = aws_acm_certificate.cert.arn
   integrations = {
     "GET /api/health" = {
