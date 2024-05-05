@@ -1,5 +1,4 @@
 import { APIGatewayProxyEvent, Context, Handler } from 'aws-lambda';
-// import AWSXRay from 'aws-xray-sdk';
 import routes from './routes';
 import buildPath from './utils/buildPath';
 import isErrorLike from './utils/isErrorLike';
@@ -11,6 +10,7 @@ export const handler: Handler = async (
   context: Context,
 ) => {
   const path =
+    event.path ??
     // path can either be the last part of the path or the routeKey
     // depending on whether the function is executed from aws or a http call comes thru from the http gateway
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
