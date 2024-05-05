@@ -59,7 +59,8 @@ resource "aws_iam_role" "lambda_exec" {
 #     })
 #   }
 # }
-module "aws_lambda_function" {
+
+module "lambda" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "~> 3.0"
 
@@ -81,7 +82,7 @@ module "aws_lambda_function" {
   allowed_triggers = {
     AllowExecutionFromAPIGateway = {
       service    = "apigateway"
-      source_arn = "${apigateway.apigatewayv2_api.execution_arn}/*/*"
+      source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
     }
   }
 

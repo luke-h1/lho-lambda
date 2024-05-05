@@ -1,4 +1,4 @@
-module "apigateway" {
+module "api_gateway" {
   source                                = "terraform-aws-modules/apigateway-v2/aws"
   version                               = "4.0.0"
   name                                  = "now-playing-gw-${var.env}"
@@ -8,7 +8,6 @@ module "apigateway" {
   fail_on_warnings                      = false
   create_api_domain_name                = false
   create_default_stage                  = false
-  target                                = aws_lambda_function.lambda_function.arn
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
     allow_methods = ["*"]
@@ -18,33 +17,10 @@ module "apigateway" {
   domain_name_certificate_arn = aws_acm_certificate.cert.arn
   integrations = {
     "GET /api/health" = {
-      lambda_arn             = aws_lambda_function.arn
+      lambda_arn             = module.lambda.lambda_function_arn
       payload_format_version = "2.0"
     },
-    "$default" = {
-      lambda_arn = aws_lambda_function.lambda_function.arn
-      tls_config = jsonencode({
-        server_name_to_verify = local.domain_name
-      })
-
-      response_parameters = jsonencode([
-        {
-          status_code = 500
-          mappings = {
-            "append:header.header1" = "$context.requestId"
-            "overwrite:statuscode"  = "403"
-          }
-        },
-        {
-          status_code = 404
-          mappings = {
-            "append:header.error" = "$stageVariables.environmentId"
-          }
-        }
-      ])
-    }
   }
-
 }
 # resource "aws_apigatewayv2_integration" "lambda" {
 #   api_id             = aws_apigatewayv2_api.lambda.id
