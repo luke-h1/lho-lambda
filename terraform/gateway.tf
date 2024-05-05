@@ -9,7 +9,6 @@ module "apigateway-v2" {
   create_api_domain_name                = false
   create_default_stage                  = false
   target                                = aws_lambda_function.lambda.arn
-
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
     allow_methods = ["*"]
@@ -21,8 +20,31 @@ module "apigateway-v2" {
     "GET /api/health" = {
       lambda_arn             = aws_lambda_function.lambda.arn
       payload_format_version = "2.0"
+    },
+    "$default" = {
+      lambda_arn = aws_lambda_function.lambda.arn
+      tls_config = jsonencode({
+        server_name_to_verify = local.domain_name
+      })
+
+      response_parameters = jsonencode([
+        {
+          status_code = 500
+          mappings = {
+            "append:header.header1" = "$context.requestId"
+            "overwrite:statuscode"  = "403"
+          }
+        },
+        {
+          status_code = 404
+          mappings = {
+            "append:header.error" = "$stageVariables.environmentId"
+          }
+        }
+      ])
     }
   }
+
 }
 # resource "aws_apigatewayv2_integration" "lambda" {
 #   api_id             = aws_apigatewayv2_api.lambda.id
