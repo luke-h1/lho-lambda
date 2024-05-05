@@ -31,16 +31,18 @@ locals {
     health = {
       path   = "/api/health",
       method = "GET"
+      key    = "HEAD /api/health"
     },
     version = {
-      key    = "version"
       path   = "/api/version",
       method = "GET"
+      key = "GET /api/version"
     },
     now_playing = {
       key    = "now-playing"
       path   = "/api/now-playing",
       method = "GET"
+      key = "GET /api/now-playing"
     }
   }
 }
