@@ -5,8 +5,11 @@ module "apigateway-v2" {
   description                           = "API Gateway for Now Playing"
   protocol_type                         = "HTTP"
   create_default_stage_access_log_group = false
-
-  fail_on_warnings = false
+  create                                = true
+  create_default_stage_api_mapping      = true
+  create_api_gateway                    = true
+  create_api_domain_name                = true
+  fail_on_warnings                      = false
 
   cors_configuration = {
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
@@ -17,7 +20,7 @@ module "apigateway-v2" {
   domain_name_certificate_arn = aws_acm_certificate.cert.arn
   integrations = {
     "GET /api/health" = {
-      lambda_arn             = aws_lambda_function.lambda.invoke_arn
+      lambda_arn             = aws_lambda_function.lambda.arn
       payload_format_version = "2.0"
     }
   }
