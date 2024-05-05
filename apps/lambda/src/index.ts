@@ -19,7 +19,8 @@ export const handler: Handler = async (
     // @ts-expect-error missing aws-lambda types
     event.routeKey ??
     // @ts-expect-error missing aws-lambda types
-    event.rawPath;
+    event.rawPath ??
+    event.path;
 
   // AWSXRay.enableAutomaticMode();
 
