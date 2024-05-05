@@ -45,6 +45,48 @@ locals {
   }
 }
 
+resource "aws_apigatewayv2_integration" "lambda" {
+  api_id               = aws_apigatewayv2_api.lambda.id
+  integration_uri      = aws_lambda_function.lambda.invoke_arn
+  integration_type     = "AWS_PROXY"
+  integration_method   = "POST"
+  passthrough_behavior = "WHEN_NO_MATCH"
+}
+
+# ROUTES 
+##############################################################################
+resource "aws_apigatewayv2_route" "lambda_route_health" {
+  api_id         = aws_apigatewayv2_api.lambda.id
+  target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key      = "GET /api/health"
+  operation_name = "health"
+}
+resource "aws_apigatewayv2_route" "lambda_route_health_head" {
+  api_id           = aws_apigatewayv2_api.lambda.id
+  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key        = "HEAD /api/health"
+  api_key_required = false
+  operation_name   = "head health"
+}
+
+resource "aws_apigatewayv2_route" "lambda_route_version" {
+  api_id           = aws_apigatewayv2_api.lambda.id
+  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key        = "GET /api/version"
+  api_key_required = false
+  operation_name   = "version"
+}
+
+resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
+  api_id           = aws_apigatewayv2_api.lambda.id
+  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key        = "GET /api/now-playing"
+  api_key_required = false
+  operation_name   = "now-playing"
+}
+##############################################################################
+
+
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
   name   = var.env
@@ -108,47 +150,6 @@ resource "aws_apigatewayv2_stage" "lambda" {
 #   )
 # }
 
-
-resource "aws_apigatewayv2_integration" "lambda" {
-  api_id               = aws_apigatewayv2_api.lambda.id
-  integration_uri      = aws_lambda_function.lambda.invoke_arn
-  integration_type     = "AWS_PROXY"
-  integration_method   = "POST"
-  passthrough_behavior = "WHEN_NO_MATCH"
-}
-
-# ROUTES 
-##############################################################################
-resource "aws_apigatewayv2_route" "lambda_route_health" {
-  api_id         = aws_apigatewayv2_api.lambda.id
-  target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key      = "GET /api/health"
-  operation_name = "health"
-}
-resource "aws_apigatewayv2_route" "lambda_route_health_head" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "HEAD /api/health"
-  api_key_required = false
-  operation_name   = "head health"
-}
-
-resource "aws_apigatewayv2_route" "lambda_route_version" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/version"
-  api_key_required = false
-  operation_name   = "version"
-}
-
-resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/now-playing"
-  api_key_required = false
-  operation_name   = "now-playing"
-}
-##############################################################################
 
 
 resource "aws_cloudwatch_log_group" "api_gw" {
