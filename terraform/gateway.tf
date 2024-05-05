@@ -26,6 +26,23 @@ resource "aws_apigatewayv2_api_mapping" "lambda" {
   stage       = aws_apigatewayv2_stage.lambda.id
 }
 
+locals {
+  routes = {
+    health = {
+      path   = "/api/health",
+      method = "GET"
+    },
+    version = {
+      path   = "/api/version",
+      method = "GET"
+    },
+    now_playing = {
+      path   = "/api/now-playing",
+      method = "GET"
+    }
+  }
+}
+
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id = aws_apigatewayv2_api.lambda.id
   name   = var.env
@@ -34,23 +51,34 @@ resource "aws_apigatewayv2_stage" "lambda" {
     throttling_rate_limit  = 20000
     logging_level          = "OFF"
   }
-  # access_log_settings {
-  #   destination_arn = aws_cloudwatch_log_group.api_gw.arn
-  #   format = jsonencode({
-  #     requestId               = "$context.requestId"
-  #     sourceIp                = "$context.identity.sourceIp"
-  #     requestTime             = "$context.requestTime"
-  #     protocol                = "$context.protocol"
-  #     httpMethod              = "$context.httpMethod"
-  #     resourcePath            = "$context.resourcePath"
-  #     routeKey                = "$context.routeKey"
-  #     status                  = "$context.status"
-  #     responseLength          = "$context.responseLength"
-  #     integrationErrorMessage = "$context.integrationErrorMessage"
-  #     }
-  #   )
-  # }
+
+  dynamic "route_settings" {
+    for_each = local.routes
+    content {
+      route_key              = "${route_settings.value.method} ${route_settings.value.path}"
+      throttling_burst_limit = 10000
+      throttling_rate_limit  = 20000
+      logging_level          = "OFF"
+    }
+  }
 }
+# access_log_settings {
+#   destination_arn = aws_cloudwatch_log_group.api_gw.arn
+#   format = jsonencode({
+#     requestId               = "$context.requestId"
+#     sourceIp                = "$context.identity.sourceIp"
+#     requestTime             = "$context.requestTime"
+#     protocol                = "$context.protocol"
+#     httpMethod              = "$context.httpMethod"
+#     resourcePath            = "$context.resourcePath"
+#     routeKey                = "$context.routeKey"
+#     status                  = "$context.status"
+#     responseLength          = "$context.responseLength"
+#     integrationErrorMessage = "$context.integrationErrorMessage"
+#     }
+#   )
+# }
+
 
 resource "aws_apigatewayv2_integration" "lambda" {
   api_id               = aws_apigatewayv2_api.lambda.id
