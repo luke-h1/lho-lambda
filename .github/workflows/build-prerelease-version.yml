@@ -18,6 +18,8 @@ env:
   TF_VAR_certificate_body: ${{ secrets.STAGING_CERTIFICATE_BODY }}
   TF_VAR_certificate_chain: ${{ secrets.STAGING_CERTIFICATE_CHAIN }}
   TF_VAR_deployed_by: ${{ github.actor }}
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: luke-h1-projects
 
 jobs:
   build:
@@ -52,6 +54,18 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}
+          path: |
+            node_modules/.cache/turbo
+            apps/*/.turbo
+            packages/*/.turbo
+            *.turbo
+
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -82,7 +96,6 @@ jobs:
 
       - name: build lambda
         run: | 
-          cd apps/lambda
           pnpm build
 
   deploy:
@@ -162,7 +175,6 @@ jobs:
 
       - name: build lambda
         run: | 
-          cd apps/lambda
           pnpm build
      
       - name: Terraform plan
