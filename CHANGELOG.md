@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.2.15"></a>
+
+## [0.2.15](https://github.com/luke-h1/lho-lambda/compare/v0.2.14...v0.2.15) (2024-06-07)
+
+### Features
+
+- **infrastructure:** add turborepo to project ([e534b92](https://github.com/luke-h1/lho-lambda/commit/e534b92))
+
 <a name="0.2.14"></a>
 
 ## [0.2.14](https://github.com/luke-h1/lho-lambda/compare/v0.2.13...v0.2.14) (2024-06-01)
