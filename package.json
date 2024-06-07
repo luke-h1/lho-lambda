@@ -2,9 +2,11 @@
   "name": "root",
   "version": "0.0.0-monorepo",
   "engines": {},
+  "packageManager": "pnpm@9.0.6",
   "scripts": {
     "alphabetize": "node scripts/alphabetizePackageJson.js",
     "commit": "cz",
+    "build": "turbo run build",
     "clean": "pnpm -r --parallel exec rm -rf node_modules && rm -rf node_modules",
     "tsc": "pnpm -r --aggregate-output --reporter=append-only --no-bail tsc",
     "lint": "eslint --fix --ext .ts,.tsx,.js,.jsx .",
@@ -28,7 +30,8 @@
     "git-cz": "^4.9.0",
     "husky": "^9.0.11",
     "lint-staged": "15.2.5",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.3"
   },
   "config": {
     "commitizen": {
