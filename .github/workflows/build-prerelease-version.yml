@@ -177,7 +177,7 @@ jobs:
         uses: changesets/action@v1.4.6
         with:
           version: pnpm changeset:version
-          # publish: pnpm changeset:publish
+          publish: pnpm changeset:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -187,7 +187,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pnpm changeset version --no-git-tag --snapshot canary
-          # pnpm changeset publish --no-git-tag --snapshot canary --tag canary
+          pnpm changeset publish --no-git-tag --snapshot canary --tag canary
 
       - name: build lambda
         run: | 
