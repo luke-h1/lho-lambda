@@ -14,6 +14,7 @@
     "format:check": "prettier --list-different \"apps/**/*.{js,jsx,ts,tsx,css,scss,html}\"",
     "changeset:version": "node ./scripts/changesets/version.mjs",
     "changeset:publish": "changeset publish",
+    "ci:publish": "pnpm publish -r",
     "prepare": "husky"
   },
   "devDependencies": {
