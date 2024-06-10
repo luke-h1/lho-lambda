@@ -224,7 +224,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Fetch latest commits 
-        run: git fetch && git pull
+        run: git fetch && git pull && git reset --hard origin/main
 
       - name: get package version
         id: package-version

@@ -245,15 +245,30 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
-      - name: Publish packages
+      - name: Configure git
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
-          pnpm lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push --force-publish
-          git push --force --no-verify --follow-tags
+
+      - name: PR or Publish
+        id: changesets
+        uses: changesets/action@v1.4.6
+        with:
+          version: pnpm changeset:version
+          # publish: pnpm changeset:publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Prerelease
+        if: steps.changesets.outputs.published != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git reset --hard origin/main
+          pnpm changeset version --no-git-tag --snapshot canary
 
       - name: Terraform init
         working-directory: terraform
