@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.2.17"></a>
+
+## [0.2.17](https://github.com/luke-h1/lho-lambda/compare/v0.2.16...v0.2.17) (2024-06-17)
+
+### Bug Fixes
+
+- **infrastructure:** fix branch deploys ([8039599](https://github.com/luke-h1/lho-lambda/commit/8039599))
+
+### Chores
+
+- **lambda:** update deps ([9ce7040](https://github.com/luke-h1/lho-lambda/commit/9ce7040))
+
 <a name="0.2.16"></a>
 
 ## [0.2.16](https://github.com/luke-h1/lho-lambda/compare/v0.2.15...v0.2.16) (2024-06-16)
