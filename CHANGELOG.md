@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.2.18"></a>
+
+## [0.2.18](https://github.com/luke-h1/lho-lambda/compare/v0.2.17...v0.2.18) (2024-06-21)
+
+### Chores
+
+- **lambda:** decrease revalidation time ([e022b5f](https://github.com/luke-h1/lho-lambda/commit/e022b5f))
+
 <a name="0.2.17"></a>
 
 ## [0.2.17](https://github.com/luke-h1/lho-lambda/compare/v0.2.16...v0.2.17) (2024-06-17)
