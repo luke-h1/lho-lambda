@@ -17,9 +17,9 @@
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
-    "@types/node": "20.14.8",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
+    "@types/node": "20.14.9",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
     "commitizen": "4.3.0",
     "conventional-changelog-angular-all": "^1.7.0",
     "eslint": "^8.57.0",
@@ -31,7 +31,7 @@
     "husky": "^9.0.11",
     "lint-staged": "15.2.7",
     "prettier": "^3.3.2",
-    "turbo": "^2.0.4"
+    "turbo": "^2.0.5"
   },
   "config": {
     "commitizen": {
@@ -55,6 +55,6 @@
     }
   },
   "dependencies": {
-    "lerna": "^8.1.3"
+    "lerna": "^8.1.5"
   }
 }
