@@ -2,7 +2,7 @@
   "name": "root",
   "version": "0.0.0-monorepo",
   "engines": {},
-  "packageManager": "pnpm@9.0.6",
+  "packageManager": "pnpm@9.4.0",
   "scripts": {
     "alphabetize": "node scripts/alphabetizePackageJson.js",
     "build": "turbo run build",
