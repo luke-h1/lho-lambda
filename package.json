@@ -5,14 +5,14 @@
   "packageManager": "pnpm@9.0.6",
   "scripts": {
     "alphabetize": "node scripts/alphabetizePackageJson.js",
-    "commit": "cz",
     "build": "turbo run build",
     "clean": "pnpm -r --parallel exec rm -rf node_modules && rm -rf node_modules",
-    "tsc": "pnpm -r --aggregate-output --reporter=append-only --no-bail tsc",
-    "lint": "eslint --fix --ext .ts,.tsx,.js,.jsx .",
+    "commit": "cz",
     "format": "prettier --write \"apps/**/*.{js,jsx,ts,tsx,css,scss,html}\"",
     "format:check": "prettier --list-different \"apps/**/*.{js,jsx,ts,tsx,css,scss,html}\"",
-    "prepare": "husky"
+    "lint": "eslint --fix --ext .ts,.tsx,.js,.jsx .",
+    "prepare": "husky",
+    "tsc": "pnpm -r --aggregate-output --reporter=append-only --no-bail tsc"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
