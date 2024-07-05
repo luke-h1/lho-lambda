@@ -178,16 +178,6 @@ jobs:
         working-directory: terraform
         run: terraform plan -out=tfplan -no-color
 
-      - uses: trstringer/manual-approval@v1.9.1
-        timeout-minutes: 10
-        with:
-           secret: ${{ secrets.GITHUB_TOKEN }}
-           approvers: luke-h1
-           issue-body: ${{ steps.get-body.outputs.body }}
-           minimum-approvals: 1
-           issue-title: "Approve terraform for ${{ github.head_ref }}-${{ github.sha }} release"
-           exclude-workflow-initiator-as-approver: false
-
   release:
     name: Release packages
     runs-on: ubuntu-latest
