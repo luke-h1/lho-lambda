@@ -178,7 +178,7 @@ jobs:
         working-directory: terraform
         run: terraform plan -out=tfplan -no-color
 
-      - uses: trstringer/manual-approval@v1
+      - uses: trstringer/manual-approval@v1.9.1
         timeout-minutes: 10
         with:
            secret: ${{ secrets.GITHUB_TOKEN }}
