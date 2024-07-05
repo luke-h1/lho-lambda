@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.2.24"></a>
+
+## [0.2.24](https://github.com/luke-h1/lho-lambda/compare/v0.2.23...v0.2.24) (2024-07-05)
+
+### Bug Fixes
+
+- **infrastructure:** fix workflows ([bf93c23](https://github.com/luke-h1/lho-lambda/commit/bf93c23))
+- **infrastructure:** remove approval step due to gh issues ([ccfe8ed](https://github.com/luke-h1/lho-lambda/commit/ccfe8ed))
+- **lambda:** fix approval step ([7c089f5](https://github.com/luke-h1/lho-lambda/commit/7c089f5))
+
 <a name="0.2.23"></a>
 
 ## [0.2.23](https://github.com/luke-h1/lho-lambda/compare/v0.2.22...v0.2.23) (2024-06-29)
