@@ -6,10 +6,6 @@ variable "env" {
 variable "env_vars" {
   type        = map(string)
   description = "The environment variables to set on lambda"
-  validation {
-    condition     = contains(keys(var.env_vars), "SPOTIFY_CLIENT_ID") && contains(keys(var.env_vars), "SPOTIFY_CLIENT_SECRET") && contains(keys(var.env_vars), "SPOTIFY_REFRESH_TOKEN")
-    error_message = "env_vars must contain keys: SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN"
-  }
 }
 
 variable "zone_id" {
@@ -46,4 +42,9 @@ variable "certificate_chain" {
 variable "deployed_by" {
   type        = string
   description = "The user who deployed the lambda"
+}
+
+variable "environment" {
+  type        = string
+  description = "The environment the lambda is deployed to (staging or live)"
 }

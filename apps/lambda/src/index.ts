@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent, Context, Handler } from 'aws-lambda';
+import client from 'prom-client';
 import routes from './routes';
 import buildPath from './utils/buildPath';
 import isErrorLike from './utils/isErrorLike';
@@ -22,7 +23,15 @@ export const handler: Handler = async (
 
   // AWSXRay.enableAutomaticMode();
 
+  // eslint-disable-next-line no-console
   console.log('path is', path);
+
+  const { collectDefaultMetrics } = client;
+
+  collectDefaultMetrics({
+    labels: { NODE_APP_INSTANCE: process.env.NODE_APP_INSTANCE },
+    prefix: `lho-nowplaying-${process.env.ENVIRONMENT}`,
+  });
 
   try {
     return await Promise.race([routes(path), lambdaTimeout(context)]).then(

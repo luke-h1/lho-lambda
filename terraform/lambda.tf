@@ -55,7 +55,8 @@ resource "aws_lambda_function" "lambda" {
   environment {
     variables = merge(var.env_vars, {
       DEPLOYED_AT = timestamp()
-      DEPLOYED_BY = var.deployed_by
+      DEPLOYED_BY = var.deployed_by,
+      ENVIRONMENT = var.environment,
     })
   }
 }

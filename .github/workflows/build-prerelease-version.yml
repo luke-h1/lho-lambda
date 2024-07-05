@@ -20,6 +20,7 @@ env:
   TF_VAR_deployed_by: ${{ github.actor }}
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: luke-h1-projects
+  TF_VAR_environment: staging
 
 jobs:
   build:
@@ -44,7 +45,7 @@ jobs:
         run: git pull --rebase
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
@@ -129,7 +130,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
