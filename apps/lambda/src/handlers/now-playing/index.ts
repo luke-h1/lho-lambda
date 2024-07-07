@@ -3,7 +3,11 @@ import { Song, SongItem } from '@lambda/types/spotify';
 import NodeCache from 'node-cache';
 
 const nowPlayingHandler = async (): Promise<Song | string> => {
-  const cache = new NodeCache({ stdTTL: 5, checkperiod: 5 });
+  const cache = new NodeCache({
+    stdTTL: 5,
+    checkperiod: 5,
+    deleteOnExpire: true,
+  });
 
   const cachedSong = cache.get<Song>('now-playing');
 
