@@ -1,7 +1,16 @@
 import spotifyService from '@lambda/services/spotifyService';
 import { Song, SongItem } from '@lambda/types/spotify';
+import NodeCache from 'node-cache';
 
 const nowPlayingHandler = async (): Promise<Song | string> => {
+  const cache = new NodeCache({ stdTTL: 5, checkperiod: 5 });
+
+  const cachedSong = cache.get<Song>('now-playing');
+
+  if (cachedSong) {
+    return JSON.stringify(cachedSong, null, 2);
+  }
+
   if (process.env.SHOULD_CALL_SPOTIFY === 'false') {
     return JSON.stringify(
       {
@@ -49,6 +58,15 @@ const nowPlayingHandler = async (): Promise<Song | string> => {
   // @ts-expect-error album images are optional
   const albumImageUrl = song.item.album.images[0].url;
   const songUrl = song.item.external_urls.spotify;
+
+  cache.set('now-playing', {
+    album,
+    albumImageUrl,
+    artist,
+    isPlaying,
+    songUrl,
+    title,
+  });
 
   return JSON.stringify(
     {
