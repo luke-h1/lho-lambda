@@ -6,7 +6,7 @@ const routes = async (path: string) => {
   let response: unknown;
   const includeCacheHeader =
     path === 'now-playing' || path === '/api/now-playing';
-  const revalidate = 3;
+  const revalidate = 5;
 
   switch (path) {
     case 'health' || '/api/health':
