@@ -1,7 +1,9 @@
 {
   "name": "root",
   "version": "0.0.0-monorepo",
-  "engines": {},
+  "engines": {
+    "pnpm": "9.4.0"
+  },
   "packageManager": "pnpm@9.4.0",
   "scripts": {
     "alphabetize": "node scripts/alphabetizePackageJson.js",
@@ -17,9 +19,9 @@
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
-    "@types/node": "20.14.9",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.14.1",
+    "@types/node": "20.14.10",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
     "commitizen": "4.3.0",
     "conventional-changelog-angular-all": "^1.7.0",
     "eslint": "^8.57.0",
@@ -55,6 +57,6 @@
     }
   },
   "dependencies": {
-    "lerna": "^8.1.5"
+    "lerna": "^8.1.6"
   }
 }
