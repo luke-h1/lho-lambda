@@ -4,6 +4,7 @@ import buildPath from './utils/buildPath';
 import isErrorLike from './utils/isErrorLike';
 import LambdaError from './utils/lambdaError';
 import lambdaTimeout from './utils/lambdaTimeout';
+import logger from './utils/logger';
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent,
@@ -22,7 +23,7 @@ export const handler: Handler = async (
 
   // AWSXRay.enableAutomaticMode();
 
-  console.log('path is', path);
+  logger.info('path is', path);
 
   try {
     return await Promise.race([routes(path), lambdaTimeout(context)]).then(

@@ -17,8 +17,11 @@
   "dependencies": {
     "aws-xray-sdk": "^3.6.0",
     "axios": "^1.6.8",
+    "dayjs": "^1.10.7",
     "debug": "^4.3.4",
     "lodash": "^4.17.21",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "pino": "^8.6.1",
+    "pino-pretty": "^9.1.0"
   }
 }
