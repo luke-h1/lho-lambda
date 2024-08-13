@@ -44,11 +44,6 @@ resource "aws_lambda_function" "lambda" {
   # tracing_config {
   #   mode = "Active"
   # }
-  tags = {
-    Environment = var.env
-    Service     = "nowplaying"
-    s3export    = var.env == "live" ? "true" : "false"
-  }
   description   = "Now playing Lambda ${var.env}"
   memory_size   = 128
   architectures = ["arm64"]
@@ -58,6 +53,9 @@ resource "aws_lambda_function" "lambda" {
       DEPLOYED_BY = var.deployed_by
     })
   }
+  tags = merge(var.tags, {
+    Environment = var.env
+  })
 }
 
 # resource "aws_cloudwatch_log_group" "lambda_logs" {

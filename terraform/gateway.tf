@@ -8,6 +8,10 @@ resource "aws_apigatewayv2_api" "lambda" {
     allow_methods  = ["*"]
     expose_headers = ["*"]
   }
+
+  tags = merge(var.tags, {
+    Environment = var.env
+  })
 }
 
 resource "aws_apigatewayv2_domain_name" "domain_name" {
@@ -18,6 +22,9 @@ resource "aws_apigatewayv2_domain_name" "domain_name" {
     endpoint_type   = "REGIONAL"
     security_policy = "TLS_1_2"
   }
+  tags = merge(var.tags, {
+    Environment = var.env
+  })
 }
 
 resource "aws_apigatewayv2_api_mapping" "lambda" {
@@ -57,6 +64,9 @@ resource "aws_apigatewayv2_stage" "lambda" {
   #     }
   #   )
   # }
+  tags = merge(var.tags, {
+    Environment = var.env
+  })
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
@@ -104,11 +114,10 @@ resource "aws_cloudwatch_log_group" "api_gw" {
   name              = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
   retention_in_days = 1
   log_group_class   = "INFREQUENT_ACCESS"
-  tags = {
+
+  tags = merge(var.tags, {
     Environment = var.env
-    Service     = "nowplaying"
-    s3export    = "true"
-  }
+  })
 }
 
 resource "aws_lambda_permission" "api_gw" {
