@@ -47,3 +47,12 @@ variable "deployed_by" {
   type        = string
   description = "The user who deployed the lambda"
 }
+
+variable "tags" {
+  type        = map(string)
+  description = "The tags to apply to the resources"
+  default = {
+    "Service"   = "NowPlaying"
+    "ManagedBy" = "Terraform"
+  }
+}
