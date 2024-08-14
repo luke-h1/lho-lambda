@@ -1,0 +1,20 @@
+name: Install
+description: Install dependencies and setup environment
+runs:
+  using: composite
+  steps:
+    - name: format:check
+      run: pnpm format:check
+      shell: bash
+
+    - name: lint
+      run: pnpm lint
+      shell: bash
+
+    - name: tsc
+      run: pnpm tsc
+      shell: bash
+
+    - name: test
+      run: pnpm test
+      shell: bash

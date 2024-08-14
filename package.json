@@ -14,6 +14,9 @@
     "format:check": "prettier --list-different \"apps/**/*.{js,jsx,ts,tsx,css,scss,html}\"",
     "lint": "eslint --fix --ext .ts,.tsx,.js,.jsx .",
     "prepare": "husky",
+    "test": "pnpm -r --no-bail test",
+    "test:ci": "pnpm -r --no-bail --aggregate-output --reporter=append-only test:ci",
+    "test:snapshot": "pnpm -r --no-bail test:snapshot",
     "tsc": "pnpm -r --aggregate-output --reporter=append-only --no-bail tsc"
   },
   "devDependencies": {
