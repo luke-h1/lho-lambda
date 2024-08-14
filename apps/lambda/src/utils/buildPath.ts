@@ -2,12 +2,16 @@ import { LambdaActions } from './lambdaError';
 
 const buildPath = (path: string): LambdaActions | string => {
   switch (path) {
-    case 'now-playing' || '/api/now-playing':
+    case 'now-playing':
+    case '/api/now-playing':
       return 'nowPlaying';
-    case 'health' || '/api/health':
+
+    case 'health':
+    case '/api/health':
       return 'health';
 
-    case 'version' || '/api/version':
+    case 'version':
+    case '/api/version':
       return 'version';
 
     default:
