@@ -56,3 +56,9 @@ variable "tags" {
     "ManagedBy" = "Terraform"
   }
 }
+
+variable "git_sha" {
+  type        = string
+  description = "The git sha of the commit that caused the deploy"
+  default     = "unknown"
+}

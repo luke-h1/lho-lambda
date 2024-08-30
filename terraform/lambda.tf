@@ -51,10 +51,11 @@ resource "aws_lambda_function" "lambda" {
     variables = merge(var.env_vars, {
       DEPLOYED_AT = timestamp()
       DEPLOYED_BY = var.deployed_by
+      GIT_SHA : var.git_sha
     })
   }
   tags = merge(var.tags, {
-    Environment = var.env
+    Environment = var.env,
   })
 }
 
