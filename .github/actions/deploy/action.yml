@@ -49,7 +49,7 @@ runs:
 
     - name: create new pre-release version
       shell: bash
-      if: ${{ inputs.environment == 'staging' }}
+      if: ${{ inputs.environment == 'staging' && github.ref != 'refs/heads/main' }}
       run: |
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
