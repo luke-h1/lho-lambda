@@ -1,5 +1,5 @@
 name: Destroy
-description: Destroy an environment
+description: Destroy
 inputs:
   environment:
     description: 'The environment to destroy'

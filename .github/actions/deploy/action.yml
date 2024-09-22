@@ -1,5 +1,5 @@
 name: Deploy
-description: Deploy to an environment
+description: Deploy
 inputs:
   environment:
     description: 'The environment to deploy to'
