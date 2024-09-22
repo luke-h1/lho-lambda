@@ -70,11 +70,11 @@ runs:
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
         pnpm lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push --force-publish
-        git push --force --no-verify --follow-tags
+        git push -u origin main --force --no-verify --follow-tags
     
     - name: Pull latest changelogs and version
       if: ${{ inputs.environment == 'live' && inputs.create-changelogs == 'true' }}
-      run: git fetch && git pull --rebase
+      run: git fetch -u origin main && git pull --rebase origin main
       shell: bash
 
     - name: Terraform plan
