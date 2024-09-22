@@ -63,6 +63,7 @@ runs:
       run: | 
         echo "Event: ${{ github.event_name }}"
         echo "Event trigger: ${{ github.event.inputs.trigger }}"
+      shell: bash
 
     - name: Publish packages
       shell: bash
