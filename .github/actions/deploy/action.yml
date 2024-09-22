@@ -10,6 +10,10 @@ inputs:
   aws-secret-access-key:
     description: "AWS secret access key to use"
     required: true
+  create-changelogs:
+    description: "Whether to create changelogs"
+    required: false
+    default: false
 runs:
   using: composite
   steps:
@@ -49,7 +53,7 @@ runs:
 
     - name: create new pre-release version
       shell: bash
-      if: ${{ inputs.environment == 'staging' && github.ref != 'refs/heads/main' }}
+      if: ${{ inputs.environment == 'staging' && github.ref != 'refs/heads/main' && inputs.create-changelogs == 'true' }}
       run: |
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
@@ -59,15 +63,9 @@ runs:
       shell: bash
       run: pnpm build
 
-    - name: log event
-      run: | 
-        echo "Event: ${{ github.event_name }}"
-        echo "Event trigger: ${{ github.event.inputs.trigger }}"
-      shell: bash
-
     - name: Publish packages
       shell: bash
-      if: ${{ inputs.environment == 'live' && github.event.inputs.trigger == 'build-release-version' }}
+      if: ${{ inputs.environment == 'live' && inputs.create-changelogs == 'true' }}
       run: |
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
@@ -84,4 +82,3 @@ runs:
       shell: bash
       working-directory: terraform
       run: terraform apply -auto-approve tfplan
-

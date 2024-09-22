@@ -55,6 +55,7 @@ jobs:
           environment: ${{ github.event.inputs.env }}
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          create-changelogs: false
 
   discord-message:
     runs-on: ubuntu-latest
