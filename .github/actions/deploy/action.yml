@@ -71,6 +71,10 @@ runs:
         git config user.email "${{ github.actor }}@users.noreply.github.com"
         pnpm lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push --force-publish
         git push --force --no-verify --follow-tags
+    
+    - name: Pull latest changelogs and version
+      if: ${{ inputs.environment == 'live' && inputs.create-changelogs == 'true' }}
+      run: git pull --rebase
 
     - name: Terraform plan
       id: plan
