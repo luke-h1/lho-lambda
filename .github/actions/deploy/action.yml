@@ -59,6 +59,11 @@ runs:
       shell: bash
       run: pnpm build
 
+    - name: log event
+      run: | 
+        echo "Event: ${{ github.event_name }}"
+        echo "Event trigger: ${{ github.event.inputs.trigger }}"
+
     - name: Publish packages
       shell: bash
       if: ${{ inputs.environment == 'live' && github.event.inputs.trigger == 'build-release-version' }}
