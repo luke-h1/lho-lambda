@@ -60,7 +60,7 @@ jobs:
           environment: staging
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          create-changelogs: true
+          create-changelogs: false
 
   discord-message:
     runs-on: ubuntu-latest
