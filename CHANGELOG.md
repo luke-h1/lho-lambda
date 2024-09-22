@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.18"></a>
+
+## [0.3.18](https://github.com/luke-h1/lho-lambda/compare/v0.3.17...v0.3.18) (2024-09-22)
+
+### Chores
+
+- **ci:** reword notifications ([a9e0bcb](https://github.com/luke-h1/lho-lambda/commit/a9e0bcb))
+
 <a name="0.3.17"></a>
 
 ## [0.3.17](https://github.com/luke-h1/lho-lambda/compare/v0.3.16...v0.3.17) (2024-09-22)
