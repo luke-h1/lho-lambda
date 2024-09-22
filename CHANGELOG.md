@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.11"></a>
+
+## [0.3.11](https://github.com/luke-h1/lho-lambda/compare/v0.3.10...v0.3.11) (2024-09-22)
+
+### Bug Fixes
+
+- **ci:** add git sha to deploy workflow ([7ce7048](https://github.com/luke-h1/lho-lambda/commit/7ce7048))
+- **ci:** fix changelogs not publishing ([86bb238](https://github.com/luke-h1/lho-lambda/commit/86bb238))
+- **ci:** only trigger changelogs via build-release-version ([2de5b76](https://github.com/luke-h1/lho-lambda/commit/2de5b76))
+
+### Chores
+
+- **ci:** cleanup actions ([a9dc52a](https://github.com/luke-h1/lho-lambda/commit/a9dc52a))
+- **ci:** debug event triggers ([96922d1](https://github.com/luke-h1/lho-lambda/commit/96922d1))
+- **ci:** debug triggers ([833a344](https://github.com/luke-h1/lho-lambda/commit/833a344))
+
 <a name="0.3.10"></a>
 
 ## [0.3.10](https://github.com/luke-h1/lho-lambda/compare/v0.3.9...v0.3.10) (2024-09-17)
