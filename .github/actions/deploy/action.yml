@@ -75,6 +75,7 @@ runs:
     - name: Pull latest changelogs and version
       if: ${{ inputs.environment == 'live' && inputs.create-changelogs == 'true' }}
       run: git pull --rebase
+      shell: bash
 
     - name: Terraform plan
       id: plan
