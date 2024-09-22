@@ -1,0 +1,30 @@
+name: Changelogs
+description: changelogs
+inputs:
+  prerelease:
+    description: "Whether to create a pre-release version"
+    required: true
+    default: false
+  publish:
+    description: "Whether to publish the changelogs"
+    required: true
+    default: false
+runs:
+  using: composite
+  steps:
+    - name: create new pre-release version
+      shell: bash
+      if: ${{ inputs.prerelease == 'true' }}
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        pnpm lerna version --yes prerelease --allow-branch ${{ github.head_ref }} --preid pre-release-${{ github.run_number }} --no-changelog --force-publish --no-git-tag-version --no-push
+
+    - name: Publish packages
+      shell: bash
+      if: ${{ inputs.publish == 'true' }}
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        pnpm lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push --force-publish
+        git push -u origin main --force --no-verify --follow-tags

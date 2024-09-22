@@ -49,13 +49,15 @@ jobs:
       - name: Validate
         uses: ./.github/actions/validate
 
+      - name: Changelogs
+        uses: ./.github/actions/changelog
+
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
           environment: ${{ github.event.inputs.env }}
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          create-changelogs: false
 
   discord-message:
     runs-on: ubuntu-latest

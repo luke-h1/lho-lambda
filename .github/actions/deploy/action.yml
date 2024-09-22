@@ -10,10 +10,6 @@ inputs:
   aws-secret-access-key:
     description: "AWS secret access key to use"
     required: true
-  create-changelogs:
-    description: "Whether to create changelogs"
-    required: false
-    default: false
 runs:
   using: composite
   steps:
@@ -51,31 +47,9 @@ runs:
       working-directory: terraform
       run: terraform validate
 
-    - name: create new pre-release version
-      shell: bash
-      if: ${{ inputs.environment == 'staging' && github.ref != 'refs/heads/main' }}
-      run: |
-        git config user.name "${{ github.actor }}"
-        git config user.email "${{ github.actor }}@users.noreply.github.com"
-        pnpm lerna version --yes prerelease --allow-branch ${{ github.head_ref }} --preid pre-release-${{ github.run_number }} --no-changelog --force-publish --no-git-tag-version --no-push
-
     - name: Build lambda
       shell: bash
       run: pnpm build
-
-    - name: Publish packages
-      shell: bash
-      if: ${{ inputs.environment == 'live' && inputs.create-changelogs == 'true' }}
-      run: |
-        git config user.name "${{ github.actor }}"
-        git config user.email "${{ github.actor }}@users.noreply.github.com"
-        pnpm lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push --force-publish
-        git push -u origin main --force --no-verify --follow-tags
-    
-    - name: Pull latest changelogs and version
-      if: ${{ inputs.environment == 'live' && inputs.create-changelogs == 'true' }}
-      run: git fetch -u origin main && git pull --rebase origin main
-      shell: bash
 
     - name: Terraform plan
       id: plan

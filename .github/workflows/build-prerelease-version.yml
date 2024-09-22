@@ -22,27 +22,9 @@ env:
   TURBO_TEAM: luke-h1-projects
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
-      - name: build
-        uses: ./.github/actions/install
-
-      - name: validate
-        uses: ./.github/actions/validate
-
   deploy:
     name: Deploy to staging
     runs-on: ubuntu-latest
-    needs: build
     timeout-minutes: 10
     steps:
       - name: Checkout repository
@@ -54,13 +36,24 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
+      - name: Validate
+        uses: ./.github/actions/validate
+
+      - name: Changelogs
+        uses: ./.github/actions/changelog
+        with:
+          prerelease: true
+          publish: false
+
+      - name: fetch latest commits
+        run: git fetch && git pull
+
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
           environment: staging
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          create-changelogs: false
 
   discord-message:
     runs-on: ubuntu-latest
