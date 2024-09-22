@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.12"></a>
+
+## [0.3.12](https://github.com/luke-h1/lho-lambda/compare/v0.3.11...v0.3.12) (2024-09-22)
+
+### Bug Fixes
+
+- **ci:** fix build ([6ef0b75](https://github.com/luke-h1/lho-lambda/commit/6ef0b75))
+- **ci:** fix latest version not being included in apply ([9fffa17](https://github.com/luke-h1/lho-lambda/commit/9fffa17))
+
 <a name="0.3.11"></a>
 
 ## [0.3.11](https://github.com/luke-h1/lho-lambda/compare/v0.3.10...v0.3.11) (2024-09-22)
