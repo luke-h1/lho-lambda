@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.19"></a>
+
+## [0.3.19](https://github.com/luke-h1/lho-lambda/compare/v0.3.18...v0.3.19) (2024-09-22)
+
+### Bug Fixes
+
+- **infrastructure:** prevent concurrent terraform deploys ([0bcd9a3](https://github.com/luke-h1/lho-lambda/commit/0bcd9a3))
+
 <a name="0.3.18"></a>
 
 ## [0.3.18](https://github.com/luke-h1/lho-lambda/compare/v0.3.17...v0.3.18) (2024-09-22)
