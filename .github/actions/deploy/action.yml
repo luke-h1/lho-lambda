@@ -15,7 +15,7 @@ runs:
   steps:
     - name: Validate environment
       shell: bash
-      run: if [ "${{ inputs.environment }}" != "staging" ] && [ "${{ inputs.environment }}" != "live" ]; then echo "Invalid environment"; exit 1; fi
+      run: if [ "${{ inputs.environment }}" != "staging" ] && [ "${{ inputs.environment }}" != "live" ] && [ "${{ inputs.environment }}" != "test" ]; then echo "Invalid environment"; exit 1; fi
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
@@ -40,7 +40,7 @@ runs:
     - name: Deploy DynamoDB lock table if not exists
       shell: bash
       working-directory: terraform
-      run: terraform apply -auto-approve -target=module.dynamodb
+      run: terraform apply -auto-approve -target=aws_dynamodb_table.dynamodb_terraform_lock
 
     - name: Terraform fmt -check
       shell: bash

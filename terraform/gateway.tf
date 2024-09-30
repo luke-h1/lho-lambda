@@ -14,24 +14,20 @@ resource "aws_apigatewayv2_api" "lambda" {
   })
 }
 
-resource "aws_apigatewayv2_domain_name" "domain_name" {
-  domain_name = var.env == "live" ? "nowplaying.${var.root_domain}" : "nowplaying-${var.env}.${var.root_domain}"
+# resource "aws_apigatewayv2_domain_name" "domain_name" {
+#   domain_name = var.env == "live" ? "nowplaying.${var.root_domain}" : "nowplaying.${var.env}.${var.root_domain}"
+#   depends_on  = [aws_acm_certificate_validation.val]
+#   domain_name_configuration {
+#     certificate_arn = aws_acm_certificate_validation.val.certificate_arn
+#     endpoint_type   = "REGIONAL"
+#     security_policy = "TLS_1_2"
+#   }
+#   tags = merge(var.tags, {
+#     Environment = var.env
+#   })
+# }
 
-  domain_name_configuration {
-    certificate_arn = aws_acm_certificate.cert.arn
-    endpoint_type   = "REGIONAL"
-    security_policy = "TLS_1_2"
-  }
-  tags = merge(var.tags, {
-    Environment = var.env
-  })
-}
 
-resource "aws_apigatewayv2_api_mapping" "lambda" {
-  api_id      = aws_apigatewayv2_api.lambda.id
-  domain_name = aws_apigatewayv2_domain_name.domain_name.domain_name
-  stage       = aws_apigatewayv2_stage.lambda.id
-}
 
 resource "aws_apigatewayv2_stage" "lambda" {
   api_id      = aws_apigatewayv2_api.lambda.id

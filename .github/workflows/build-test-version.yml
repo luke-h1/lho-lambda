@@ -1,37 +1,25 @@
-name: Deploy
+name: Build test version
 on:
-  workflow_dispatch:
-    inputs:
-      env:
-        description: 'Environment to deploy to'
-        required: true
-        default: 'staging'
-        type: choice
-        options:
-          - staging
-          - live
-          - test
-
+  pull_request:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
   PNPM_VERSION: 9.4.0
-  # terraform variables; TODO: move to secretmanager
-  TF_VAR_env: ${{ github.event.inputs.env  == 'staging' && 'staging' || 'live' }}
+  TF_VAR_env: test
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
-  TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
-  TF_VAR_root_domain: lhowsam.com
-  TF_VAR_sub_domain: nowplaying.lhowsam.com
-  TF_VAR_private_key: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_PRIVATE_KEY || secrets.LIVE_PRIVATE_KEY }}
-  TF_VAR_certificate_body: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_BODY || secrets.LIVE_CERTIFICATE_BODY }}
-  TF_VAR_certificate_chain: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_CHAIN || secrets.LIVE_CERTIFICATE_CHAIN }}
+  # TF_VAR_root_domain: lhowsam.com
+  # TF_VAR_private_key: ${{ secrets.STAGING_PRIVATE_KEY }}
+  # TF_VAR_certificate_body: ${{ secrets.STAGING_CERTIFICATE_BODY }}
+  # TF_VAR_certificate_chain: ${{ secrets.STAGING_CERTIFICATE_CHAIN }}
   TF_VAR_deployed_by: ${{ github.actor }}
   TF_VAR_git_sha: ${{ github.sha }}
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: luke-h1-projects
 
 jobs:
   deploy:
-    name: Deploy ${{ github.event.inputs.env }}
+    name: Deploy to test
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -41,9 +29,6 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
-      - name: Fetch latest commits
-        run: git fetch && git pull
-
       - name: Install
         uses: ./.github/actions/install
 
@@ -52,18 +37,24 @@ jobs:
 
       - name: Changelogs
         uses: ./.github/actions/changelog
+        with:
+          prerelease: true
+          publish: false
 
-      - name: Deploy
+      - name: fetch latest commits
+        run: git fetch && git pull
+
+      - name: Deploy to test
         uses: ./.github/actions/deploy
         with:
-          environment: ${{ github.event.inputs.env }}
+          environment: test
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   discord-message:
     runs-on: ubuntu-latest
-    needs: deploy
     if: success()
+    needs: deploy
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -72,7 +63,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Fetch latest commits
-        run: git fetch -u origin main && git pull --rebase origin main
+        run: git fetch && git pull
 
       - name: get package version
         id: package-version
@@ -85,18 +76,13 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-          args: ':white_check_mark: release of lho-lambda (${{ github.event.inputs.env }}) - ${{ steps.package-version.outputs.current-version }} successful :white_check_mark:'
+          args: ':white_check_mark: test release of lho-lambda ${{ github.head_ref }} successful :white_check_mark:'
 
   discord-fail-message:
     runs-on: ubuntu-latest
     if: failure()
+    needs: deploy
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
       - name: get package version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@main
@@ -108,4 +94,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-          args: ':red_circle: Build of release lho-lambda (${{ github.event.inputs.env }}) - ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          args: ':red_circle: test release of lho-lambda ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
