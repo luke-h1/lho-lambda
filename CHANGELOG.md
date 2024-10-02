@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.20"></a>
+
+## [0.3.20](https://github.com/luke-h1/lho-lambda/compare/v0.3.19...v0.3.20) (2024-10-02)
+
+### Code Refactoring
+
+- **infrastructure:** refactor naming conventions ([8bc7490](https://github.com/luke-h1/lho-lambda/commit/8bc7490))
+
 <a name="0.3.19"></a>
 
 ## [0.3.19](https://github.com/luke-h1/lho-lambda/compare/v0.3.18...v0.3.19) (2024-09-22)
