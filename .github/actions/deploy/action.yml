@@ -40,7 +40,7 @@ runs:
     - name: Deploy DynamoDB lock table if not exists
       shell: bash
       working-directory: terraform
-      run: terraform apply -auto-approve -target=module.dynamodb
+      run: terraform apply -auto-approve -target=aws_dynamodb_table.dynamodb_terraform_lock
 
     - name: Terraform fmt -check
       shell: bash
