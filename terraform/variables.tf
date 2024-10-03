@@ -23,11 +23,6 @@ variable "root_domain" {
   default     = "lhowsam.com"
 }
 
-variable "sub_domain" {
-  type        = string
-  description = "The sub domain for the route53 record"
-}
-
 variable "private_key" {
   type        = string
   description = "The private key for the certificate"

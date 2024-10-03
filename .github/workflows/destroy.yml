@@ -21,7 +21,6 @@ env:
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
   TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
   TF_VAR_root_domain: lhowsam.com
-  TF_VAR_sub_domain: nowplaying.lhowsam.com
   TF_VAR_private_key: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_PRIVATE_KEY || secrets.LIVE_PRIVATE_KEY }}
   TF_VAR_certificate_body: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_BODY || secrets.LIVE_CERTIFICATE_BODY }}
   TF_VAR_certificate_chain: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_CERTIFICATE_CHAIN || secrets.LIVE_CERTIFICATE_CHAIN }}
