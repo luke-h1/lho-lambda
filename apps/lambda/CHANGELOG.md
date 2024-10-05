@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.21"></a>
+
+## [0.3.21](https://github.com/luke-h1/lho-lambda/compare/v0.3.20...v0.3.21) (2024-10-05)
+
+**Note:** Version bump only for package lambda
+
 <a name="0.3.20"></a>
 
 ## [0.3.20](https://github.com/luke-h1/lho-lambda/compare/v0.3.19...v0.3.20) (2024-10-02)
