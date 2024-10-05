@@ -20,6 +20,7 @@ env:
   TF_VAR_git_sha: ${{ github.sha }}
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: luke-h1-projects
+permissions: write-all
 
 jobs:
   deploy:
@@ -54,6 +55,21 @@ jobs:
           environment: staging
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Get version
+        id: lambda-version
+        run: |
+          echo "::set-output name=LAMBDA_VERSION::$(node -e 'console.log(require("./apps/lambda/package.json").version)')"
+
+      - uses: actions/github-script@v7
+        with: 
+          script: | 
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '* [Lambda version](https://nowplaying-staging.lhowsam.com) - ${{ steps.lambda-version.outputs.LAMBDA_VERSION }}'
+            })
 
   discord-message:
     runs-on: ubuntu-latest
