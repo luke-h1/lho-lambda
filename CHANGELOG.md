@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.23"></a>
+
+## [0.3.23](https://github.com/luke-h1/lho-lambda/compare/v0.3.22...v0.3.23) (2024-10-11)
+
+### Chores
+
+- **lambda:** update eslint ([f398d82](https://github.com/luke-h1/lho-lambda/commit/f398d82))
+
 <a name="0.3.22"></a>
 
 ## [0.3.22](https://github.com/luke-h1/lho-lambda/compare/v0.3.21...v0.3.22) (2024-10-05)
