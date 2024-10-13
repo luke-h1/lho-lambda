@@ -9,15 +9,18 @@ const routes = async (path: string) => {
   const revalidate = 5;
 
   switch (path) {
-    case 'health' || '/api/health':
+    case 'health':
+    case '/api/health':
       response = await healthHandler();
       break;
 
-    case 'version' || '/api/version':
+    case 'version':
+    case '/api/version':
       response = await versionHandler();
       break;
 
-    case 'now-playing' || '/api/now-playing':
+    case 'now-playing':
+    case '/api/now-playing':
       response = await nowPlayingHandler();
       break;
 
