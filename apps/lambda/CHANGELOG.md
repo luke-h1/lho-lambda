@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.24"></a>
+
+## [0.3.24](https://github.com/luke-h1/lho-lambda/compare/v0.3.23...v0.3.24) (2024-10-13)
+
+### Chores
+
+- **lambda:** logic fix + destroy workflow typo fix ([1ac6163](https://github.com/luke-h1/lho-lambda/commit/1ac6163))
+
 <a name="0.3.23"></a>
 
 ## [0.3.23](https://github.com/luke-h1/lho-lambda/compare/v0.3.22...v0.3.23) (2024-10-11)
