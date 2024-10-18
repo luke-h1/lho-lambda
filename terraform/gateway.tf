@@ -83,6 +83,7 @@ resource "aws_apigatewayv2_route" "lambda_route_health" {
   target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
   route_key      = "GET /api/health"
   operation_name = "health"
+  authorizer_id  = aws_apigatewayv2_api.lambda_authorizer.id
 }
 resource "aws_apigatewayv2_route" "lambda_route_health_head" {
   api_id           = aws_apigatewayv2_api.lambda.id
@@ -90,6 +91,8 @@ resource "aws_apigatewayv2_route" "lambda_route_health_head" {
   route_key        = "HEAD /api/health"
   api_key_required = false
   operation_name   = "head health"
+  authorizer_id    = aws_apigatewayv2_api.lambda_authorizer.id
+
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_version" {
@@ -98,6 +101,8 @@ resource "aws_apigatewayv2_route" "lambda_route_version" {
   route_key        = "GET /api/version"
   api_key_required = false
   operation_name   = "version"
+  authorizer_id    = aws_apigatewayv2_api.lambda_authorizer.id
+
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
@@ -106,6 +111,8 @@ resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
   route_key        = "GET /api/now-playing"
   api_key_required = false
   operation_name   = "now-playing"
+  authorizer_id    = aws_apigatewayv2_api.lambda_authorizer.id
+
 }
 ##############################################################################
 
