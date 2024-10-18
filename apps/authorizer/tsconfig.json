@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@auth/*": ["./src/*"],
+      "@auth-test/*": ["src/test/*"]
+    },
+    "incremental": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "build"]
+}
