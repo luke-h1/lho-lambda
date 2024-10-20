@@ -68,7 +68,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '* [Lambda version](https://nowplaying-staging.lhowsam.com) - ${{ steps.lambda-version.outputs.LAMBDA_VERSION }}'
+              body: '* [Lambda version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}`'
             })
 
   discord-message:
