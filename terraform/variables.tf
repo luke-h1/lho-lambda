@@ -62,3 +62,9 @@ variable "git_sha" {
   description = "The git sha of the commit that caused the deploy"
   default     = "unknown"
 }
+
+variable "project_name" {
+  type        = string
+  description = "The name of the project"
+  default     = "nowplaying"
+}

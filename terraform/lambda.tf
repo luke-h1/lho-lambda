@@ -5,7 +5,7 @@ data "archive_file" "lambda_archive" {
 }
 
 resource "aws_iam_role" "lambda_exec" {
-  name = "lho-lambda-${var.env}-exec-role"
+  name = "${var.project_name}-${var.env}-exec-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -34,7 +34,7 @@ resource "aws_iam_role" "lambda_exec" {
 # }
 
 resource "aws_lambda_function" "lambda" {
-  function_name    = "nowplaying-lambda-${var.env}"
+  function_name    = "${var.project_name}-lambda-${var.env}"
   runtime          = "nodejs20.x"
   handler          = "index.handler"
   role             = aws_iam_role.lambda_exec.arn
