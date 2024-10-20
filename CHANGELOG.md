@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.27"></a>
+
+## [0.3.27](https://github.com/luke-h1/lho-lambda/compare/v0.3.26...v0.3.27) (2024-10-20)
+
+### Chores
+
+- **infrastructure:** update terraform action ([25c6c00](https://github.com/luke-h1/lho-lambda/commit/25c6c00))
+
 <a name="0.3.26"></a>
 
 ## [0.3.26](https://github.com/luke-h1/lho-lambda/compare/v0.3.25...v0.3.26) (2024-10-20)
