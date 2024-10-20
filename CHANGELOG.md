@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.28"></a>
+
+## [0.3.28](https://github.com/luke-h1/lho-lambda/compare/v0.3.27...v0.3.28) (2024-10-20)
+
+### Bug Fixes
+
+- **infrastructure:** fix husky warnings ([f2cf755](https://github.com/luke-h1/lho-lambda/commit/f2cf755))
+
 <a name="0.3.27"></a>
 
 ## [0.3.27](https://github.com/luke-h1/lho-lambda/compare/v0.3.26...v0.3.27) (2024-10-20)
