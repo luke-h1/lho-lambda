@@ -1,6 +1,6 @@
 # lho-lambda
 
-Supporting lambdas for lhowsam.com. Handles now-playing and other API requests that supports lhowsam.com
+Lambda for lhowsam.com. Handles Spotify API requests
 
 ## Tech stack
 
