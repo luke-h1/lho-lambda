@@ -18,7 +18,7 @@ runs:
       run: if [ "${{ inputs.environment }}" != "staging" ] && [ "${{ inputs.environment }}" != "live" ]; then echo "Invalid environment"; exit 1; fi
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v3
@@ -29,7 +29,7 @@ runs:
         mask-aws-account-id: true
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
 
     - name: Terraform init
       shell: bash
