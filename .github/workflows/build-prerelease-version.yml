@@ -34,6 +34,9 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
+      - name: Ensure rebased with main
+        run: ./scripts/ensure-rebased.sh
+
       - name: Install
         uses: ./.github/actions/install
 
