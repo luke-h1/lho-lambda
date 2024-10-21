@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.32"></a>
+
+## [0.3.32](https://github.com/luke-h1/lho-lambda/compare/v0.3.31...v0.3.32) (2024-10-21)
+
+### Features
+
+- **infrastructure:** add cloudwatch metric filter ([b04d8f5](https://github.com/luke-h1/lho-lambda/commit/b04d8f5))
+
 <a name="0.3.31"></a>
 
 ## [0.3.31](https://github.com/luke-h1/lho-lambda/compare/v0.3.30...v0.3.31) (2024-10-20)
