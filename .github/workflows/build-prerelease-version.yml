@@ -91,12 +91,17 @@ jobs:
         with:
           path: apps/lambda
 
+      - name: Get version
+        id: lambda-version
+        run: |
+          echo "::set-output name=LAMBDA_VERSION::$(node -e 'console.log(require("./apps/lambda/package.json").version)')"
+
       - name: Discord success notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-          args: ':white_check_mark: staging release of lho-lambda ${{ github.head_ref }} successful :white_check_mark:'
+          args: ':white_check_mark: staging release of lho-lambda `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}` (${{ github.head_ref }}) successful :white_check_mark:'
 
   discord-fail-message:
     runs-on: ubuntu-latest
@@ -109,9 +114,14 @@ jobs:
         with:
           path: apps/lambda
 
+      - name: Get version
+        id: lambda-version
+        run: |
+          echo "::set-output name=LAMBDA_VERSION::$(node -e 'console.log(require("./apps/lambda/package.json").version)')"
+
       - name: Discord fail notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-          args: ':red_circle: staging release of lho-lambda ${{ github.head_ref }} failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          args: ':red_circle: staging release of lho-lambda `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}` (${{ github.head_ref }}) failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
