@@ -59,14 +59,14 @@ resource "aws_lambda_function" "lambda" {
   })
 }
 
-# resource "aws_cloudwatch_log_group" "lambda_logs" {
-#   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
-#   retention_in_days = 1
-#   log_group_class   = "STANDARD"
+resource "aws_cloudwatch_log_group" "lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
+  retention_in_days = 1
+  log_group_class   = "STANDARD"
 
-#   tags = {
-#     Environment = var.env
-#     Service     = "nowplaying"
-#     s3export    = "true"
-#   }
-# }
+  tags = {
+    Environment = var.env
+    Service     = "nowplaying"
+    s3export    = "true"
+  }
+}
