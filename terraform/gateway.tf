@@ -48,22 +48,35 @@ resource "aws_apigatewayv2_stage" "lambda" {
     throttling_rate_limit  = 20000
     logging_level          = "OFF"
   }
-  # access_log_settings {
-  #   destination_arn = aws_cloudwatch_log_group.api_gw.arn
-  #   format = jsonencode({
-  #     requestId               = "$context.requestId"
-  #     sourceIp                = "$context.identity.sourceIp"
-  #     requestTime             = "$context.requestTime"
-  #     protocol                = "$context.protocol"
-  #     httpMethod              = "$context.httpMethod"
-  #     resourcePath            = "$context.resourcePath"
-  #     routeKey                = "$context.routeKey"
-  #     status                  = "$context.status"
-  #     responseLength          = "$context.responseLength"
-  #     integrationErrorMessage = "$context.integrationErrorMessage"
-  #     }
-  #   )
-  # }
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gw.arn
+    format = jsonencode({
+      requestTime              = "$context.requestTime"
+      requestId                = "$context.requestId"
+      httpMethod               = "$context.httpMethod"
+      path                     = "$context.path"
+      resourcePath             = "$context.resourcePath"
+      status                   = "$context.status"
+      responseLatency          = "$context.responseLatency"
+      integrationRequestId     = "$context.integration.requestId"
+      functionResponseStatus   = "$context.status"
+      integrationLatency       = "$context.integration.latency"
+      integrationServiceStatus = "$context.integration.integrationStatus"
+      ip                       = "$context.identity.sourceIp"
+      userAgent                = "$context.identity.userAgent"
+      requestId                = "$context.requestId"
+      sourceIp                 = "$context.identity.sourceIp"
+      requestTime              = "$context.requestTime"
+      protocol                 = "$context.protocol"
+      httpMethod               = "$context.httpMethod"
+      resourcePath             = "$context.resourcePath"
+      routeKey                 = "$context.routeKey"
+      status                   = "$context.status"
+      responseLength           = "$context.responseLength"
+      integrationErrorMessage  = "$context.integrationErrorMessage"
+      }
+    )
+  }
   tags = merge(var.tags, {
     Environment = var.env
   })
