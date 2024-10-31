@@ -60,6 +60,6 @@
     }
   },
   "dependencies": {
-    "lerna": "^8.1.8"
+    "lerna": "^8.1.9"
   }
 }
