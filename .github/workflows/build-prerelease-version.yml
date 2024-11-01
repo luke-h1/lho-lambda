@@ -7,7 +7,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  PNPM_VERSION: 9.4.0
+  PNPM_VERSION: 9.12.3
   TF_VAR_env: staging
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
   TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
