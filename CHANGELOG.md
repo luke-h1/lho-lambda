@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.39"></a>
+
+## [0.3.39](https://github.com/luke-h1/lho-lambda/compare/v0.3.38...v0.3.39) (2024-11-01)
+
+### Chores
+
+- **lambda:** update esbuild ([de82195](https://github.com/luke-h1/lho-lambda/commit/de82195))
+
 <a name="0.3.38"></a>
 
 ## [0.3.38](https://github.com/luke-h1/lho-lambda/compare/v0.3.37...v0.3.38) (2024-10-31)
