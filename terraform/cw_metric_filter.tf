@@ -32,7 +32,7 @@ resource "aws_cloudwatch_log_metric_filter" "lambda_count_lhowsam_prod" {
   log_group_name = aws_cloudwatch_log_group.lambda_logs.name
 
   metric_transformation {
-    name          = "${var.env}_CountLhowsamProd"
+    name          = "CountLhowsamProd"
     namespace     = "LambdaCustom"
     value         = "1"
     unit          = "Count"
@@ -46,7 +46,7 @@ resource "aws_cloudwatch_log_metric_filter" "lambda_count_lhowsam_dev" {
   log_group_name = aws_cloudwatch_log_group.lambda_logs.name
 
   metric_transformation {
-    name          = "${var.env}_CountLhowsamDev"
+    name          = "CountLhowsamDev"
     namespace     = "LambdaCustom"
     value         = "1"
     unit          = "Count"
