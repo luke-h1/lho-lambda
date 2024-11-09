@@ -9,9 +9,13 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent,
   context: Context,
 ) => {
+  /**
+   * The incoming request path can either be the last part of the req ctx path, the route key
+   * or the rawPath depending on whether the function is executed from aws or the lambda is
+   * executed via a HTTP request via API gateway
+   */
+
   const path =
-    // path can either be the last part of the path or the routeKey
-    // depending on whether the function is executed from aws or a http call comes thru from the http gateway
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     event.requestContext?.path?.split('/').pop() ??

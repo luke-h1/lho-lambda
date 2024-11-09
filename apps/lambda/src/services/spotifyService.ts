@@ -40,6 +40,6 @@ const spotifyService = {
       },
     });
   },
-};
+} as const;
 
 export default spotifyService;

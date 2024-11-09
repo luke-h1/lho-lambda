@@ -15,8 +15,8 @@ describe('buildPath', () => {
     expect(result).toEqual('version');
   });
 
-  test('should return path by default', () => {
+  test('should return `unknown` for un-registered paths', () => {
     const result = buildPath('/123/123');
-    expect(result).toEqual('/123/123');
+    expect(result).toEqual('unknown');
   });
 });

@@ -15,7 +15,7 @@ const buildPath = (path: string): LambdaActions | string => {
       return 'version';
 
     default:
-      return path;
+      return 'unknown';
   }
 };
 export default buildPath;

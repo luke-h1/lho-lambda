@@ -1,6 +1,6 @@
 import pkg from '../../../package.json';
 
-const versionHandler = async () => {
+const versionHandler = async (): Promise<string> => {
   return JSON.stringify(
     {
       version: pkg.version,

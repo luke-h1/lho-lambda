@@ -2,7 +2,7 @@ import spotifyService from '@lambda/services/spotifyService';
 import { Song, SongItem } from '@lambda/types/spotify';
 import NodeCache from 'node-cache';
 
-const nowPlayingHandler = async (): Promise<Song | string> => {
+const nowPlayingHandler = async (): Promise<string> => {
   const cache = new NodeCache({
     stdTTL: 5,
     checkperiod: 5,
