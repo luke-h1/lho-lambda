@@ -3,10 +3,10 @@ resource "aws_apigatewayv2_api" "lambda" {
   protocol_type                = "HTTP"
   disable_execute_api_endpoint = true
   cors_configuration {
-    allow_headers  = ["*"]
-    allow_origins  = ["*"]
-    allow_methods  = ["*"]
-    expose_headers = ["*"]
+    allow_headers  = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "Content-Length", "X-Requested-With", "Content-Type"]
+    allow_origins  = ["https://lhowsam.com", "https://dev.lhowsam.com"]
+    allow_methods  = ["GET", "HEAD"]
+    expose_headers = ["Content-Type", "X-Amz-Date"]
   }
 
   tags = merge(var.tags, {

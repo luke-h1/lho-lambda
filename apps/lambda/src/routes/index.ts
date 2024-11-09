@@ -33,8 +33,10 @@ const routes = async (path: string) => {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,OPTIONS,POST,PUT,DELETE',
+      'Access-Control-Allow-Origin': [
+        'https://lhowsam.com',
+        'https://dev.lhowsam.com',
+      ],
       'Cache-Control': includeCacheHeader
         ? `max-age=${revalidate}, s-maxage=${revalidate}, stale-while-revalidate=${revalidate}, stale-if-error=${revalidate}`
         : 'no-cache',
