@@ -19,6 +19,8 @@ runs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v3
@@ -30,6 +32,8 @@ runs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
 
     - name: Terraform init
       working-directory: terraform

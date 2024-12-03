@@ -19,6 +19,8 @@ runs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v3
@@ -30,6 +32,8 @@ runs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
 
     - name: Terraform init
       shell: bash
@@ -60,9 +64,9 @@ runs:
       id: plan
       shell: bash
       working-directory: terraform
-      run: terraform plan -no-color
+      run: terraform plan -no-color -out=tfplan
 
     - name: Terraform apply
       shell: bash
       working-directory: terraform
-      run: terraform apply -auto-approve
+      run: terraform apply -auto-approve tfplan
