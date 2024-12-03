@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.46"></a>
+
+## [0.3.46](https://github.com/luke-h1/lho-lambda/compare/v0.3.45...v0.3.46) (2024-12-03)
+
+### Bug Fixes
+
+- **infrastructure:** pin terraform version due to bug in latest tf version ([22d43d9](https://github.com/luke-h1/lho-lambda/commit/22d43d9))
+
 <a name="0.3.45"></a>
 
 ## [0.3.45](https://github.com/luke-h1/lho-lambda/compare/v0.3.44...v0.3.45) (2024-12-03)
