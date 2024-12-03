@@ -60,9 +60,9 @@ runs:
       id: plan
       shell: bash
       working-directory: terraform
-      run: terraform plan -no-color -out=tfplan
+      run: terraform plan -no-color
 
     - name: Terraform apply
       shell: bash
       working-directory: terraform
-      run: terraform apply -auto-approve tfplan
+      run: terraform apply -auto-approve
