@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.48"></a>
+
+## [0.3.48](https://github.com/luke-h1/lho-lambda/compare/v0.3.47...v0.3.48) (2024-12-18)
+
+### Chores
+
+- **lambda:** update deps ([0a6c50a](https://github.com/luke-h1/lho-lambda/commit/0a6c50a))
+
 <a name="0.3.47"></a>
 
 ## [0.3.47](https://github.com/luke-h1/lho-lambda/compare/v0.3.46...v0.3.47) (2024-12-10)
