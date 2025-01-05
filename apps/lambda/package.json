@@ -9,10 +9,10 @@
     "tsc": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.146",
+    "@types/aws-lambda": "^8.10.147",
     "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.14",
-    "@types/lodash": "^4.17.13",
+    "@types/lodash": "^4.17.14",
     "@types/node": "^20.11.30",
     "babel-jest": "^29.7.0",
     "esbuild": "^0.24.2",
