@@ -1,6 +1,6 @@
 {
   "name": "lambda",
-  "version": "0.3.51",
+  "version": "0.3.52",
   "scripts": {
     "build": "esbuild --bundle --minify --keep-names --sourcemap --sources-content=false --target=node20 --platform=node --outfile=dist/index.js src/index.ts",
     "clean": "rm -rf ./dist",
