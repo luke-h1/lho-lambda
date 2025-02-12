@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.53"></a>
+
+## [0.3.53](https://github.com/luke-h1/lho-lambda/compare/v0.3.52...v0.3.53) (2025-02-12)
+
+### Bug Fixes
+
+- **ci:** fix build ([ab613ea](https://github.com/luke-h1/lho-lambda/commit/ab613ea))
+
+### Chores
+
+- **lambda:** remove unused routing ([c929074](https://github.com/luke-h1/lho-lambda/commit/c929074))
+
 <a name="0.3.52"></a>
 
 ## [0.3.52](https://github.com/luke-h1/lho-lambda/compare/v0.3.51...v0.3.52) (2025-02-09)
