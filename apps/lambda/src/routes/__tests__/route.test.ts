@@ -1,7 +1,7 @@
 import healthHandler from '@lambda/handlers/health';
 import nowPlayingHandler from '@lambda/handlers/now-playing';
 import versionHandler from '@lambda/handlers/version';
-import routes from '@lambda/routes';
+import routes, { RoutePath } from '@lambda/routes';
 
 describe('routes', () => {
   test('should return health response for health route', async () => {
@@ -41,7 +41,7 @@ describe('routes', () => {
   });
 
   test('should return 404 if route is not found', async () => {
-    const result = await routes('/123/123');
+    const result = await routes('/123/123' as unknown as RoutePath);
     expect(result).toEqual({
       statusCode: 200,
       headers: expect.any(Object),

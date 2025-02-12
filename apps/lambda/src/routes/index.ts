@@ -2,10 +2,11 @@ import healthHandler from '@lambda/handlers/health';
 import nowPlayingHandler from '@lambda/handlers/now-playing';
 import versionHandler from '@lambda/handlers/version';
 
-const routes = async (path: string) => {
+export type RoutePath = '/api/health' | '/api/version' | '/api/now-playing';
+
+const routes = async (path: RoutePath) => {
   let response: unknown;
-  const includeCacheHeader =
-    path === 'now-playing' || path === '/api/now-playing';
+  const includeCacheHeader = path === '/api/now-playing';
 
   const revalidate = 5;
 
