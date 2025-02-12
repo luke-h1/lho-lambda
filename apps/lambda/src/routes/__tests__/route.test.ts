@@ -5,7 +5,7 @@ import routes from '@lambda/routes';
 
 describe('routes', () => {
   test('should return health response for health route', async () => {
-    const result = await routes('health');
+    const result = await routes('/api/health');
 
     expect(result).toEqual({
       statusCode: 200,
@@ -17,7 +17,7 @@ describe('routes', () => {
   });
 
   test('should return version response for version route', async () => {
-    const result = await routes('version');
+    const result = await routes('/api/version');
 
     expect(result).toEqual({
       statusCode: 200,
@@ -29,7 +29,7 @@ describe('routes', () => {
   });
 
   test('should return now-playing response for now-playing route', async () => {
-    const result = await routes('now-playing');
+    const result = await routes('/api/now-playing');
     expect(result).toEqual({
       statusCode: 200,
       headers: expect.any(Object),
