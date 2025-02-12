@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, Context, Handler } from 'aws-lambda';
-import routes from './routes';
+import routes, { RoutePath } from './routes';
 import buildPath from './utils/buildPath';
 import isErrorLike from './utils/isErrorLike';
 import LambdaError from './utils/lambdaError';
@@ -14,9 +14,10 @@ export const handler: Handler = async (
   // AWSXRay.enableAutomaticMode();
 
   try {
-    return await Promise.race([routes(path), lambdaTimeout(context)]).then(
-      value => value,
-    );
+    return await Promise.race([
+      routes(path as RoutePath),
+      lambdaTimeout(context),
+    ]).then(value => value);
   } catch (e) {
     const errorBody = isErrorLike(e)
       ? new LambdaError({
