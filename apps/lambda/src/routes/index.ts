@@ -10,17 +10,17 @@ const routes = async (path: string) => {
   const revalidate = 5;
 
   switch (path) {
-    case 'health':
+    /**
+     * @see terraform/gateway.tf for a list of valid routes
+     */
     case '/api/health':
       response = await healthHandler();
       break;
 
-    case 'version':
     case '/api/version':
       response = await versionHandler();
       break;
 
-    case 'now-playing':
     case '/api/now-playing':
       response = await nowPlayingHandler();
       break;
