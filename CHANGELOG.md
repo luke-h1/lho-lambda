@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.55"></a>
+
+## [0.3.55](https://github.com/luke-h1/lho-lambda/compare/v0.3.54...v0.3.55) (2025-04-01)
+
+### Bug Fixes
+
+- **test:** fix route unit test ([2cd9304](https://github.com/luke-h1/lho-lambda/commit/2cd9304))
+
+### Chores
+
+- **gateway:** reduce cache time ([9213636](https://github.com/luke-h1/lho-lambda/commit/9213636))
+
 <a name="0.3.54"></a>
 
 ## [0.3.54](https://github.com/luke-h1/lho-lambda/compare/v0.3.53...v0.3.54) (2025-02-12)
