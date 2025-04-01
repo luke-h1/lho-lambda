@@ -8,7 +8,7 @@ const routes = async (path: RoutePath) => {
   let response: unknown;
   const includeCacheHeader = path === '/api/now-playing';
 
-  const revalidate = 5;
+  const revalidate = 2;
 
   switch (path) {
     /**
