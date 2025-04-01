@@ -36,7 +36,7 @@ describe('routes', () => {
       body: await nowPlayingHandler(),
     });
     expect(result.headers['Cache-Control']).toEqual(
-      'max-age=5, s-maxage=5, stale-while-revalidate=5, stale-if-error=5',
+      'max-age=2, s-maxage=2, stale-while-revalidate=2, stale-if-error=2',
     );
   });
 
