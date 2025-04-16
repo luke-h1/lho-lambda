@@ -46,7 +46,7 @@ resource "aws_lambda_function" "lambda" {
   #   mode = "Active"
   # }
   description   = "Now playing Lambda ${var.env}"
-  memory_size   = 128
+  memory_size   = 256
   architectures = ["arm64"]
   environment {
     variables = merge(var.env_vars, {
