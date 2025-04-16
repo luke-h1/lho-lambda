@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.56"></a>
+
+## [0.3.56](https://github.com/luke-h1/lho-lambda/compare/v0.3.55...v0.3.56) (2025-04-16)
+
+### Performance Improvements
+
+- **lambda:** increase memory size to 256mb ([395589e](https://github.com/luke-h1/lho-lambda/commit/395589e))
+- **lambda:** increase memory size to 256mb ([4416322](https://github.com/luke-h1/lho-lambda/commit/4416322))
+
 <a name="0.3.55"></a>
 
 ## [0.3.55](https://github.com/luke-h1/lho-lambda/compare/v0.3.54...v0.3.55) (2025-04-01)
