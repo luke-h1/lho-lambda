@@ -59,8 +59,7 @@ const nowPlayingHandler = async (): Promise<string> => {
     .join(', ');
   const album = song.item.album.name;
 
-  // @ts-expect-error album images are optional
-  const albumImageUrl = song.item.album.images[0].url;
+  const albumImageUrl = song?.item?.album?.images?.[0]?.url ?? '';
   const songUrl = song.item.external_urls.spotify;
 
   cache.set('now-playing', {
