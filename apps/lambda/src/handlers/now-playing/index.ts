@@ -28,11 +28,12 @@ const nowPlayingHandler = async (): Promise<string> => {
   }
 
   const res = await spotifyService.getNowPlaying();
-  if (res.status === 204 || res.status > 400) {
+  if (res.status === 204 || res.status !== 200) {
     return JSON.stringify(
       {
         isPlaying: false,
         status: 200,
+        error: 'Sporting API returned a non-200 status code',
       },
       null,
       2,
