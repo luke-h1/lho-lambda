@@ -15,6 +15,10 @@ module.exports = {
       name: '\tCode change that improves performance',
     },
     {
+      value: 'performance',
+      name: '\tCode change that improves performance',
+    },
+    {
       value: 'test',
       name: 'test:\tAdding tests cases / adds missing tests',
     },
