@@ -89,6 +89,8 @@ resource "aws_apigatewayv2_integration" "lambda" {
   integration_method = "POST"
 }
 
+
+
 # ROUTES 
 ##############################################################################
 resource "aws_apigatewayv2_route" "lambda_route_health" {
@@ -97,28 +99,28 @@ resource "aws_apigatewayv2_route" "lambda_route_health" {
   route_key      = "GET /api/health"
   operation_name = "health"
 }
+
 resource "aws_apigatewayv2_route" "lambda_route_health_head" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "HEAD /api/health"
-  api_key_required = false
-  operation_name   = "head health"
+  api_id         = aws_apigatewayv2_api.lambda.id
+  target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key      = "HEAD /api/health"
+  operation_name = "head health"
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_version" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/version"
-  api_key_required = false
-  operation_name   = "version"
+  api_id         = aws_apigatewayv2_api.lambda.id
+  target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key      = "GET /api/version"
+  operation_name = "version"
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
-  api_id           = aws_apigatewayv2_api.lambda.id
-  target           = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key        = "GET /api/now-playing"
-  api_key_required = false
-  operation_name   = "now-playing"
+  api_id             = aws_apigatewayv2_api.lambda.id
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key          = "GET /api/now-playing"
+  operation_name     = "now-playing"
+  authorizer_id      = aws_apigatewayv2_authorizer.api_key.id
+  authorization_type = "CUSTOM"
 }
 ##############################################################################
 
