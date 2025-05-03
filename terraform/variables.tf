@@ -68,3 +68,10 @@ variable "project_name" {
   description = "The name of the project"
   default     = "nowplaying"
 }
+
+variable "api_key" {
+  description = "API key for securing the API Gateway endpoints"
+  type        = string
+  sensitive   = true
+}
+

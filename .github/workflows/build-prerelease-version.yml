@@ -19,7 +19,9 @@ env:
   TF_VAR_deployed_by: ${{ github.actor }}
   TF_VAR_git_sha: ${{ github.sha }}
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: luke-h1-projects
+  TURBO_TEAM: luke-h1-project
+  TF_VAR_api_key: ${{ secrets.STAGING_API_KEY }}
+
 permissions: write-all
 
 jobs:
@@ -73,58 +75,3 @@ jobs:
               repo: context.repo.repo,
               body: '* [Lambda version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}`'
             })
-
-  discord-message:
-    runs-on: ubuntu-latest
-    if: success()
-    needs: deploy
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
-      - name: Fetch latest commits
-        run: git fetch && git pull
-
-      - name: get package version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
-        with:
-          path: apps/lambda
-
-      - name: Get version
-        id: lambda-version
-        run: |
-          echo "::set-output name=LAMBDA_VERSION::$(node -e 'console.log(require("./apps/lambda/package.json").version)')"
-
-      - name: Discord success notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: ':white_check_mark: staging release of lho-lambda `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}` (${{ github.head_ref }}) successful :white_check_mark:'
-
-  discord-fail-message:
-    runs-on: ubuntu-latest
-    if: failure()
-    needs: deploy
-    steps:
-      - name: get package version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
-        with:
-          path: apps/lambda
-
-      - name: Get version
-        id: lambda-version
-        run: |
-          echo "::set-output name=LAMBDA_VERSION::$(node -e 'console.log(require("./apps/lambda/package.json").version)')"
-
-      - name: Discord fail notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args: ':red_circle: staging release of lho-lambda `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}` (${{ github.head_ref }}) failed :red_circle: URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
