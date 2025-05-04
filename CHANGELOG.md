@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="1.1.1"></a>
+
+## [1.1.1](https://github.com/luke-h1/lho-lambda/compare/v1.1.0...v1.1.1) (2025-05-04)
+
+### Chores
+
+- **infrastructure:** align auth lambda settings ([f96b8dc](https://github.com/luke-h1/lho-lambda/commit/f96b8dc))
+
 <a name="1.1.0"></a>
 
 # [1.1.0](https://github.com/luke-h1/lho-lambda/compare/v0.3.56...v1.1.0) (2025-05-03)
