@@ -1,4 +1,3 @@
-
 data "archive_file" "auth_archive" {
   type        = "zip"
   source_dir  = "${path.module}/../apps/authorizer/dist"
@@ -11,7 +10,9 @@ resource "aws_lambda_function" "api_key_authorizer" {
   role             = aws_iam_role.lambda_exec.arn
   handler          = "index.handler"
   source_code_hash = data.archive_file.auth_archive.output_base64sha256
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
+  memory_size      = 256
+  architectures    = ["arm64"]
   timeout          = 10
 
   environment {
