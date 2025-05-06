@@ -21,6 +21,7 @@ env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: luke-h1-project
   TF_VAR_api_key: ${{ secrets.STAGING_API_KEY }}
+  TF_VAR_discord_webhook_url: ${{ secrets.DISCORD_ALERTS_WEBHOOK_URL}}
 
 permissions: write-all
 

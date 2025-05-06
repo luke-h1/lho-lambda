@@ -28,6 +28,7 @@ env:
   TF_VAR_deployed_by: ${{ github.actor }}
   TF_VAR_git_sha: ${{ github.sha }}
   TF_VAR_api_key: ${{ github.event.inputs.env  == 'staging' && secrets.STAGING_API_KEY || secrets.LIVE_API_KEY }}
+  TF_VAR_discord_webhook_url: ${{ secrets.DISCORD_ALERTS_WEBHOOK_URL}}
 
 jobs:
   deploy:

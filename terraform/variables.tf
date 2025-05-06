@@ -75,3 +75,9 @@ variable "api_key" {
   sensitive   = true
 }
 
+variable "discord_webhook_url" {
+  description = "Discord webhook URL for logging authorizer denials"
+  type        = string
+  sensitive   = true
+}
+
