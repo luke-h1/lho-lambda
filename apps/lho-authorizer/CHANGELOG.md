@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="1.2.0"></a>
+
+# [1.2.0](https://github.com/luke-h1/lho-lambda/compare/v1.1.2...v1.2.0) (2025-05-10)
+
+### Features
+
+- **infrastructure:** convert to bun ([4825ab6](https://github.com/luke-h1/lho-lambda/commit/4825ab6))
+
 <a name="1.1.2"></a>
 
 ## [1.1.2](https://github.com/luke-h1/lho-lambda/compare/v1.1.1...v1.1.2) (2025-05-06)
