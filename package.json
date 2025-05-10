@@ -1,27 +1,37 @@
 {
   "name": "root",
   "version": "0.0.0-monorepo",
+  "private": true,
+  "engineStrict": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "engines": {
-    "pnpm": "9.12.3"
+    "node": ">=22",
+    "bun": "1.2.5"
   },
-  "packageManager": "pnpm@9.12.3",
   "scripts": {
     "alphabetize": "node scripts/alphabetizePackageJson.js",
-    "build": "turbo run build",
-    "clean": "pnpm -r --parallel exec rm -rf node_modules && rm -rf node_modules",
+    "build": "bun run --filter '*' build",
     "commit": "cz",
-    "format": "prettier --write \"apps/**/*.{js,jsx,ts,tsx,css,scss,html}\"",
-    "format:check": "prettier --list-different \"apps/**/*.{js,jsx,ts,tsx,css,scss,html}\"",
-    "lint": "eslint --fix --ext .ts,.tsx,.js,.jsx .",
+    "fmt:tf": "terraform fmt terraform",
+    "lint:check": "bun run --filter '*' lint:check",
+    "lint:fix": "bun run --filter '*' lint:fix",
+    "preinstall": "only-allow bun && node ./scripts/commit-hooks",
     "prepare": "husky",
-    "test": "pnpm -r --no-bail test",
-    "test:ci": "pnpm -r --no-bail --aggregate-output --reporter=append-only test:ci",
-    "test:snapshot": "pnpm -r --no-bail test:snapshot",
-    "tsc": "pnpm -r --aggregate-output --reporter=append-only --no-bail tsc"
+    "prettier:check": "bun run --filter '*' prettier:check",
+    "prettier:fix": "bun run --filter '*' prettier:fix",
+    "test": "bun run --filter '*' test",
+    "test:ci": "bun run --filter '*' test:ci",
+    "test:snapshot": "bun run --filter '*' test:snapshot",
+    "ts:check": "bun run --filter '*' ts:check"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/compat": "^1.2.8",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^8.57.1",
     "@types/node": "20.14.10",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
@@ -32,11 +42,15 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-prettier": "^5.2.6",
     "git-cz": "^4.9.0",
     "husky": "^9.1.7",
     "lint-staged": "15.3.0",
+    "only-allow": "^1.2.1",
     "prettier": "^3.4.2",
-    "turbo": "^2.3.3"
+    "turbo": "^2.3.3",
+    "typescript-eslint": "^8.32.0"
   },
   "config": {
     "commitizen": {

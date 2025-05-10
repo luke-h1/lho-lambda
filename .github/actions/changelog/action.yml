@@ -18,7 +18,7 @@ runs:
       run: |
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
-        pnpm lerna version --yes prerelease --allow-branch ${{ github.head_ref }} --preid pre-release-${{ github.run_number }} --no-changelog --force-publish --no-git-tag-version --no-push
+        bun lerna version --yes prerelease --allow-branch ${{ github.head_ref }} --preid pre-release-${{ github.run_number }} --no-changelog --force-publish --no-git-tag-version --no-push
 
     - name: Publish packages
       shell: bash
@@ -26,5 +26,5 @@ runs:
       run: |
         git config user.name "${{ github.actor }}"
         git config user.email "${{ github.actor }}@users.noreply.github.com"
-        pnpm lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push --force-publish
+        bun lerna version --yes --conventional-commits --create-release github --changelog-preset conventional-changelog-angular-all --no-push --force-publish
         git push -u origin main --force --no-verify --follow-tags

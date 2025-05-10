@@ -15,7 +15,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  PNPM_VERSION: 9.12.3
   # terraform variables; TODO: move to secretmanager
   TF_VAR_env: ${{ github.event.inputs.env  == 'staging' && 'staging' || 'live' }}
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}

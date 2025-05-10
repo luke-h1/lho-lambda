@@ -1,5 +1,5 @@
 {
-  "npmClient": "pnpm",
+  "npmClient": "bun",
   "packages": ["apps/*"],
   "command": {
     "version": {

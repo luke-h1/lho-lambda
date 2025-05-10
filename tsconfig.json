@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "Bundler",
     "isolatedModules": true,
     "allowImportingTsExtensions": true,
     "declaration": false,
@@ -15,25 +14,30 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "strictNullChecks": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-    "resolveJsonModule": true,
     "outDir": "dist",
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
+    "paths": {
+      "@lambda/*": ["./apps/lho-lambda/src/*"],
+      "@lambda-test/*": ["./apps/lho-lambda/src/test/*"],
+      "@authorizer/*": ["./apps/lho-authorizer/src/*"],
+      "@authorizer-test/*": ["./apps/lho-authorizer/src/test/*"]
+    },
     "target": "es2020",
     "strict": true,
     "preserveConstEnums": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@lambda/*": ["./apps/lambda/src/*"],
-      "@lambda-test/*": ["./apps/lambda/src/test/*"]
-    },
-    "incremental": true
+    "incremental": true,
+    "checkJs": true
   },
-  "exclude": ["node_modules"]
+  "include": ["apps/**/*", "scripts/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
