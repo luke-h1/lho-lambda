@@ -10,7 +10,7 @@ const lambdaTimeout = (context: Context) =>
           name: 'LambdaTimeout',
           code: 500,
           statusCode: 500,
-          action: 'timeout',
+          action: 'unknown',
         }),
       );
     }, context.getRemainingTimeInMillis() - 1000);

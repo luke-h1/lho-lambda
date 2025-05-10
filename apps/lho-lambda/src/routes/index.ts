@@ -15,11 +15,11 @@ const routes = async (path: RoutePath) => {
      * @see terraform/gateway.tf for a list of valid routes
      */
     case '/api/health':
-      response = await healthHandler();
+      response = healthHandler();
       break;
 
     case '/api/version':
-      response = await versionHandler();
+      response = versionHandler();
       break;
 
     case '/api/now-playing':

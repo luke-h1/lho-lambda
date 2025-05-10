@@ -1,3 +1,9 @@
+variable "project_name" {
+  type        = string
+  description = "the name of the project"
+  default     = "now-playing"
+}
+
 variable "env" {
   type        = string
   description = "The environment to deploy to"
@@ -52,7 +58,7 @@ variable "tags" {
   type        = map(string)
   description = "The tags to apply to the resources"
   default = {
-    "Service"   = "NowPlaying"
+    "Service"   = "now-playing"
     "ManagedBy" = "Terraform"
   }
 }
@@ -61,12 +67,6 @@ variable "git_sha" {
   type        = string
   description = "The git sha of the commit that caused the deploy"
   default     = "unknown"
-}
-
-variable "project_name" {
-  type        = string
-  description = "The name of the project"
-  default     = "nowplaying"
 }
 
 variable "api_key" {

@@ -1,8 +1,13 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable */
+// @ts-nocheck
 const fs = require('fs');
 const path = require('path');
 
-const packageJsonPaths = ['package.json', 'apps/lambda/package.json'];
+const packageJsonPaths = [
+  'package.json',
+  'apps/lho-lambda/package.json',
+  'apps/lho-authorizer/package.json',
+];
 
 packageJsonPaths.forEach(packageJsonPath => {
   const fullPath = path.join(__dirname, '..', packageJsonPath);

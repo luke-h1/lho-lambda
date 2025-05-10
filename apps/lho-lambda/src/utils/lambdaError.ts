@@ -3,6 +3,7 @@ const lambdaActions = {
   nowPlaying: 'reqNowPlaying',
   health: 'reqHealth',
   version: 'reqVersion',
+  unknown: 'unknown',
 } as const;
 
 export type LambdaActions = keyof typeof lambdaActions;
@@ -11,7 +12,7 @@ interface Errors extends Error {
   statusCode?: number;
   code?: number;
   body?: string;
-  action?: LambdaActions | string;
+  action?: LambdaActions;
 }
 
 export default class LambdaError extends Error implements Errors {
@@ -21,7 +22,7 @@ export default class LambdaError extends Error implements Errors {
 
   body?: string;
 
-  action?: LambdaActions | string;
+  action?: LambdaActions;
 
   constructor({
     message,
@@ -34,7 +35,7 @@ export default class LambdaError extends Error implements Errors {
   }: Errors) {
     super(message);
     this.name = name || 'LambdaError';
-    this.action = action ?? 'unknown';
+    this.action = action || 'unknown';
     this.body = body;
     this.code = code;
     this.stack = stack;

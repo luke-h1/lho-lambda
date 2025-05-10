@@ -1,5 +1,5 @@
 resource "aws_apigatewayv2_api" "lambda" {
-  name                         = "now-playing-gw-${var.env}"
+  name                         = "${var.project_name}-gw-${var.env}"
   protocol_type                = "HTTP"
   disable_execute_api_endpoint = true
   cors_configuration {

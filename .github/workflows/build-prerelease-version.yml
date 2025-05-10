@@ -7,7 +7,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  PNPM_VERSION: 9.12.3
   TF_VAR_env: staging
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
   TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
@@ -62,10 +61,11 @@ jobs:
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Get version
+      - name: Get versions
         id: lambda-version
         run: |
-          echo "::set-output name=LAMBDA_VERSION::$(node -e 'console.log(require("./apps/lambda/package.json").version)')"
+          echo "::set-output name=LAMBDA_VERSION::$(node -e 'console.log(require("./apps/lho-lambda/package.json").version)')"
+          echo "::set-output name=AUTHORIZER_VERSION::$(node -e 'console.log(require("./apps/lho-authorizer/package.json").version)')"
 
       - uses: actions/github-script@v7
         with: 
@@ -74,5 +74,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '* [Lambda version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}`'
+              body: '* [Lambda version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}`\n* [Authorizer version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.AUTHORIZER_VERSION }}`'
             })

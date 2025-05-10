@@ -1,6 +1,6 @@
 import { LambdaActions } from './lambdaError';
 
-const buildPath = (path: string): LambdaActions | string => {
+const buildPath = (path: string): LambdaActions => {
   switch (path) {
     case 'now-playing':
     case '/api/now-playing':

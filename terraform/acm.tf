@@ -8,7 +8,7 @@ resource "aws_acm_certificate" "cert" {
   certificate_body  = var.certificate_body
   certificate_chain = var.certificate_chain
   tags = {
-    Name    = "Nowplaying certificate for ${var.env}"
+    Name    = "${var.project_name} certificate for ${var.env}"
     stage   = var.env
     service = var.project_name
   }

@@ -4,17 +4,17 @@ runs:
   using: composite
   steps:
     - name: format:check
-      run: pnpm format:check
+      run: bun prettier:check
       shell: bash
 
     - name: lint
-      run: pnpm lint
+      run: bun lint:check
       shell: bash
 
     - name: tsc
-      run: pnpm tsc
+      run: bun ts:check
       shell: bash
 
     - name: test
-      run: pnpm test
+      run: bun test
       shell: bash

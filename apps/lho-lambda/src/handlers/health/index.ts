@@ -1,4 +1,4 @@
-const healthHandler = async (): Promise<string> => {
+const healthHandler = () => {
   return JSON.stringify(
     {
       status: 'OK',
