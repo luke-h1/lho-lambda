@@ -1,8 +1,13 @@
 import healthHandler from '@lambda/handlers/health';
 import nowPlayingHandler from '@lambda/handlers/now-playing';
+import streakHandler from '@lambda/handlers/streak';
 import versionHandler from '@lambda/handlers/version';
 
-export type RoutePath = '/api/health' | '/api/version' | '/api/now-playing';
+export type RoutePath =
+  | '/api/health'
+  | '/api/version'
+  | '/api/now-playing'
+  | '/api/streak';
 
 const routes = async (path: RoutePath) => {
   let response: unknown;
@@ -24,6 +29,10 @@ const routes = async (path: RoutePath) => {
 
     case '/api/now-playing':
       response = await nowPlayingHandler();
+      break;
+
+    case '/api/streak':
+      response = streakHandler();
       break;
 
     default:
