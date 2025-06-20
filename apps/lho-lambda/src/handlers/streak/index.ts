@@ -7,9 +7,7 @@ const streakHandler = (): string => {
 
   return JSON.stringify(
     {
-      targetDate: '2025-06-20',
       distance,
-      message: `${distance}`,
     },
     null,
     2,
