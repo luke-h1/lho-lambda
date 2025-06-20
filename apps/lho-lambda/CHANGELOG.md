@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="1.4.0"></a>
+
+# [1.4.0](https://github.com/luke-h1/lho-lambda/compare/v1.3.0...v1.4.0) (2025-06-20)
+
+### Features
+
+- **api:** add streak handler ([8c1fbc1](https://github.com/luke-h1/lho-lambda/commit/8c1fbc1))
+
 <a name="1.3.0"></a>
 
 # [1.3.0](https://github.com/luke-h1/lho-lambda/compare/v1.2.0...v1.3.0) (2025-06-20)
