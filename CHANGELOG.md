@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="1.4.2"></a>
+
+## [1.4.2](https://github.com/luke-h1/lho-lambda/compare/v1.4.1...v1.4.2) (2025-07-03)
+
+### Chores
+
+- **api:** change dates ([ec5bc62](https://github.com/luke-h1/lho-lambda/commit/ec5bc62))
+
 <a name="1.4.1"></a>
 
 ## [1.4.1](https://github.com/luke-h1/lho-lambda/compare/v1.4.0...v1.4.1) (2025-07-03)
