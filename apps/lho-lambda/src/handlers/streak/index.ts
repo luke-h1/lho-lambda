@@ -1,7 +1,11 @@
 import { formatDistanceToNow } from 'date-fns';
 
 const streakHandler = (): string => {
-  const targetDates = [new Date('2025-06-20'), new Date('2025-07-02')];
+  const targetDates = [
+    new Date('2025-06-20'),
+    new Date('2025-07-02'),
+    new Date('2025-07-03'),
+  ];
 
   const distances = targetDates.map(date => ({
     date: date.toISOString(),
