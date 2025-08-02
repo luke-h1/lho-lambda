@@ -101,10 +101,13 @@ resource "aws_apigatewayv2_route" "lambda_route_health" {
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_health_head" {
-  api_id         = aws_apigatewayv2_api.lambda.id
-  target         = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  route_key      = "HEAD /api/health"
-  operation_name = "head health"
+  api_id             = aws_apigatewayv2_api.lambda.id
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key          = "HEAD /api/health"
+  operation_name     = "head health"
+  authorizer_id      = aws_apigatewayv2_authorizer.api_key.id
+  authorization_type = "CUSTOM"
+
 }
 
 resource "aws_apigatewayv2_route" "lambda_route_version" {
