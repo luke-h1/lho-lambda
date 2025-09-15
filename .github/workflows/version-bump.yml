@@ -1,0 +1,61 @@
+name: Version Bump
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+jobs:
+  version-bump:
+    if: github.event_name == 'push' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.5"
+
+      - name: Generate changelog and version
+        id: changelog
+        uses: ./.github/actions/changelog
+        with:
+          create_tag: "true"
+          push_changes: "true"
+
+      - name: Create Release
+        if: steps.changelog.outputs.version != ''
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.changelog.outputs.version_tag }}
+          release_name: Release ${{ steps.changelog.outputs.version_tag }}
+          body: |
+            ## Changes in ${{ steps.changelog.outputs.version_tag }}
+            
+            Release type: ${{ steps.changelog.outputs.release_type }}
+            
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed changes.
+          draft: false
+          prerelease: false
+
+      - name: Summary
+        run: |
+          echo "## Version Bump Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Version**: ${{ steps.changelog.outputs.version_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Type**: ${{ steps.changelog.outputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Changelog**: Updated" >> $GITHUB_STEP_SUMMARY
+          echo "- **Git Tag**: Created" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitHub Release**: Created" >> $GITHUB_STEP_SUMMARY

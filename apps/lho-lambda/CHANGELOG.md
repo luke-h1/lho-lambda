@@ -409,7 +409,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Code Refactoring
 
-- **lambda:** refactor ci/cd to use composite actions and update unit tests ([318442b](https://github.com/luke-h1/lho-lambda/commit/318442b))
+- **lambda:** refactor ci/cd to use composite actions and update unit
+  tests ([318442b](https://github.com/luke-h1/lho-lambda/commit/318442b))
 
 <a name="0.3.5"></a>
 
@@ -839,7 +840,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- **lambda:** explict set of cache header if path part is api ([ea7a6fe](https://github.com/luke-h1/lho-lambda/commit/ea7a6fe))
+- **lambda:** explict set of cache header if path part is
+  api ([ea7a6fe](https://github.com/luke-h1/lho-lambda/commit/ea7a6fe))
 
 <a name="0.1.10"></a>
 

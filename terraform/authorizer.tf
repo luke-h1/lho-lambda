@@ -1,6 +1,6 @@
 data "archive_file" "auth_archive" {
   type        = "zip"
-  source_dir  = "${path.module}/../apps/lho-authorizer/dist"
+  source_dir  = "${path.module}/../apps/lho-authorizer/src/bin/Release/net8.0/publish"
   output_path = "${path.module}/../authorizer.zip"
 }
 
@@ -8,18 +8,17 @@ resource "aws_lambda_function" "api_authorizer" {
   filename         = "${path.module}/../authorizer.zip"
   function_name    = "${var.project_name}-api-authorizer-${var.env}"
   role             = aws_iam_role.lambda_exec.arn
-  handler          = "index.handler"
+  handler          = "lhoAuthorizer::lhoAuthorizer.Function::FunctionHandler"
   source_code_hash = data.archive_file.auth_archive.output_base64sha256
-  runtime          = "nodejs22.x"
+  runtime          = "dotnet8"
   memory_size      = 256
   architectures    = ["arm64"]
   timeout          = 10
 
   environment {
     variables = {
-      API_KEY             = var.api_key
-      ENVIRONMENT         = var.env
-      DISCORD_WEBHOOK_URL = var.discord_webhook_url
+      API_KEY     = var.api_key
+      ENVIRONMENT = var.env
     }
   }
 

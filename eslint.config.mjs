@@ -103,7 +103,7 @@ export default [
       "object-curly-spacing": ["error", "always"],
       "operator-linebreak": 0,
       "quote-props": 0,
-      quotes: ["error", "single", { avoidEscape: true }],
+      quotes: ["error", "single", {avoidEscape: true}],
       semi: ["error", "always"],
       "spaced-comment": 0,
       "no-console": "warn",

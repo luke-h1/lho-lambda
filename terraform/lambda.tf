@@ -1,6 +1,6 @@
 data "archive_file" "lambda_archive" {
   type        = "zip"
-  source_dir  = "${path.module}/../apps/lho-lambda/dist"
+  source_dir  = "${path.module}/../apps/lho-lambda/src/bin/Release/net8.0/publish"
   output_path = "${path.module}/../lambda.zip"
 }
 
@@ -36,12 +36,12 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "${var.project_name}-lambda-${var.env}"
-  runtime          = "nodejs22.x"
-  handler          = "index.handler"
+  runtime          = "dotnet8"
+  handler          = "lho-lambda::LhoLambda.LambdaEntryPoint::FunctionHandlerAsync"
   role             = aws_iam_role.lambda_exec.arn
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
-  timeout          = 10
+  timeout          = 30
   # tracing_config {
   #   mode = "Active"
   # }
@@ -50,6 +50,7 @@ resource "aws_lambda_function" "lambda" {
   architectures = ["arm64"]
   environment {
     variables = merge(var.env_vars, {
+      VERSION     = var.app_version
       DEPLOYED_AT = timestamp()
       DEPLOYED_BY = var.deployed_by
       GIT_SHA : var.git_sha

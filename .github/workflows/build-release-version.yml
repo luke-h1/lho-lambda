@@ -53,7 +53,7 @@ jobs:
           publish: true
 
       - name: fetch latest commits
-        run: git fetch && git pull
+        run: git stash && git fetch && git pull
 
       - name: Deploy
         uses: ./.github/actions/deploy
