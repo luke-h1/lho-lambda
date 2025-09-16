@@ -1,7 +1,7 @@
 module.exports = {
   types: [
-    { value: 'feat', name: 'feat:\tAdding a new feature' },
-    { value: 'fix', name: 'fix:\tFixing a bug' },
+    {value: 'feat', name: 'feat:\tAdding a new feature'},
+    {value: 'fix', name: 'fix:\tFixing a bug'},
     {
       value: 'style',
       name: 'style: Add or update styles',
@@ -22,13 +22,13 @@ module.exports = {
       value: 'chore',
       name: 'chore:\tChanges to the build process or auxiliary tools\n\t\tand libraries such as documentation generation',
     },
-    { value: 'revert', name: 'revert:\tRevert to a commit' },
+    {value: 'revert', name: 'revert:\tRevert to a commit'},
   ],
   scopes: [
-    { name: 'lambda' },
-    { name: 'infrastructure' },
-    { name: 'documentation' },
-    { name: 'ci' },
+    {name: 'lambda'},
+    {name: 'infrastructure'},
+    {name: 'documentation'},
+    {name: 'ci'},
   ],
   allowCustomScopes: true,
   allowBreakingChanges: ['feat', 'fix', 'perf', 'refactor'],

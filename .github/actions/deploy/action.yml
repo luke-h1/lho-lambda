@@ -2,7 +2,7 @@ name: Deploy
 description: Deploy
 inputs:
   environment:
-    description: 'The environment to deploy to'
+    description: "The environment to deploy to"
     required: true
   aws-key-id:
     description: "The AWS key to use"
@@ -56,15 +56,26 @@ runs:
       working-directory: terraform
       run: terraform validate
 
-    - name: Build lambdas
+    - name: Setup version information
       shell: bash
-      run: bun run build
+      env:
+        GITHUB_EVENT_NAME: ${{ github.event_name }}
+        GITHUB_REF_NAME: ${{ github.ref_name }}
+      run: |
+        chmod +x scripts/version.sh
+        ./scripts/version.sh info
+
+    - name: Build .NET Lambda functions
+      shell: bash
+      run: |
+        chmod +x scripts/build.sh
+        ./scripts/build.sh
 
     - name: Terraform plan
       id: plan
       shell: bash
       working-directory: terraform
-      run: terraform plan -no-color -out=tfplan
+      run: terraform plan -no-color -out=tfplan -var="app_version=$VERSION" -var="git_sha=$GIT_SHA"
 
     - name: Terraform apply
       shell: bash

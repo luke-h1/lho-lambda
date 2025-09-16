@@ -162,7 +162,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- **infrastructure:** pin terraform version due to bug in latest tf version ([22d43d9](https://github.com/luke-h1/lho-lambda/commit/22d43d9))
+- **infrastructure:** pin terraform version due to bug in latest tf
+  version ([22d43d9](https://github.com/luke-h1/lho-lambda/commit/22d43d9))
 
 <a name="0.3.45"></a>
 
@@ -258,7 +259,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- **infrastructure:** prevent branches being out of sync with main ([59a91b1](https://github.com/luke-h1/lho-lambda/commit/59a91b1))
+- **infrastructure:** prevent branches being out of sync with
+  main ([59a91b1](https://github.com/luke-h1/lho-lambda/commit/59a91b1))
 
 <a name="0.3.33"></a>
 
@@ -266,7 +268,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Chores
 
-- **infrastructure:** tweak discord deploy notification ([f448e67](https://github.com/luke-h1/lho-lambda/commit/f448e67))
+- **infrastructure:** tweak discord deploy
+  notification ([f448e67](https://github.com/luke-h1/lho-lambda/commit/f448e67))
 
 <a name="0.3.32"></a>
 
@@ -378,7 +381,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- **infrastructure:** prevent concurrent terraform deploys ([0bcd9a3](https://github.com/luke-h1/lho-lambda/commit/0bcd9a3))
+- **infrastructure:** prevent concurrent terraform
+  deploys ([0bcd9a3](https://github.com/luke-h1/lho-lambda/commit/0bcd9a3))
 
 <a name="0.3.18"></a>
 
@@ -435,7 +439,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 - **ci:** fix build ([6ef0b75](https://github.com/luke-h1/lho-lambda/commit/6ef0b75))
-- **ci:** fix latest version not being included in apply ([9fffa17](https://github.com/luke-h1/lho-lambda/commit/9fffa17))
+- **ci:** fix latest version not being included in
+  apply ([9fffa17](https://github.com/luke-h1/lho-lambda/commit/9fffa17))
 
 <a name="0.3.11"></a>
 
@@ -445,7 +450,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **ci:** add git sha to deploy workflow ([7ce7048](https://github.com/luke-h1/lho-lambda/commit/7ce7048))
 - **ci:** fix changelogs not publishing ([86bb238](https://github.com/luke-h1/lho-lambda/commit/86bb238))
-- **ci:** only trigger changelogs via build-release-version ([2de5b76](https://github.com/luke-h1/lho-lambda/commit/2de5b76))
+- **ci:** only trigger changelogs via
+  build-release-version ([2de5b76](https://github.com/luke-h1/lho-lambda/commit/2de5b76))
 
 ### Chores
 
@@ -491,7 +497,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Code Refactoring
 
-- **lambda:** refactor ci/cd to use composite actions and update unit tests ([318442b](https://github.com/luke-h1/lho-lambda/commit/318442b))
+- **lambda:** refactor ci/cd to use composite actions and update unit
+  tests ([318442b](https://github.com/luke-h1/lho-lambda/commit/318442b))
 
 <a name="0.3.5"></a>
 
@@ -564,7 +571,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 - **infrastructure:** fix workflows ([bf93c23](https://github.com/luke-h1/lho-lambda/commit/bf93c23))
-- **infrastructure:** remove approval step due to gh issues ([ccfe8ed](https://github.com/luke-h1/lho-lambda/commit/ccfe8ed))
+- **infrastructure:** remove approval step due to gh
+  issues ([ccfe8ed](https://github.com/luke-h1/lho-lambda/commit/ccfe8ed))
 - **lambda:** fix approval step ([7c089f5](https://github.com/luke-h1/lho-lambda/commit/7c089f5))
 
 <a name="0.2.23"></a>
@@ -1051,7 +1059,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- **lambda:** explict set of cache header if path part is api ([ea7a6fe](https://github.com/luke-h1/lho-lambda/commit/ea7a6fe))
+- **lambda:** explict set of cache header if path part is
+  api ([ea7a6fe](https://github.com/luke-h1/lho-lambda/commit/ea7a6fe))
 
 <a name="0.1.10"></a>
 

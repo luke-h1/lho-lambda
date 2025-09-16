@@ -63,6 +63,12 @@ variable "tags" {
   }
 }
 
+variable "app_version" {
+  type        = string
+  description = "The version of the application"
+  default     = "unknown"
+}
+
 variable "git_sha" {
   type        = string
   description = "The git sha of the commit that caused the deploy"

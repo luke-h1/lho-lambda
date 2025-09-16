@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       env:
-        description: 'Environment to deploy to'
+        description: "Environment to deploy to"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
@@ -42,7 +42,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Fetch latest commits
-        run: git fetch && git pull
+        run: git stash && git fetch && git pull
 
       - name: Install
         uses: ./.github/actions/install

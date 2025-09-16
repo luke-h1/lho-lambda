@@ -3,18 +3,12 @@ description: Validate
 runs:
   using: composite
   steps:
-    - name: format:check
-      run: bun prettier:check
+    - name: Build main lambda
       shell: bash
+      working-directory: apps/lho-lambda
+      run: dotnet build --configuration Release --no-restore
 
-    - name: lint
-      run: bun lint:check
+    - name: Build authorizer lambda
       shell: bash
-
-    - name: tsc
-      run: bun ts:check
-      shell: bash
-
-    - name: test
-      run: bun test
-      shell: bash
+      working-directory: apps/lho-authorizer
+      run: dotnet build --configuration Release --no-restore
