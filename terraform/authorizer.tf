@@ -15,6 +15,8 @@ resource "aws_lambda_function" "api_authorizer" {
   architectures    = ["arm64"]
   timeout          = 10
 
+  # 
+
   environment {
     variables = {
       API_KEY     = var.api_key
