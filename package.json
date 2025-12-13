@@ -5,16 +5,11 @@
   "engineStrict": true,
   "engines": {
     "node": ">=22",
-    "bun": "1.2.5"
+    "bun": "1.3.2"
   },
   "scripts": {
     "commit": "cz",
-    "fmt:tf": "terraform fmt terraform",
-    "changelog": "./scripts/changelog.sh",
-    "changelog:tag": "./scripts/changelog.sh --tag",
-    "version": "./scripts/version.sh get",
-    "version:update": "./scripts/version.sh update",
-    "version:info": "./scripts/version.sh info"
+    "fmt:tf": "terraform fmt terraform"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",

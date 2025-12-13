@@ -65,11 +65,9 @@ runs:
         chmod +x scripts/version.sh
         ./scripts/version.sh info
 
-    - name: Build .NET Lambda functions
+    - name: Build functions
       shell: bash
-      run: |
-        chmod +x scripts/build.sh
-        ./scripts/build.sh
+      run: swift build -c release
 
     - name: Terraform plan
       id: plan
