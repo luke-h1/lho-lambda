@@ -13,10 +13,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Validate environment
-      shell: bash
-      run: if [ "${{ inputs.environment }}" != "staging" ] && [ "${{ inputs.environment }}" != "live" ]; then echo "Invalid environment"; exit 1; fi
-
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
@@ -56,20 +52,21 @@ runs:
       working-directory: terraform
       run: terraform validate
 
-    - name: Setup version information
-      shell: bash
-      env:
-        GITHUB_EVENT_NAME: ${{ github.event_name }}
-        GITHUB_REF_NAME: ${{ github.ref_name }}
-      run: |
-        chmod +x scripts/version.sh
-        ./scripts/version.sh info
-
-    - name: Build .NET Lambda functions
+    - name: Build functions for Lambda
       shell: bash
       run: |
-        chmod +x scripts/build.sh
-        ./scripts/build.sh
+        docker run --rm \
+          --platform linux/amd64 \
+          -v "${{ github.workspace }}:/workspace" \
+          -w /workspace \
+          swift:6.1-amazonlinux2 \
+          bash -c "swift build -c release --static-swift-stdlib && \
+            cp .build/release/lambda .build/release/bootstrap && \
+            chmod 755 .build/release/bootstrap && \
+            mkdir -p .build/release/authorizer-package && \
+            cp .build/release/authorizer .build/release/authorizer-package/bootstrap && \
+            chmod 755 .build/release/authorizer-package/bootstrap"
+        sudo chown -R $(id -u):$(id -g) .build
 
     - name: Terraform plan
       id: plan

@@ -1,14 +1,12 @@
-name: Install
+name: Validate
 description: Validate
 runs:
   using: composite
   steps:
-    - name: Build main lambda
+    - name: Run SwiftLint
       shell: bash
-      working-directory: apps/lho-lambda
-      run: dotnet build --configuration Release --no-restore
+      run: swiftlint
 
-    - name: Build authorizer lambda
+    - name: Build functions
       shell: bash
-      working-directory: apps/lho-authorizer
-      run: dotnet build --configuration Release --no-restore
+      run: swift build -c release

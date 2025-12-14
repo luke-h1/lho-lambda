@@ -1,6 +1,6 @@
 data "archive_file" "lambda_archive" {
   type        = "zip"
-  source_dir  = "${path.module}/../apps/lho-lambda/src/bin/Release/net8.0/publish"
+  source_file = "${path.module}/../.build/release/bootstrap"
   output_path = "${path.module}/../lambda.zip"
 }
 
@@ -36,8 +36,8 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "${var.project_name}-lambda-${var.env}"
-  runtime          = "dotnet8"
-  handler          = "lho-lambda::LhoLambda.LambdaEntryPoint::FunctionHandlerAsync"
+  runtime          = "provided.al2"
+  handler          = "bootstrap"
   role             = aws_iam_role.lambda_exec.arn
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
@@ -47,7 +47,7 @@ resource "aws_lambda_function" "lambda" {
   # }
   description   = "Now playing Lambda ${var.env}"
   memory_size   = 256
-  architectures = ["arm64"]
+  architectures = ["x86_64"]
   environment {
     variables = merge(var.env_vars, {
       VERSION     = var.app_version

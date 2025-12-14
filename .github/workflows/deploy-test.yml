@@ -1,13 +1,13 @@
-name: Build pre-release version
+name: Build test version
 on:
   workflow_dispatch:
-  # pull_request:
-  #   types: [opened, synchronize, edited, reopened]
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  TF_VAR_env: staging
+  TF_VAR_env: test
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
   TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
   TF_VAR_root_domain: lhowsam.com
@@ -57,7 +57,7 @@ jobs:
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
-          environment: staging
+          environment: ${{ env.TF_VAR_env }}
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
