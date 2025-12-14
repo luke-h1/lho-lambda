@@ -3,38 +3,18 @@ description: Install dependencies
 runs:
   using: composite
   steps:
-    - name: Install moreutils
-      run: sudo apt install moreutils
-      shell: bash
-
-    # https://github.com/actions/virtual-environments/issues/1187
-    - name: tune linux network
-      run: sudo ethtool -K eth0 tx off rx off
-      shell: bash
-
     - name: Ensure branch is rebased with main
       run: git stash && git pull --rebase
       shell: bash
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v3
       with:
-        dotnet-version: "8.0.x"
+        swift-version: "6.1.0"
 
-    - name: Restore .NET dependencies for main lambda
+    - name: Resolve Swift dependencies
       shell: bash
-      working-directory: apps/lho-lambda/src
-      run: dotnet restore
-
-    - name: Restore .NET dependencies for authorizer
-      shell: bash
-      working-directory: apps/lho-authorizer/src
-      run: dotnet restore
-
-    # https://github.com/actions/virtual-environments/issues/1187
-    - name: tune linux network
-      run: sudo ethtool -K eth0 tx off rx off
-      shell: bash
+      run: swift package resolve
 
     - name: 🥟 Setup Bun
       uses: oven-sh/setup-bun@v2
