@@ -53,6 +53,7 @@ jobs:
           title: "chore(release): version packages"
           commit: "chore(release): version packages"
           version: bun run changeset:version
+          publish: echo "Skip npm publish"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

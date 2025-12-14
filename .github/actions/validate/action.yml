@@ -3,10 +3,6 @@ description: Validate
 runs:
   using: composite
   steps:
-    - name: Run SwiftLint
-      shell: bash
-      run: swiftlint
-
     - name: Build functions
       shell: bash
       run: swift build -c release

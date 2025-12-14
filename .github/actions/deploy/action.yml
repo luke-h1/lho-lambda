@@ -86,7 +86,7 @@ runs:
       id: plan
       shell: bash
       working-directory: terraform
-      run: terraform plan -no-color -out=tfplan -var="app_version=${{ env.APP_VERSION }}" -var="git_sha=$GIT_SHA"
+      run: terraform plan -no-color -out=tfplan -var="app_version=${{ env.APP_VERSION }}" -var="git_sha=${{ github.sha }}"
 
     - name: Terraform apply
       shell: bash
