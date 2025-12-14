@@ -72,9 +72,32 @@ jobs:
         with:
           script: |
             const version = '${{ steps.version.outputs.version }}';
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            const marker = '<!-- test-deployment-comment -->';
+            const body = `${marker}\n## 🚀 Test Deployment\n\n- **Version**: \`${version}\`\n- **URL**: https://nowplaying-test.lhowsam.com\n- **Health**: https://nowplaying-test.lhowsam.com/api/health\n- **Version API**: https://nowplaying-test.lhowsam.com/api/version`;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🚀 Test Deployment\n\n- **Version**: \`${version}\`\n- **URL**: https://nowplaying-test.lhowsam.com\n- **Health**: https://nowplaying-test.lhowsam.com/api/health\n- **Version API**: https://nowplaying-test.lhowsam.com/api/version`
+              issue_number: context.issue.number,
             });
+            
+            const existingComment = comments.find(comment => comment.body.includes(marker));
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
