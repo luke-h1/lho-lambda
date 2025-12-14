@@ -1,11 +1,14 @@
-name: Build test version
+name: Deploy Test (PR Preview)
+
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, synchronize, edited, reopened]
+    types: [opened, synchronize, reopened]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 env:
   TF_VAR_env: test
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
@@ -17,18 +20,16 @@ env:
   TF_VAR_certificate_chain: ${{ secrets.STAGING_CERTIFICATE_CHAIN }}
   TF_VAR_deployed_by: ${{ github.actor }}
   TF_VAR_git_sha: ${{ github.sha }}
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: luke-h1-project
   TF_VAR_api_key: ${{ secrets.STAGING_API_KEY }}
-  TF_VAR_discord_webhook_url: ${{ secrets.DISCORD_ALERTS_WEBHOOK_URL}}
+  TF_VAR_discord_webhook_url: ${{ secrets.DISCORD_ALERTS_WEBHOOK_URL }}
 
 permissions: write-all
 
 jobs:
   deploy:
-    name: Deploy to staging
+    name: Deploy to Test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,20 +40,23 @@ jobs:
       - name: Ensure rebased with main
         run: ./scripts/ensure-rebased.sh
 
-      # - name: Install
-      #   uses: ./.github/actions/install
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: ".bun-version"
 
-      # - name: Validate
-      #   uses: ./.github/actions/validate
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-      # - name: Changelogs
-      #   uses: ./.github/actions/changelog
-      #   with:
-      #     prerelease: true
-      #     publish: false
-
-      - name: fetch latest commits
-        run: git fetch && git pull
+      - name: Get pre-release version
+        id: version
+        run: |
+          BASE_VERSION=$(jq -r .version package.json)
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          PRERELEASE_VERSION="${BASE_VERSION}-pr.${PR_NUMBER}.${SHORT_SHA}"
+          echo "version=${PRERELEASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "Pre-release version: ${PRERELEASE_VERSION}"
 
       - name: Deploy
         uses: ./.github/actions/deploy
@@ -60,19 +64,17 @@ jobs:
           environment: ${{ env.TF_VAR_env }}
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
 
-      - name: Get versions
-        id: lambda-version
-        run: |
-          echo "::set-output name=LAMBDA_VERSION::$(./scripts/version.sh get)"
-          echo "::set-output name=AUTHORIZER_VERSION::$(./scripts/version.sh get)"
-
-      - uses: actions/github-script@v7
+      - name: Comment on PR
+        uses: actions/github-script@v7
         with:
           script: |
+            const version = '${{ steps.version.outputs.version }}';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '* [Lambda version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}`\n* [Authorizer version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.AUTHORIZER_VERSION }}`'
-            })
+              body: `## 🚀 Test Deployment\n\n- **Version**: \`${version}\`\n- **URL**: https://nowplaying-test.lhowsam.com\n- **Health**: https://nowplaying-test.lhowsam.com/api/health\n- **Version API**: https://nowplaying-test.lhowsam.com/api/version`
+            });

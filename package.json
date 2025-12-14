@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "0.0.0-monorepo",
+  "version": "0.0.1",
   "private": true,
   "engineStrict": true,
   "engines": {
@@ -9,9 +9,13 @@
   },
   "scripts": {
     "commit": "cz",
-    "fmt:tf": "terraform fmt terraform"
+    "fmt:tf": "terraform fmt terraform",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:status": "changeset status"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.10",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "commitizen": "4.3.1",

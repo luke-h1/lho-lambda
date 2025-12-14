@@ -68,11 +68,25 @@ runs:
             chmod 755 .build/release/authorizer-package/bootstrap"
         sudo chown -R $(id -u):$(id -g) .build
 
+    - name: Get version
+      id: version
+      shell: bash
+      run: |
+        # Use VERSION env var if set (for pre-releases), otherwise read from package.json
+        if [ -n "$VERSION" ]; then
+          echo "Using provided version: $VERSION"
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        else
+          PKG_VERSION=$(jq -r .version package.json)
+          echo "Using package.json version: $PKG_VERSION"
+          echo "APP_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+        fi
+
     - name: Terraform plan
       id: plan
       shell: bash
       working-directory: terraform
-      run: terraform plan -no-color -out=tfplan -var="app_version=$VERSION" -var="git_sha=$GIT_SHA"
+      run: terraform plan -no-color -out=tfplan -var="app_version=${{ env.APP_VERSION }}" -var="git_sha=$GIT_SHA"
 
     - name: Terraform apply
       shell: bash

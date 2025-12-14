@@ -1,11 +1,12 @@
-name: Build pre-release version
+name: Deploy Staging (Pre-release)
+
 on:
   workflow_dispatch:
-  # pull_request:
-  #   types: [opened, synchronize, edited, reopened]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 env:
   TF_VAR_env: staging
   TF_VAR_env_vars: ${{ secrets.LIVE_ENV_VARS }}
@@ -17,42 +18,38 @@ env:
   TF_VAR_certificate_chain: ${{ secrets.STAGING_CERTIFICATE_CHAIN }}
   TF_VAR_deployed_by: ${{ github.actor }}
   TF_VAR_git_sha: ${{ github.sha }}
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: luke-h1-project
   TF_VAR_api_key: ${{ secrets.STAGING_API_KEY }}
-  TF_VAR_discord_webhook_url: ${{ secrets.DISCORD_ALERTS_WEBHOOK_URL}}
+  TF_VAR_discord_webhook_url: ${{ secrets.DISCORD_ALERTS_WEBHOOK_URL }}
 
 permissions: write-all
 
 jobs:
   deploy:
-    name: Deploy to staging
+    name: Deploy to Staging
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.head_ref }}
 
-      - name: Ensure rebased with main
-        run: ./scripts/ensure-rebased.sh
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: ".bun-version"
 
-      # - name: Install
-      #   uses: ./.github/actions/install
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-      # - name: Validate
-      #   uses: ./.github/actions/validate
-
-      # - name: Changelogs
-      #   uses: ./.github/actions/changelog
-      #   with:
-      #     prerelease: true
-      #     publish: false
-
-      - name: fetch latest commits
-        run: git fetch && git pull
+      - name: Get pre-release version
+        id: version
+        run: |
+          BASE_VERSION=$(jq -r .version package.json)
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          PRERELEASE_VERSION="${BASE_VERSION}-staging.${SHORT_SHA}"
+          echo "version=${PRERELEASE_VERSION}" >> $GITHUB_OUTPUT
+          echo "Pre-release version: ${PRERELEASE_VERSION}"
 
       - name: Deploy
         uses: ./.github/actions/deploy
@@ -60,19 +57,12 @@ jobs:
           environment: staging
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
 
-      - name: Get versions
-        id: lambda-version
+      - name: Summary
         run: |
-          echo "::set-output name=LAMBDA_VERSION::$(./scripts/version.sh get)"
-          echo "::set-output name=AUTHORIZER_VERSION::$(./scripts/version.sh get)"
-
-      - uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '* [Lambda version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.LAMBDA_VERSION }}`\n* [Authorizer version](https://nowplaying-${{env.TF_VAR_env}}.lhowsam.com) - `${{ steps.lambda-version.outputs.AUTHORIZER_VERSION }}`'
-            })
+          echo "## 🚀 Staging Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://nowplaying-staging.lhowsam.com" >> $GITHUB_STEP_SUMMARY
