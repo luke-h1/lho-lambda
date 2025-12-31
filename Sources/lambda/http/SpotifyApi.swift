@@ -106,16 +106,15 @@ actor SpotifyApi {
         request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
-        // Properly URL-encode the refresh token
-        var components = URLComponents()
-        components.queryItems = [
+        var formComponents = URLComponents()
+        formComponents.queryItems = [
             URLQueryItem(name: "grant_type", value: "refresh_token"),
             URLQueryItem(name: "refresh_token", value: refreshToken),
         ]
-        guard let bodyString = components.url?.query else {
-            throw SpotifyServiceError.invalidResponse
-        }
-        request.httpBody = bodyString.data(using: .utf8)
+        let queryString =
+            formComponents.percentEncodedQuery
+            ?? "grant_type=refresh_token&refresh_token=\(refreshToken.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? refreshToken)"
+        request.httpBody = queryString.data(using: .utf8)
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -132,6 +131,14 @@ actor SpotifyApi {
 
         guard !data.isEmpty else {
             throw SpotifyServiceError.decodingError("Empty response from token endpoint")
+        }
+
+        // Check if the response is an error response from Spotify
+        if let responseString = String(data: data, encoding: .utf8),
+            responseString.contains("\"error\"")
+        {
+            throw SpotifyServiceError.httpError(
+                statusCode: httpResponse.statusCode, message: responseString)
         }
 
         let decoder = JSONDecoder()
