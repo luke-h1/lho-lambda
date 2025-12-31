@@ -10,7 +10,8 @@ enum SpotifyServiceError: Error, CustomStringConvertible {
     case missingClientCredentials
     case invalidURL(urlString: String)
     case invalidResponse
-    case httpError(statusCode: Int)
+    case httpError(statusCode: Int, message: String? = nil)
+    case decodingError(String)
 
     var description: String {
         switch self {
@@ -24,8 +25,13 @@ enum SpotifyServiceError: Error, CustomStringConvertible {
             return "Invalid URL: \(urlString)"
         case .invalidResponse:
             return "Invalid response from Spotify API"
-        case .httpError(let statusCode):
+        case .httpError(let statusCode, let message):
+            if let message = message {
+                return "HTTP error with status code: \(statusCode) - \(message)"
+            }
             return "HTTP error with status code: \(statusCode)"
+        case .decodingError(let details):
+            return "Failed to decode response: \(details)"
         }
     }
 }
@@ -118,18 +124,53 @@ actor SpotifyApi {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
-            throw SpotifyServiceError.httpError(statusCode: httpResponse.statusCode)
+            let errorMessage =
+                String(data: data, encoding: .utf8) ?? "Unable to read error response"
+            throw SpotifyServiceError.httpError(
+                statusCode: httpResponse.statusCode, message: errorMessage)
+        }
+
+        guard !data.isEmpty else {
+            throw SpotifyServiceError.decodingError("Empty response from token endpoint")
         }
 
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
+        do {
+            let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
+            // Cache the token (subtract 60 seconds for safety margin)
+            cachedAccessToken = tokenResponse.accessToken
+            tokenExpiresAt = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 60))
 
-        // Cache the token (subtract 60 seconds for safety margin)
-        cachedAccessToken = tokenResponse.accessToken
-        tokenExpiresAt = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 60))
+            return tokenResponse.accessToken
+        } catch {
+            let errorDetails = "\(error)"
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Missing key '\(key.stringValue)' at \(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
+                    )
+                case .typeMismatch(let type, let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Type mismatch for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type)"
+                    )
+                case .valueNotFound(let type, let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Value not found for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type)"
+                    )
+                case .dataCorrupted(let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Data corrupted at \(context.codingPath.map { $0.stringValue }.joined(separator: ".")): \(context.debugDescription)"
+                    )
+                @unknown default:
+                    throw SpotifyServiceError.decodingError("Decoding error: \(errorDetails)")
+                }
+            }
+            throw SpotifyServiceError.decodingError(
+                "Failed to decode token response: \(errorDetails)")
+        }
 
-        return tokenResponse.accessToken
     }
 
     func getNowPlaying() async throws -> SpotifyResponse? {
@@ -156,12 +197,47 @@ actor SpotifyApi {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
-            throw SpotifyServiceError.httpError(statusCode: httpResponse.statusCode)
+            let errorMessage =
+                String(data: data, encoding: .utf8) ?? "Unable to read error response"
+            throw SpotifyServiceError.httpError(
+                statusCode: httpResponse.statusCode, message: errorMessage)
+        }
+
+        guard !data.isEmpty else {
+            throw SpotifyServiceError.decodingError("Empty response from Spotify API")
         }
 
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return try decoder.decode(SpotifyResponse.self, from: data)
+        do {
+            return try decoder.decode(SpotifyResponse.self, from: data)
+        } catch {
+            let errorDetails = "\(error)"
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Missing key '\(key.stringValue)' at \(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
+                    )
+                case .typeMismatch(let type, let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Type mismatch for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type)"
+                    )
+                case .valueNotFound(let type, let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Value not found for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type)"
+                    )
+                case .dataCorrupted(let context):
+                    throw SpotifyServiceError.decodingError(
+                        "Data corrupted at \(context.codingPath.map { $0.stringValue }.joined(separator: ".")): \(context.debugDescription)"
+                    )
+                @unknown default:
+                    throw SpotifyServiceError.decodingError("Decoding error: \(errorDetails)")
+                }
+            }
+            throw SpotifyServiceError.decodingError(
+                "Failed to decode Spotify response: \(errorDetails)")
+        }
 
     }
 }
