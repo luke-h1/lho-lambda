@@ -106,15 +106,11 @@ actor SpotifyApi {
         request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
-        var formComponents = URLComponents()
-        formComponents.queryItems = [
-            URLQueryItem(name: "grant_type", value: "refresh_token"),
-            URLQueryItem(name: "refresh_token", value: refreshToken),
-        ]
-        let queryString =
-            formComponents.percentEncodedQuery
-            ?? "grant_type=refresh_token&refresh_token=\(refreshToken.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? refreshToken)"
-        request.httpBody = queryString.data(using: .utf8)
+        let refreshTokenEncoded =
+            refreshToken.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+            ?? refreshToken
+        let bodyString = "grant_type=refresh_token&refresh_token=\(refreshTokenEncoded)"
+        request.httpBody = bodyString.data(using: .utf8)
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -133,10 +129,11 @@ actor SpotifyApi {
             throw SpotifyServiceError.decodingError("Empty response from token endpoint")
         }
 
+        // Log the response for debugging if it's not what we expect
+        let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
+
         // Check if the response is an error response from Spotify
-        if let responseString = String(data: data, encoding: .utf8),
-            responseString.contains("\"error\"")
-        {
+        if responseString.contains("\"error\"") {
             throw SpotifyServiceError.httpError(
                 statusCode: httpResponse.statusCode, message: responseString)
         }
@@ -174,8 +171,10 @@ actor SpotifyApi {
                     throw SpotifyServiceError.decodingError("Decoding error: \(errorDetails)")
                 }
             }
+            // Include the actual response in the error for debugging
             throw SpotifyServiceError.decodingError(
-                "Failed to decode token response: \(errorDetails)")
+                "Failed to decode token response: \(errorDetails). Response body: \(responseString)"
+            )
         }
 
     }
