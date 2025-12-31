@@ -65,6 +65,7 @@ jobs:
           environment: live
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          op-service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Create GitHub Release
         if: steps.changesets.outputs.hasChangesets == 'false'

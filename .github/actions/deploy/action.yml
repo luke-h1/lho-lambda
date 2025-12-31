@@ -10,6 +10,9 @@ inputs:
   aws-secret-access-key:
     description: "AWS secret access key to use"
     required: true
+  op-service-account-token:
+    description: "1Password service account token"
+    required: true
 runs:
   using: composite
   steps:
@@ -37,7 +40,7 @@ runs:
       with:
         export-env: true
       env:
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ inputs.op-service-account-token }}
         SPOTIFY_CLIENT_ID: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_ID
         SPOTIFY_CLIENT_SECRET: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_SECRET
         SPOTIFY_REFRESH_TOKEN: op://ci-cd/lho-lambda/SPOTIFY_REFRESH_TOKEN
