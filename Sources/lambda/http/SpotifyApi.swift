@@ -4,11 +4,24 @@ import Foundation
     import FoundationNetworking
 #endif
 
-enum SpotifyServiceError: Error {
+enum SpotifyServiceError: Error, CustomStringConvertible {
     case missingAccessToken
-    case invalidURL
+    case invalidURL(urlString: String)
     case invalidResponse
     case httpError(statusCode: Int)
+    
+    var description: String {
+        switch self {
+        case .missingAccessToken:
+            return "Missing Spotify access token"
+        case .invalidURL(let urlString):
+            return "Invalid URL: \(urlString)"
+        case .invalidResponse:
+            return "Invalid response from Spotify API"
+        case .httpError(let statusCode):
+            return "HTTP error with status code: \(statusCode)"
+        }
+    }
 }
 
 actor SpotifyApi {
@@ -26,8 +39,9 @@ actor SpotifyApi {
             throw SpotifyServiceError.missingAccessToken
         }
 
-        guard let url = URL(string: "\(baseURL)/me/player/currently-playing") else {
-            throw SpotifyServiceError.missingAccessToken
+        let urlString = "\(baseURL)/me/player/currently-playing"
+        guard let url = URL(string: urlString) else {
+            throw SpotifyServiceError.invalidURL(urlString: urlString)
         }
 
         var request = URLRequest(url: url)

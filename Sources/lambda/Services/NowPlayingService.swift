@@ -72,8 +72,12 @@ actor NowPlayingService {
 
             return response
         } catch {
-            logger.error(
-                "Error fetching nowplaying data from spotify: \(error.localizedDescription)")
+            if let spotifyError = error as? SpotifyServiceError {
+                logger.error("Error fetching nowplaying data from spotify: \(spotifyError.description)")
+            } else {
+                logger.error(
+                    "Error fetching nowplaying data from spotify: \(error.localizedDescription)")
+            }
 
             return NowPlayingResponse(
                 isPlaying: false,
