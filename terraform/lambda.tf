@@ -53,7 +53,6 @@ resource "aws_lambda_function" "lambda" {
       SPOTIFY_CLIENT_ID     = var.spotify_client_id
       SPOTIFY_CLIENT_SECRET = var.spotify_client_secret
       SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
-      SPOTIFY_ACCESS_TOKEN  = var.spotify_access_token
       VERSION               = var.app_version
       DEPLOYED_AT           = timestamp()
       DEPLOYED_BY           = var.deployed_by

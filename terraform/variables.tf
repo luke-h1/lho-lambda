@@ -27,12 +27,6 @@ variable "spotify_refresh_token" {
   sensitive   = true
 }
 
-variable "spotify_access_token" {
-  type        = string
-  description = "Spotify access token"
-  sensitive   = true
-}
-
 variable "zone_id" {
   type        = string
   description = "The zone id for the route53 record"
