@@ -57,26 +57,6 @@ jobs:
           echo "version=${PRERELEASE_VERSION}" >> $GITHUB_OUTPUT
           echo "Pre-release version: ${PRERELEASE_VERSION}"
 
-      - name: Load secrets
-        id: load_secrets
-        uses: 1password/load-secrets-action@v3
-        with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          SPOTIFY_CLIENT_ID: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_ID
-          SPOTIFY_CLIENT_SECRET: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_SECRET
-          SPOTIFY_REFRESH_TOKEN: op://ci-cd/lho-lambda/SPOTIFY_REFRESH_TOKEN
-          SPOTIFY_ACCESS_TOKEN: op://ci-cd/lho-lambda/SPOTIFY_ACCESS_TOKEN
-          OP_ENV_FILE: ".env"
-
-      - name: Set Terraform variables
-        run: |
-          echo "TF_VAR_spotify_client_id=$SPOTIFY_CLIENT_ID" >> $GITHUB_ENV
-          echo "TF_VAR_spotify_client_secret=$SPOTIFY_CLIENT_SECRET" >> $GITHUB_ENV
-          echo "TF_VAR_spotify_refresh_token=$SPOTIFY_REFRESH_TOKEN" >> $GITHUB_ENV
-          echo "TF_VAR_spotify_access_token=$SPOTIFY_ACCESS_TOKEN" >> $GITHUB_ENV
-
       - name: Deploy
         uses: ./.github/actions/deploy
         with:
