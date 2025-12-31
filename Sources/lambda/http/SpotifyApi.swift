@@ -106,17 +106,21 @@ actor SpotifyApi {
         request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
-        // Construct form-encoded body for Spotify token refresh
-        // Spotify expects: grant_type=refresh_token&refresh_token=<token>
-        // Percent-encode only the refresh_token value, not the parameter names
-        let refreshTokenEncoded =
-            refreshToken
-            .addingPercentEncoding(
-                withAllowedCharacters: CharacterSet.urlQueryAllowed
-                    .subtracting(CharacterSet(charactersIn: "&="))
-            ) ?? refreshToken
-        let bodyString = "grant_type=refresh_token&refresh_token=\(refreshTokenEncoded)"
-        request.httpBody = bodyString.data(using: .utf8)
+        // Construct form-encoded body using URLComponents for proper encoding
+        // Create a temporary URL to get properly encoded query string
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "accounts.spotify.com"
+        components.path = "/api/token"
+        components.queryItems = [
+            URLQueryItem(name: "grant_type", value: "refresh_token"),
+            URLQueryItem(name: "refresh_token", value: refreshToken),
+        ]
+        // Extract the query string (everything after the ?)
+        guard let queryString = components.url?.query else {
+            throw SpotifyServiceError.invalidResponse
+        }
+        request.httpBody = queryString.data(using: .utf8)
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
