@@ -106,9 +106,15 @@ actor SpotifyApi {
         request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
+        // Construct form-encoded body for Spotify token refresh
+        // Spotify expects: grant_type=refresh_token&refresh_token=<token>
+        // Percent-encode only the refresh_token value, not the parameter names
         let refreshTokenEncoded =
-            refreshToken.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-            ?? refreshToken
+            refreshToken
+            .addingPercentEncoding(
+                withAllowedCharacters: CharacterSet.urlQueryAllowed
+                    .subtracting(CharacterSet(charactersIn: "&="))
+            ) ?? refreshToken
         let bodyString = "grant_type=refresh_token&refresh_token=\(refreshTokenEncoded)"
         request.httpBody = bodyString.data(using: .utf8)
 
@@ -133,9 +139,20 @@ actor SpotifyApi {
         let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
 
         // Check if the response is an error response from Spotify
-        if responseString.contains("\"error\"") {
+        // Spotify error responses contain "error" field (case-insensitive check)
+        let lowercasedResponse = responseString.lowercased()
+        if lowercasedResponse.contains("\"error\"")
+            || lowercasedResponse.contains("error_description")
+        {
             throw SpotifyServiceError.httpError(
                 statusCode: httpResponse.statusCode, message: responseString)
+        }
+
+        // Also check if response looks like HTML (which would indicate an error page)
+        if responseString.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("<") {
+            throw SpotifyServiceError.httpError(
+                statusCode: httpResponse.statusCode,
+                message: "Received HTML response instead of JSON: \(responseString.prefix(200))")
         }
 
         let decoder = JSONDecoder()
@@ -149,32 +166,31 @@ actor SpotifyApi {
             return tokenResponse.accessToken
         } catch {
             let errorDetails = "\(error)"
+            // Always include the response body in error messages for debugging
+            let errorMessage: String
             if let decodingError = error as? DecodingError {
                 switch decodingError {
                 case .keyNotFound(let key, let context):
-                    throw SpotifyServiceError.decodingError(
-                        "Missing key '\(key.stringValue)' at \(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
-                    )
+                    errorMessage =
+                        "Missing key '\(key.stringValue)' at \(context.codingPath.map { $0.stringValue }.joined(separator: ".")). Response body: \(responseString)"
                 case .typeMismatch(let type, let context):
-                    throw SpotifyServiceError.decodingError(
-                        "Type mismatch for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type)"
-                    )
+                    errorMessage =
+                        "Type mismatch for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type). Response body: \(responseString)"
                 case .valueNotFound(let type, let context):
-                    throw SpotifyServiceError.decodingError(
-                        "Value not found for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type)"
-                    )
+                    errorMessage =
+                        "Value not found for '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))': expected \(type). Response body: \(responseString)"
                 case .dataCorrupted(let context):
-                    throw SpotifyServiceError.decodingError(
-                        "Data corrupted at \(context.codingPath.map { $0.stringValue }.joined(separator: ".")): \(context.debugDescription)"
-                    )
+                    errorMessage =
+                        "Data corrupted at \(context.codingPath.map { $0.stringValue }.joined(separator: ".")): \(context.debugDescription). Response body: \(responseString)"
                 @unknown default:
-                    throw SpotifyServiceError.decodingError("Decoding error: \(errorDetails)")
+                    errorMessage =
+                        "Decoding error: \(errorDetails). Response body: \(responseString)"
                 }
+            } else {
+                errorMessage =
+                    "Failed to decode token response: \(errorDetails). Response body: \(responseString)"
             }
-            // Include the actual response in the error for debugging
-            throw SpotifyServiceError.decodingError(
-                "Failed to decode token response: \(errorDetails). Response body: \(responseString)"
-            )
+            throw SpotifyServiceError.decodingError(errorMessage)
         }
 
     }
