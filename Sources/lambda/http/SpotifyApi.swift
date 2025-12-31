@@ -160,7 +160,6 @@ actor SpotifyApi {
         }
 
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
         do {
             let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
             // Cache the token (subtract 60 seconds for safety margin)
