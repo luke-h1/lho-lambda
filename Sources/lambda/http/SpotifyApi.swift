@@ -4,7 +4,7 @@ import Foundation
     import FoundationNetworking
 #endif
 
-enum SpotifyServiceError: Error, CustomStringConvertible {
+enum SpotifyServiceError: Error, CustomStringConvertible, Sendable {
     case missingAccessToken
     case missingRefreshToken
     case missingClientCredentials
@@ -49,7 +49,9 @@ struct TokenResponse: Codable {
 }
 
 actor SpotifyApi {
+    private static let requestTimeout: TimeInterval = 10
     private let baseURL: String
+    private let session: URLSession
     private let accessToken: String?
     private let clientId: String?
     private let clientSecret: String?
@@ -57,13 +59,19 @@ actor SpotifyApi {
     private var cachedAccessToken: String?
     private var tokenExpiresAt: Date?
 
-    init(baseURL: String? = nil, accessToken: String? = nil) {
+    init(baseURL: String? = nil, accessToken: String? = nil, session: URLSession? = nil) {
         self.baseURL = baseURL ?? "https://api.spotify.com/v1"
-        let env = ProcessInfo.processInfo.environment
-        self.accessToken = accessToken ?? env["SPOTIFY_ACCESS_TOKEN"]
-        self.clientId = env["SPOTIFY_CLIENT_ID"]
-        self.clientSecret = env["SPOTIFY_CLIENT_SECRET"]
-        self.refreshToken = env["SPOTIFY_REFRESH_TOKEN"]
+        let config: URLSessionConfiguration = {
+            let c = URLSessionConfiguration.default
+            c.timeoutIntervalForRequest = Self.requestTimeout
+            c.timeoutIntervalForResource = Self.requestTimeout
+            return c
+        }()
+        self.session = session ?? URLSession(configuration: config)
+        self.accessToken = accessToken ?? Environment.Spotify.accessToken
+        self.clientId = Environment.Spotify.clientId
+        self.clientSecret = Environment.Spotify.clientSecret
+        self.refreshToken = Environment.Spotify.refreshToken
     }
 
     private func getAccessToken() async throws -> String {
@@ -73,8 +81,7 @@ actor SpotifyApi {
 
         if let cachedToken = cachedAccessToken,
             let expiresAt = tokenExpiresAt,
-            expiresAt > Date()
-        {
+            expiresAt > Date() {
             return cachedToken
         }
 
@@ -91,7 +98,6 @@ actor SpotifyApi {
             throw SpotifyServiceError.invalidURL(urlString: tokenURL)
         }
 
-        // Create basic auth header
         let credentials = "\(clientId):\(clientSecret)"
         guard let credentialsData = credentials.data(using: .utf8) else {
             throw SpotifyServiceError.invalidResponse
@@ -109,14 +115,14 @@ actor SpotifyApi {
         components.path = "/api/token"
         components.queryItems = [
             URLQueryItem(name: "grant_type", value: "refresh_token"),
-            URLQueryItem(name: "refresh_token", value: refreshToken),
+            URLQueryItem(name: "refresh_token", value: refreshToken)
         ]
         guard let queryString = components.url?.query else {
             throw SpotifyServiceError.invalidResponse
         }
         request.httpBody = queryString.data(using: .utf8)
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw SpotifyServiceError.invalidResponse
@@ -137,8 +143,7 @@ actor SpotifyApi {
 
         let lowercasedResponse = responseString.lowercased()
         if lowercasedResponse.contains("\"error\"")
-            || lowercasedResponse.contains("error_description")
-        {
+            || lowercasedResponse.contains("error_description") {
             throw SpotifyServiceError.httpError(
                 statusCode: httpResponse.statusCode, message: responseString)
         }
@@ -199,7 +204,7 @@ actor SpotifyApi {
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw SpotifyServiceError.invalidResponse
@@ -220,10 +225,55 @@ actor SpotifyApi {
             throw SpotifyServiceError.decodingError("Empty response from Spotify API")
         }
 
+        return try decodeSpotifyResponse(SpotifyResponse.self, from: data)
+    }
+
+    func getTopTracks(timeRange: String = "medium_term", limit: Int = 10) async throws
+        -> SpotifyTopTracksResponse {
+        let accessToken = try await getAccessToken()
+
+        var components = URLComponents(string: "\(baseURL)/me/top/tracks")!
+        components.queryItems = [
+            URLQueryItem(name: "time_range", value: timeRange),
+            URLQueryItem(name: "limit", value: String(min(50, max(1, limit))))
+        ]
+
+        guard let url = components.url else {
+            throw SpotifyServiceError.invalidURL(
+                urlString: components.string ?? "\(baseURL)/me/top/tracks")
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SpotifyServiceError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let errorMessage =
+                String(data: data, encoding: .utf8) ?? "Unable to read error response"
+            throw SpotifyServiceError.httpError(
+                statusCode: httpResponse.statusCode, message: errorMessage)
+        }
+
+        guard !data.isEmpty else {
+            throw SpotifyServiceError.decodingError("Empty response from Spotify API")
+        }
+
+        return try decodeSpotifyResponse(SpotifyTopTracksResponse.self, from: data)
+    }
+
+    private func decodeSpotifyResponse<T: Decodable>(_ type: T.Type, from data: Data) throws
+        -> T {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         do {
-            return try decoder.decode(SpotifyResponse.self, from: data)
+            return try decoder.decode(type, from: data)
         } catch {
             let errorDetails = "\(error)"
             if let decodingError = error as? DecodingError {
@@ -251,6 +301,5 @@ actor SpotifyApi {
             throw SpotifyServiceError.decodingError(
                 "Failed to decode Spotify response: \(errorDetails)")
         }
-
     }
 }

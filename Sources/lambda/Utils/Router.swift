@@ -1,6 +1,7 @@
 import AWSLambdaEvents
 import AWSLambdaRuntime
 import Foundation
+import HTTPTypes
 
 final class Router: @unchecked Sendable {
     typealias Handler = (APIGatewayV2Request, LambdaContext) throws -> APIGatewayV2Response
@@ -19,8 +20,7 @@ final class Router: @unchecked Sendable {
     }
 
     func handle(event: APIGatewayV2Request, context: LambdaContext) async throws
-        -> APIGatewayV2Response
-    {
+        -> APIGatewayV2Response {
         let methodString = String(describing: event.context.http.method)
         let requestMethod = HTTPMethod(rawValue: methodString) ?? .GET
         var requestPath = event.rawPath
@@ -46,8 +46,8 @@ final class Router: @unchecked Sendable {
             }
         }
 
-        context.logger.info(
-            "Received request - Method: \(methodString), rawPath: '\(event.rawPath)', processed path: '\(requestPath)', available routes: \(routes.map { "\($0.method.rawValue) \($0.path)" }) + \(asyncRoutes.map { "\($0.method.rawValue) \($0.path)" })"
+        context.logger.debug(
+            "Request \(methodString) \(requestPath)"
         )
 
         for asyncRoute in asyncRoutes {
@@ -62,11 +62,7 @@ final class Router: @unchecked Sendable {
             }
         }
 
-        return APIGatewayV2Response(
-            statusCode: .notFound,
-            headers: ["content-type": "application/json"],
-            body: #"{"error": "Not Found"}"#
-        )
+        return ResponseBuilder.errorResponse(statusCode: HTTPResponse.Status.notFound, message: "Not Found")
     }
 }
 
@@ -104,47 +100,72 @@ func createRouter() -> Router {
     let cache = MemoryCache()
     let spotifyApi = SpotifyApi()
 
-    router.add(method: .GET, path: "/api/health") { event, context in
-        context.logger.info("Health check endpoint called")
-        return APIGatewayV2Response(
-            statusCode: .ok,
-            headers: ["content-type": "application/json"],
-            body: #"{"status": "OK"}"#
-        )
+    router.add(method: .GET, path: "/api/health") { _, _ in
+        (try? ResponseBuilder.createResponse(body: ["status": "OK"], includeCacheControl: false)) ?? ResponseBuilder.errorResponse(statusCode: HTTPResponse.Status.internalServerError, message: "Encoding error")
     }
 
-    router.add(method: .GET, path: "/api/version") { event, context async throws in
+    router.add(method: .GET, path: "/api/version") { _, context async throws in
         context.logger.info("Version endpoint called")
         let versionService = VersionService()
         return try await versionService.handleVersion()
     }
 
     router.add(method: .GET, path: "/api/now-playing") {
-        event, context async throws -> APIGatewayV2Response in
-        context.logger.info("GET /api/now-playing called")
+        _, context async throws -> APIGatewayV2Response in
         let nowplayingService = NowPlayingService(
             cache: cache,
             spotifyApi: spotifyApi,
             logger: context.logger
         )
         let response = try await nowplayingService.handleNowPlaying()
+        return try ResponseBuilder.createResponse(body: response, revalidateSeconds: 3)
+    }
 
-        let encoder = JSONEncoder()
-        let bodyData = try encoder.encode(response)
-        let bodyString = String(data: bodyData, encoding: .utf8) ?? "{}"
-
-        return APIGatewayV2Response(
-            statusCode: .ok,
-            headers: [
-                "content-type": "application/json",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET,OPTIONS,POST,PUT,DELETE",
-                "Cache-Control":
-                    "max-age=3, s-maxage=3, stale-while-revalidate=3, stale-if-error=3",
-            ],
-            body: bodyString
+    router.add(method: .GET, path: "/api/top-tracks") {
+        event, context async throws -> APIGatewayV2Response in
+        let timeRange = parseQueryParam(
+            event: event, key: "time_range",
+            defaultValue: "medium_term",
+            allowedValues: ["short_term", "medium_term", "long_term"]
         )
+        let limit = parseQueryParam(event: event, key: "limit", defaultValue: "20")
+        let limitInt = min(50, max(1, Int(limit) ?? 20))
+
+        let topTracksService = TopTracksService(
+            spotifyApi: spotifyApi,
+            logger: context.logger
+        )
+        do {
+            let response = try await topTracksService.handleTopTracks(
+                timeRange: timeRange,
+                limit: limitInt
+            )
+            return try ResponseBuilder.createResponse(body: response, revalidateSeconds: 300)
+        } catch {
+            context.logger.error("Top tracks failed: \(error)")
+            return ResponseBuilder.errorResponse(
+                statusCode: HTTPResponse.Status.internalServerError,
+                message: "Unable to fetch top tracks"
+            )
+        }
     }
 
     return router
+}
+
+private func parseQueryParam(
+    event: APIGatewayV2Request, key: String, defaultValue: String,
+    allowedValues: [String]? = nil
+) -> String {
+    let raw = event.rawQueryString
+    guard let queryItems = URLComponents(string: "?\(raw)")?.queryItems else {
+        return defaultValue
+    }
+    guard let value = queryItems.first(where: { $0.name == key })?.value, !value.isEmpty else {
+        return defaultValue
+    }
+    if let allowed = allowedValues, !allowed.contains(value) {
+        return defaultValue
+    }
+    return value
 }

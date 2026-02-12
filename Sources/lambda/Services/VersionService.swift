@@ -12,15 +12,12 @@ struct VersionResponse: Codable {
 
 actor VersionService {
     func handleVersion() async throws -> APIGatewayV2Response {
-        let version = ProcessInfo.processInfo.environment["VERSION"] ?? "unknown"
-        let deployedAt = ProcessInfo.processInfo.environment["DEPLOYED_AT"] ?? "unknown"
-        let deployedBy = ProcessInfo.processInfo.environment["DEPLOYED_BY"] ?? "unknown"
-        let gitSha = ProcessInfo.processInfo.environment["GIT_SHA"] ?? "unknown"
-
         let response = VersionResponse(
-            version: version, deployedAt: deployedAt, deployedBy: deployedBy, gitSha: gitSha
+            version: Environment.Deploy.version,
+            deployedAt: Environment.Deploy.deployedAt,
+            deployedBy: Environment.Deploy.deployedBy,
+            gitSha: Environment.Deploy.gitSha
         )
-
-        return ResponseBuilder.createResponse(body: response, includeCacheControl: false)
+        return try ResponseBuilder.createResponse(body: response, includeCacheControl: false)
     }
 }
