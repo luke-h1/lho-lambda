@@ -1,8 +1,6 @@
 import AWSLambdaRuntime
 import Foundation
 
-// MARK: - Custom Request/Response types for HTTP API v2 Authorizer
-
 struct AuthorizerRequest: Codable {
     let version: String?
     let type: String?
@@ -27,9 +25,6 @@ struct AuthorizerSimpleResponse: Codable {
     let isAuthorized: Bool
 }
 
-// MARK: - Helper Functions
-
-/// Gets a header value from the request headers (case-insensitive)
 func getHeaderValue(_ headers: [String: String]?, key: String) -> String? {
     guard let headers = headers else {
         return nil
@@ -43,8 +38,6 @@ func getHeaderValue(_ headers: [String: String]?, key: String) -> String? {
 
     return nil
 }
-
-// MARK: - Lambda Runtime
 
 let runtime = LambdaRuntime {
     (event: AuthorizerRequest, context: LambdaContext) -> AuthorizerSimpleResponse in

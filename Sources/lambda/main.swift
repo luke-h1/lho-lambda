@@ -2,8 +2,6 @@ import AWSLambdaEvents
 import AWSLambdaRuntime
 import Foundation
 
-// MARK: - Lambda Runtime
-
 let router = createRouter()
 
 let runtime = LambdaRuntime {
