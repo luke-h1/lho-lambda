@@ -123,6 +123,15 @@ resource "aws_apigatewayv2_route" "lambda_route_now_playing" {
   authorizer_id      = aws_apigatewayv2_authorizer.api_key.id
   authorization_type = "CUSTOM"
 }
+
+resource "aws_apigatewayv2_route" "lambda_route_top_tracks" {
+  api_id             = aws_apigatewayv2_api.lambda.id
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key          = "GET /api/top-tracks"
+  operation_name     = "top-tracks"
+  authorizer_id      = aws_apigatewayv2_authorizer.api_key.id
+  authorization_type = "CUSTOM"
+}
 ##############################################################################
 
 
