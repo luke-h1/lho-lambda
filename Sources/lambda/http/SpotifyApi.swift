@@ -67,12 +67,10 @@ actor SpotifyApi {
     }
 
     private func getAccessToken() async throws -> String {
-        // If we have a direct access token, use it
         if let accessToken = accessToken {
             return accessToken
         }
 
-        // If we have a cached token that hasn't expired, use it
         if let cachedToken = cachedAccessToken,
             let expiresAt = tokenExpiresAt,
             expiresAt > Date()
@@ -80,7 +78,6 @@ actor SpotifyApi {
             return cachedToken
         }
 
-        // Otherwise, refresh the token
         guard let refreshToken = refreshToken else {
             throw SpotifyServiceError.missingRefreshToken
         }
@@ -106,8 +103,6 @@ actor SpotifyApi {
         request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
 
-        // Construct form-encoded body using URLComponents for proper encoding
-        // Create a temporary URL to get properly encoded query string
         var components = URLComponents()
         components.scheme = "https"
         components.host = "accounts.spotify.com"
@@ -116,7 +111,6 @@ actor SpotifyApi {
             URLQueryItem(name: "grant_type", value: "refresh_token"),
             URLQueryItem(name: "refresh_token", value: refreshToken),
         ]
-        // Extract the query string (everything after the ?)
         guard let queryString = components.url?.query else {
             throw SpotifyServiceError.invalidResponse
         }
@@ -139,11 +133,8 @@ actor SpotifyApi {
             throw SpotifyServiceError.decodingError("Empty response from token endpoint")
         }
 
-        // Log the response for debugging if it's not what we expect
         let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
 
-        // Check if the response is an error response from Spotify
-        // Spotify error responses contain "error" field (case-insensitive check)
         let lowercasedResponse = responseString.lowercased()
         if lowercasedResponse.contains("\"error\"")
             || lowercasedResponse.contains("error_description")
@@ -152,7 +143,6 @@ actor SpotifyApi {
                 statusCode: httpResponse.statusCode, message: responseString)
         }
 
-        // Also check if response looks like HTML (which would indicate an error page)
         if responseString.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("<") {
             throw SpotifyServiceError.httpError(
                 statusCode: httpResponse.statusCode,
@@ -162,14 +152,12 @@ actor SpotifyApi {
         let decoder = JSONDecoder()
         do {
             let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
-            // Cache the token (subtract 60 seconds for safety margin)
             cachedAccessToken = tokenResponse.accessToken
             tokenExpiresAt = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 60))
 
             return tokenResponse.accessToken
         } catch {
             let errorDetails = "\(error)"
-            // Always include the response body in error messages for debugging
             let errorMessage: String
             if let decodingError = error as? DecodingError {
                 switch decodingError {

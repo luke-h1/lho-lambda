@@ -1,8 +1,6 @@
 import AWSLambdaEvents
 import Foundation
 
-// MARK: - Response Builder
-
 enum ResponseBuilder {
     static func createResponse<T: Encodable>(
         body: T,

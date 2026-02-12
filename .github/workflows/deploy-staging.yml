@@ -1,4 +1,4 @@
-name: Deploy Test (PR Preview)
+name: Deploy Staging (PR Preview)
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TF_VAR_env: test
+  TF_VAR_env: staging
   TF_VAR_zone_id: ${{ secrets.LIVE_ZONE_ID }}
   TF_VAR_root_domain: lhowsam.com
   TF_VAR_sub_domain: nowplaying.lhowsam.com
@@ -26,7 +26,7 @@ permissions: write-all
 
 jobs:
   deploy:
-    name: Deploy to Test
+    name: Deploy to Staging
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -72,8 +72,8 @@ jobs:
         with:
           script: |
             const version = '${{ steps.version.outputs.version }}';
-            const marker = '<!-- test-deployment-comment -->';
-            const body = `${marker}\n## 🚀 Test Deployment\n\n- **Version**: \`${version}\`\n- **URL**: https://nowplaying-test.lhowsam.com\n- **Health**: https://nowplaying-test.lhowsam.com/api/health\n- **Version API**: https://nowplaying-test.lhowsam.com/api/version`;
+            const marker = '<!-- staging-deployment-comment -->';
+            const body = `${marker}\n## 🚀 Staging Deployment\n\n- **Version**: \`${version}\`\n- **URL**: https://nowplaying-staging.lhowsam.com\n- **Health**: https://nowplaying-staging.lhowsam.com/api/health\n- **Version API**: https://nowplaying-staging.lhowsam.com/api/version`;
             
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({

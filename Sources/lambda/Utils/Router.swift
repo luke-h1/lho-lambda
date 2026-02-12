@@ -2,8 +2,6 @@ import AWSLambdaEvents
 import AWSLambdaRuntime
 import Foundation
 
-// MARK: - Router
-
 final class Router: @unchecked Sendable {
     typealias Handler = (APIGatewayV2Request, LambdaContext) throws -> APIGatewayV2Response
     typealias AsyncHandler = (APIGatewayV2Request, LambdaContext) async throws ->
@@ -39,7 +37,6 @@ final class Router: @unchecked Sendable {
             }
         }
 
-        // Strip /invoke prefix if present (for local testing)
         if requestPath.hasPrefix("/invoke") {
             requestPath = String(requestPath.dropFirst(7))
             if requestPath.isEmpty {
@@ -65,7 +62,6 @@ final class Router: @unchecked Sendable {
             }
         }
 
-        // No route found
         return APIGatewayV2Response(
             statusCode: .notFound,
             headers: ["content-type": "application/json"],
@@ -103,14 +99,11 @@ enum HTTPMethod: String {
     case OPTIONS
 }
 
-// MARK: - Route Handlers
-
 func createRouter() -> Router {
     let router = Router()
     let cache = MemoryCache()
     let spotifyApi = SpotifyApi()
 
-    // GET /api/health
     router.add(method: .GET, path: "/api/health") { event, context in
         context.logger.info("Health check endpoint called")
         return APIGatewayV2Response(
@@ -120,14 +113,12 @@ func createRouter() -> Router {
         )
     }
 
-    // GET /api/version
     router.add(method: .GET, path: "/api/version") { event, context async throws in
         context.logger.info("Version endpoint called")
         let versionService = VersionService()
         return try await versionService.handleVersion()
     }
 
-    // GET /api/now-playing
     router.add(method: .GET, path: "/api/now-playing") {
         event, context async throws -> APIGatewayV2Response in
         context.logger.info("GET /api/now-playing called")

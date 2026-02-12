@@ -1,6 +1,5 @@
 import Foundation
 
-// MARK: - Memory Cache Actor
 
 actor MemoryCache {
     private var cache: [String: CacheEntry] = [:]
