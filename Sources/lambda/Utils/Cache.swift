@@ -1,6 +1,5 @@
 import Foundation
 
-
 actor MemoryCache {
     private var cache: [String: CacheEntry] = [:]
 

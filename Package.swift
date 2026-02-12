@@ -11,10 +11,10 @@ let package = Package(
         .executable(name: "authorizer", targets: ["authorizer"]),
     ],
     dependencies: [
-        // for local dev
         .package(
             url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "2.6.0"),
         .package(url: "https://github.com/awslabs/swift-aws-lambda-events.git", from: "1.5.0"),
+        .package(url: "https://github.com/apple/swift-http-types.git", from: "1.5.1"),
         .package(url: "https://github.com/apple/swift-log.git", "1.0.0"..<"2.0.0"),
     ],
     targets: [
@@ -31,6 +31,7 @@ let package = Package(
             dependencies: [
                 .product(name: "AWSLambdaRuntime", package: "swift-aws-lambda-runtime"),
                 .product(name: "AWSLambdaEvents", package: "swift-aws-lambda-events"),
+                .product(name: "HTTPTypes", package: "swift-http-types"),
             ],
         ),
     ]

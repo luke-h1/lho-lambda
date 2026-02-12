@@ -1,1 +1,40 @@
-{"name":"root","version":"1.4.2","private":true,"engineStrict":true,"engines":{"node":">=22","bun":"1.3.5"},"scripts":{"commit":"cz","fmt:tf":"terraform fmt terraform","changeset":"changeset","changeset:version":"changeset version","changeset:status":"changeset status"},"devDependencies":{"@changesets/changelog-github":"^0.5.0","@changesets/cli":"^2.29.8","@commitlint/cli":"^19.8.1","@commitlint/config-conventional":"^19.8.1","commitizen":"4.3.1","conventional-changelog-cli":"^3.0.0","git-cz":"^4.9.0","lint-staged":"16.1.6"},"config":{"commitizen":{"path":"cz-conventional-changelog"}},"husky":{"hooks":{"prepare-commit-msg":"exec < /dev/tty && npx cz --hook || true"}}}
+{
+  "name": "root",
+  "version": "1.4.2",
+  "private": true,
+  "engineStrict": true,
+  "engines": {
+    "node": ">=22",
+    "bun": "1.3.5"
+  },
+  "scripts": {
+    "commit": "cz",
+    "fmt:tf": "terraform fmt terraform",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:status": "changeset status"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.29.8",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "commitizen": "4.3.1",
+    "conventional-changelog-cli": "^3.0.0",
+    "git-cz": "^4.9.0",
+    "lint-staged": "16.1.6"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "lint-staged": {
+    "*.swift": "swiftlint lint"
+  },
+  "husky": {
+    "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
+    }
+  }
+}

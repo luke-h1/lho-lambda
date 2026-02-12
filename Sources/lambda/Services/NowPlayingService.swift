@@ -24,12 +24,7 @@ actor NowPlayingService {
                 return cachedResponse
             }
 
-            let shouldCallSpotify =
-                ProcessInfo.processInfo.environment["SHOULD_CALL_SPOTIFY"] ?? "true"
-
-            if shouldCallSpotify.lowercased() == "false" {
-                logger.info("Now playing responses disabled")
-
+            if !Environment.shouldCallSpotify {
                 return NowPlayingResponse(
                     isPlaying: false, maintenance: true, status: 200, album: "",
                     albumImageUrl: "", artist: "", songUrl: "", title: ""

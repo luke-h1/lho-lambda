@@ -1,6 +1,12 @@
 import AWSLambdaRuntime
 import Foundation
 
+private func secureCompare(_ a: String?, _ b: String?) -> Bool {
+    guard let a = a, let b = b else { return a == nil && b == nil }
+    guard a.count == b.count else { return false }
+    return zip(a.utf8, b.utf8).reduce(0 as UInt8) { $0 | ($1.0 ^ $1.1) } == 0
+}
+
 struct AuthorizerRequest: Codable {
     let version: String?
     let type: String?
@@ -41,10 +47,7 @@ func getHeaderValue(_ headers: [String: String]?, key: String) -> String? {
 
 let runtime = LambdaRuntime {
     (event: AuthorizerRequest, context: LambdaContext) -> AuthorizerSimpleResponse in
-
-    context.logger.info("Authorizer invoked")
-    context.logger.info("Headers: \(String(describing: event.headers))")
-    context.logger.info("RouteArn: \(String(describing: event.routeArn))")
+    context.logger.debug("Authorizer invoked")
 
     let consumer = getHeaderValue(event.headers, key: "x-consumer")
     let validConsumers = ["lhowsam-dev", "lhowsam-prod", "lhowsam-local"]
@@ -52,19 +55,17 @@ let runtime = LambdaRuntime {
     let apiKey = getHeaderValue(event.headers, key: "x-api-key")
     let validKey = ProcessInfo.processInfo.environment["API_KEY"]
 
-    context.logger.info("API Key from header: '\(apiKey ?? "nil")'")
-
-    if apiKey != validKey {
-        context.logger.info("Deny - API key mismatch")
+    if !secureCompare(apiKey, validKey) {
+        context.logger.info("Deny - API key invalid")
         return AuthorizerSimpleResponse(isAuthorized: false)
     }
 
     if let consumer = consumer, !validConsumers.contains(consumer) {
-        context.logger.info("Deny - Invalid consumer: \(consumer)")
+        context.logger.info("Deny - Invalid consumer")
         return AuthorizerSimpleResponse(isAuthorized: false)
     }
 
-    context.logger.info("Allow - Authorization successful")
+    context.logger.debug("Allow")
     return AuthorizerSimpleResponse(isAuthorized: true)
 }
 

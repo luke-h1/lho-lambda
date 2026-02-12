@@ -41,3 +41,19 @@ struct SpotifyAlbum: Codable {
 struct SpotifyExternalUrls: Codable {
     let spotify: String
 }
+
+struct SpotifyTopTracksResponse: Codable {
+    let items: [SpotifyItem]
+}
+
+struct TopTrackResponseItem: Codable {
+    let title: String
+    let artist: String
+    let album: String
+    let albumImageUrl: String
+    let songUrl: String
+}
+
+struct TopTracksApiResponse: Codable {
+    let tracks: [TopTrackResponseItem]
+}
