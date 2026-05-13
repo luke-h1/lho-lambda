@@ -13,6 +13,9 @@ inputs:
   op-service-account-token:
     description: "1Password service account token"
     required: true
+  version:
+    description: "Application version to expose at runtime"
+    required: false
 runs:
   using: composite
   steps:
@@ -102,10 +105,12 @@ runs:
     - name: Get version
       id: version
       shell: bash
+      env:
+        DEPLOY_VERSION: ${{ inputs.version }}
       run: |
-        if [ -n "$VERSION" ]; then
-          echo "Using provided version: $VERSION"
-          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        if [ -n "$DEPLOY_VERSION" ]; then
+          echo "Using provided version: $DEPLOY_VERSION"
+          echo "APP_VERSION=$DEPLOY_VERSION" >> $GITHUB_ENV
         else
           SHORT_SHA="${GITHUB_SHA:0:7}"
           APP_VERSION="${{ inputs.environment }}-${SHORT_SHA}"
