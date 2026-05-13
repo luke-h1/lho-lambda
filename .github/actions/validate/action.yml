@@ -3,6 +3,17 @@ description: Validate
 runs:
   using: composite
   steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "10.0.x"
+
     - name: Build functions
       shell: bash
-      run: swift build -c release
+      run: |
+        dotnet build src/Lho.Lambda/Lho.Lambda.csproj
+        dotnet build src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj
+
+    - name: Test functions
+      shell: bash
+      run: dotnet test src/Lho.Lambda.Tests/Lho.Lambda.Tests.csproj --no-restore
