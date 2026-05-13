@@ -1,6 +1,6 @@
 data "archive_file" "lambda_archive" {
   type        = "zip"
-  source_dir  = "${path.module}/../src/Lho.Lambda/bin/Release/net8.0/publish"
+  source_dir  = "${path.module}/../.build/release/lambda-package"
   output_path = "${path.module}/../lambda.zip"
 }
 

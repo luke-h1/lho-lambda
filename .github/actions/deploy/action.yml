@@ -86,21 +86,31 @@ runs:
     - name: Build functions for Lambda
       shell: bash
       run: |
-        dotnet publish src/Lho.Lambda/Lho.Lambda.csproj -c Release
-        dotnet publish src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj -c Release
+        dotnet publish src/Lho.Lambda/Lho.Lambda.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained false \
+          -p:PublishReadyToRun=true \
+          --output .build/release/lambda-package
+        dotnet publish src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained false \
+          -p:PublishReadyToRun=true \
+          --output .build/release/authorizer-package
 
     - name: Get version
       id: version
       shell: bash
       run: |
-        # Use VERSION env var if set (for pre-releases), otherwise read from package.json
         if [ -n "$VERSION" ]; then
           echo "Using provided version: $VERSION"
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
         else
-          PKG_VERSION=$(jq -r .version package.json)
-          echo "Using package.json version: $PKG_VERSION"
-          echo "APP_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          APP_VERSION="${{ inputs.environment }}-${SHORT_SHA}"
+          echo "Using generated version: $APP_VERSION"
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
         fi
 
     - name: Terraform plan

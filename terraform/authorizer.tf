@@ -1,6 +1,6 @@
 data "archive_file" "auth_archive" {
   type        = "zip"
-  source_dir  = "${path.module}/../src/Lho.Lambda.Authorizer/bin/Release/net8.0/publish"
+  source_dir  = "${path.module}/../.build/release/authorizer-package"
   output_path = "${path.module}/../authorizer.zip"
 }
 
