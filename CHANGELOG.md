@@ -1,3 +1,43 @@
+# [live.65ec19f](https://github.com/luke-h1/lho-lambda/compare/v1.4.2...vlive.65ec19f) (2026-05-13)
+
+### Features
+
+* **lambda:** rewrite lambdas ([2ec5bdb](https://github.com/luke-h1/lho-lambda/commit/2ec5bdbc2c801381348cfa18970e8f0f28331a22))
+* **lambda:** convert project to swift ([132af2b](https://github.com/luke-h1/lho-lambda/commit/132af2b78f38996017b903fab56c7329b56b5e32))
+* **lambda:** convert project to swift ([b44dbf2](https://github.com/luke-h1/lho-lambda/commit/b44dbf2d697a86b43b20f592182fc32cbed199e6))
+* **lambda:** convert project to swift ([650dad9](https://github.com/luke-h1/lho-lambda/commit/650dad9e0e62f4ee59be82f4115ef29e4a204347))
+* **lambda:** convert project to swift ([f0e874a](https://github.com/luke-h1/lho-lambda/commit/f0e874a26f8662ee040d16b4199e46346483cebe))
+* **lambda:** convert to swift ([4bcf5ec](https://github.com/luke-h1/lho-lambda/commit/4bcf5ec1ff78c8cb69dc0fdd8848e9f6a9bf7ef4))
+
+### Bug Fixes
+
+* **api:** fix secrets not being loaded ([404bfb2](https://github.com/luke-h1/lho-lambda/commit/404bfb21d0daf62c89ebc14feb5513dffa104afe))
+* **api:** fix secrets not being loaded ([98adecd](https://github.com/luke-h1/lho-lambda/commit/98adecd3d425d5cafbcfc95fd926fb57a68c6335))
+* **api:** fix secrets not being loaded ([577f4f9](https://github.com/luke-h1/lho-lambda/commit/577f4f9ac3f0a8639327361a74c8c58cd242b14c))
+* **api:** fix secrets not being loaded ([399195d](https://github.com/luke-h1/lho-lambda/commit/399195d72bb0fa45ed29e2b8ecae1d0d208293e7))
+* **api:** fix secrets not being loaded ([3c717e9](https://github.com/luke-h1/lho-lambda/commit/3c717e9515d5c47e68511d79834b11adbf611b3f))
+* **api:** fix secrets not being loaded ([41ba8e1](https://github.com/luke-h1/lho-lambda/commit/41ba8e1137113d0d8ba3350e3e546254b1e1e498))
+* **api:** fix secrets not being loaded ([29bebd0](https://github.com/luke-h1/lho-lambda/commit/29bebd03ba5cf13ba500ee70a57dccde6ff658e7))
+* **api:** fix secrets not being loaded ([17021df](https://github.com/luke-h1/lho-lambda/commit/17021dfab6c469b6ded9dc98aaa7fe3914e3bcf3))
+* **api:** fix spotify 500 ([c61a65e](https://github.com/luke-h1/lho-lambda/commit/c61a65e7cfac9691d7cee8dc4ee9ce98d2252213))
+* **api:** fix spotify 500 ([67be0b8](https://github.com/luke-h1/lho-lambda/commit/67be0b8ffea7337313d0943ffd2d490e8a1196ec))
+
+### Other Changes
+
+* **release:** update changelogs and versions [skip ci] ([ad13ba1](https://github.com/luke-h1/lho-lambda/commit/ad13ba16703b0c4c2b85846b7c942f67aae7ea06))
+* **infrastructure:** add test to destroy opts ([9e8632d](https://github.com/luke-h1/lho-lambda/commit/9e8632d81e42765d4252f4ddfd5bb8d67a26c037))
+* **infrastructure:** add test to destroy opts ([03844f2](https://github.com/luke-h1/lho-lambda/commit/03844f2e8e6df3d44320bf6e8d07f546a5d4e8b1))
+* **api:** debug issues on prod lambda ([e6b8060](https://github.com/luke-h1/lho-lambda/commit/e6b80606030661e6f69d7f4b687becae04fc63b6))
+* **api:** debug issues on prod lambda ([cb91840](https://github.com/luke-h1/lho-lambda/commit/cb91840897833356c68bea9c7187a3cb3de08e50))
+* **lambda:** update lambda deps ([06508be](https://github.com/luke-h1/lho-lambda/commit/06508be14c9183c81a79e449a059bf7aa05d88f5))
+* **lambda:** update deps ([85e7bee](https://github.com/luke-h1/lho-lambda/commit/85e7bee92f889e16c513cd924e1f872474455df4))
+* **lambda:** update deps ([23a3157](https://github.com/luke-h1/lho-lambda/commit/23a31575fe1e543e73ed3fd6a90187ea912d7394))
+* **lambda:** update deps ([d369a37](https://github.com/luke-h1/lho-lambda/commit/d369a371eace5c4bc4074db260a95295a2bfd642))
+* **api:** lastfm ([92a5055](https://github.com/luke-h1/lho-lambda/commit/92a50556ef1bdacab2ac19055b18a0e9e6d56802))
+* **api:** lastfm ([6f78696](https://github.com/luke-h1/lho-lambda/commit/6f786965fad694e2dd3dca9a94543d13c9e78dc7))
+* **api:** lastfm ([9795622](https://github.com/luke-h1/lho-lambda/commit/9795622ed8b144bf904c9d664593a87d6a5a6632))
+* **api:** lastfm ([18fe61c](https://github.com/luke-h1/lho-lambda/commit/18fe61c8b49e00f869f05e69f7272274455e4f03))
+
 # [0.0.0-monorepo](https://github.com/luke-h1/lho-lambda/compare/v1.4.2...v0.0.0-monorepo) (2025-09-16)
 
 
