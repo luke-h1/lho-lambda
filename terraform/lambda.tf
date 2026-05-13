@@ -36,7 +36,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "${var.project_name}-lambda-${var.env}"
-  runtime          = "dotnet10"
+  runtime          = "dotnet8"
   handler          = "Lho.Lambda::Lho.Lambda.Functions.ApiFunction::FunctionHandler"
   role             = aws_iam_role.lambda_exec.arn
   filename         = "${path.module}/../lambda.zip"

@@ -72,7 +72,7 @@ public class NowPlayingService(MemoryCache cache, SpotifyApi spotifyApi, LastFmA
         }
 
         var nowPlayingResponse = await spotifyApi.GetNowPlaying();
-        if (nowPlayingResponse?.Item is null)
+        if (nowPlayingResponse?.Item is null || !nowPlayingResponse.IsPlaying)
         {
             logger.LogLine("No song currently playing");
             return EmptyResponse(maintenance: null, status: 200);

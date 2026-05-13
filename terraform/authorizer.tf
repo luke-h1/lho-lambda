@@ -10,7 +10,7 @@ resource "aws_lambda_function" "api_authorizer" {
   role             = aws_iam_role.lambda_exec.arn
   handler          = "Lho.Lambda.Authorizer::Lho.Lambda.Authorizer.Functions.AuthorizerFunction::FunctionHandler"
   source_code_hash = data.archive_file.auth_archive.output_base64sha256
-  runtime          = "dotnet10"
+  runtime          = "dotnet8"
   memory_size      = 256
   architectures    = ["x86_64"]
   timeout          = 10
