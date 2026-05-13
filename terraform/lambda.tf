@@ -1,6 +1,6 @@
 data "archive_file" "lambda_archive" {
   type        = "zip"
-  source_file = "${path.module}/../.build/release/bootstrap"
+  source_dir  = "${path.module}/../.build/release/lambda-package"
   output_path = "${path.module}/../lambda.zip"
 }
 
@@ -36,8 +36,8 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "${var.project_name}-lambda-${var.env}"
-  runtime          = "provided.al2"
-  handler          = "bootstrap"
+  runtime          = "dotnet8"
+  handler          = "Lho.Lambda::Lho.Lambda.Functions.ApiFunction::FunctionHandler"
   role             = aws_iam_role.lambda_exec.arn
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
@@ -53,6 +53,8 @@ resource "aws_lambda_function" "lambda" {
       SPOTIFY_CLIENT_ID     = var.spotify_client_id
       SPOTIFY_CLIENT_SECRET = var.spotify_client_secret
       SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
+      LASTFM_API_KEY        = var.lastfm_api_key
+      LASTFM_USERNAME       = var.lastfm_username
       VERSION               = var.app_version
       DEPLOYED_AT           = timestamp()
       DEPLOYED_BY           = var.deployed_by

@@ -7,29 +7,22 @@ runs:
       run: git stash && git pull --rebase
       shell: bash
 
-    - name: Setup Swift
-      uses: swift-actions/setup-swift@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
       with:
-        swift-version: "6.1.0"
+        dotnet-version: "8.0.x"
 
-    - name: Resolve Swift dependencies
+    - name: Restore dependencies
       shell: bash
-      run: swift package resolve
+      run: dotnet restore Lho.Lambda.slnx
 
-    - name: 🥟 Setup Bun
-      uses: oven-sh/setup-bun@v2
-      with:
-        bun-version-file: ".bun-version"
-
-    - name: Setup Node
-      uses: actions/setup-node@v4.1.0
-      with:
-        node-version-file: .nvmrc
-
-    - name: Install dependencies
+    - name: Build
       shell: bash
-      run: bun install
+      run: |
+        dotnet build src/Lho.Lambda/Lho.Lambda.csproj --no-restore
+        dotnet build src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj --no-restore
+        dotnet build src/Lho.Lambda.Local/Lho.Lambda.Local.csproj --no-restore
 
-    - name: Check commit message
+    - name: Test
       shell: bash
-      run: bun commitlint --from=HEAD^1
+      run: dotnet test src/Lho.Lambda.Tests/Lho.Lambda.Tests.csproj --no-restore

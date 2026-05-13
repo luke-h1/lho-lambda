@@ -13,6 +13,9 @@ inputs:
   op-service-account-token:
     description: "1Password service account token"
     required: true
+  version:
+    description: "Application version to expose at runtime"
+    required: false
 runs:
   using: composite
   steps:
@@ -20,6 +23,11 @@ runs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: "1.14.5"
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "8.0.x"
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v3
@@ -44,6 +52,8 @@ runs:
         SPOTIFY_CLIENT_ID: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_ID
         SPOTIFY_CLIENT_SECRET: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_SECRET
         SPOTIFY_REFRESH_TOKEN: op://ci-cd/lho-lambda/SPOTIFY_REFRESH_TOKEN
+        LASTFM_API_KEY: op://ci-cd/lho-lambda/LASTFM_API_KEY
+        LASTFM_USERNAME: op://ci-cd/lho-lambda/LASTFM_USERNAME
         OP_ENV_FILE: ".env"
 
     - name: Set Terraform variables
@@ -52,6 +62,8 @@ runs:
         echo "TF_VAR_spotify_client_id=$SPOTIFY_CLIENT_ID" >> $GITHUB_ENV
         echo "TF_VAR_spotify_client_secret=$SPOTIFY_CLIENT_SECRET" >> $GITHUB_ENV
         echo "TF_VAR_spotify_refresh_token=$SPOTIFY_REFRESH_TOKEN" >> $GITHUB_ENV
+        echo "TF_VAR_lastfm_api_key=$LASTFM_API_KEY" >> $GITHUB_ENV
+        echo "TF_VAR_lastfm_username=$LASTFM_USERNAME" >> $GITHUB_ENV
 
     - name: Terraform init
       shell: bash
@@ -77,31 +89,33 @@ runs:
     - name: Build functions for Lambda
       shell: bash
       run: |
-        docker run --rm \
-          --platform linux/amd64 \
-          -v "${{ github.workspace }}:/workspace" \
-          -w /workspace \
-          swift:6.1-amazonlinux2 \
-          bash -c "swift build -c release --static-swift-stdlib && \
-            cp .build/release/lambda .build/release/bootstrap && \
-            chmod 755 .build/release/bootstrap && \
-            mkdir -p .build/release/authorizer-package && \
-            cp .build/release/authorizer .build/release/authorizer-package/bootstrap && \
-            chmod 755 .build/release/authorizer-package/bootstrap"
-        sudo chown -R $(id -u):$(id -g) .build
+        dotnet publish src/Lho.Lambda/Lho.Lambda.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained false \
+          -p:PublishReadyToRun=true \
+          --output .build/release/lambda-package
+        dotnet publish src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained false \
+          -p:PublishReadyToRun=true \
+          --output .build/release/authorizer-package
 
     - name: Get version
       id: version
       shell: bash
+      env:
+        DEPLOY_VERSION: ${{ inputs.version }}
       run: |
-        # Use VERSION env var if set (for pre-releases), otherwise read from package.json
-        if [ -n "$VERSION" ]; then
-          echo "Using provided version: $VERSION"
-          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        if [ -n "$DEPLOY_VERSION" ]; then
+          echo "Using provided version: $DEPLOY_VERSION"
+          echo "APP_VERSION=$DEPLOY_VERSION" >> $GITHUB_ENV
         else
-          PKG_VERSION=$(jq -r .version package.json)
-          echo "Using package.json version: $PKG_VERSION"
-          echo "APP_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          APP_VERSION="${{ inputs.environment }}-${SHORT_SHA}"
+          echo "Using generated version: $APP_VERSION"
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
         fi
 
     - name: Terraform plan

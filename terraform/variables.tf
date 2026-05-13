@@ -27,6 +27,18 @@ variable "spotify_refresh_token" {
   sensitive   = true
 }
 
+variable "lastfm_api_key" {
+  type        = string
+  description = "Last.fm API key"
+  sensitive   = true
+}
+
+variable "lastfm_username" {
+  type        = string
+  description = "Last.fm username"
+  sensitive   = true
+}
+
 variable "zone_id" {
   type        = string
   description = "The zone id for the route53 record"
@@ -95,4 +107,3 @@ variable "discord_webhook_url" {
   type        = string
   sensitive   = true
 }
-

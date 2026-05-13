@@ -8,9 +8,9 @@ resource "aws_lambda_function" "api_authorizer" {
   filename         = "${path.module}/../authorizer.zip"
   function_name    = "${var.project_name}-api-authorizer-${var.env}"
   role             = aws_iam_role.lambda_exec.arn
-  handler          = "bootstrap"
+  handler          = "Lho.Lambda.Authorizer::Lho.Lambda.Authorizer.Functions.AuthorizerFunction::FunctionHandler"
   source_code_hash = data.archive_file.auth_archive.output_base64sha256
-  runtime          = "provided.al2"
+  runtime          = "dotnet8"
   memory_size      = 256
   architectures    = ["x86_64"]
   timeout          = 10
@@ -46,4 +46,3 @@ resource "aws_lambda_permission" "api_gw_authorizer" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.lambda.execution_arn}/authorizers/${aws_apigatewayv2_authorizer.api_key.id}"
 }
-

@@ -14,6 +14,10 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: write
+
 env:
   # terraform variables; TODO: move to secretmanager
   TF_VAR_env: ${{ github.event.inputs.env  == 'staging' && 'staging' || 'live' }}
@@ -46,11 +50,8 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
-      # - name: Validate
-      #   uses: ./.github/actions/validate
-
-      # - name: Changelogs
-      #   uses: ./.github/actions/changelog
+      - name: Validate
+        uses: ./.github/actions/validate
 
       - name: Deploy
         uses: ./.github/actions/deploy
@@ -59,3 +60,21 @@ jobs:
           aws-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           op-service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Update changelog
+        if: ${{ github.event.inputs.env == 'live' && github.ref == 'refs/heads/main' }}
+        run: |
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          DEPLOY_VERSION="live-${SHORT_SHA}"
+
+          bash scripts/update-changelog.sh "${DEPLOY_VERSION}"
+
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md already up to date"
+          else
+            git config user.name "${{ github.actor }}"
+            git config user.email "${{ github.actor }}@users.noreply.github.com"
+            git add CHANGELOG.md
+            git commit -m "chore(release): publish [skip ci]"
+            git push
+          fi
