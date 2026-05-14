@@ -96,6 +96,32 @@ variable "git_sha" {
   default     = "unknown"
 }
 
+variable "sentry_dsn" {
+  type        = string
+  description = "Sentry DSN for Lambda error monitoring"
+  sensitive   = true
+  default     = ""
+}
+
+variable "pushgateway_url" {
+  type        = string
+  description = "Prometheus Pushgateway endpoint for Lambda invocation metrics"
+  default     = "https://pushgateway.lhowsam.com"
+}
+
+variable "pushgateway_auth_header" {
+  type        = string
+  description = "Pushgateway auth header in Header=Value form, for example Authorization=Basic <base64(username:password)>"
+  sensitive   = true
+  default     = ""
+}
+
+variable "monitoring_enabled" {
+  type        = bool
+  description = "Whether Lambda functions should push invocation metrics to Pushgateway"
+  default     = true
+}
+
 variable "api_key" {
   description = "API key for securing the API Gateway endpoints"
   type        = string

@@ -56,6 +56,19 @@ public class AuthorizerFunctionTests
     Assert.False(response.IsAuthorized);
   }
 
+  [Fact]
+  public async Task DeniesMissingApiKeyConfiguration()
+  {
+    Environment.SetEnvironmentVariable("API_KEY", null);
+    var function = new AuthorizerFunction();
+
+    var response = await function.FunctionHandler(
+      CreateRequest([]),
+      new TestLambdaContext());
+
+    Assert.False(response.IsAuthorized);
+  }
+
   private static AuthorizerRequest CreateRequest(Dictionary<string, string> headers)
   {
     return new AuthorizerRequest

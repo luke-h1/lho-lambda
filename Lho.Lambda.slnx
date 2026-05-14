@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj" />
     <Project Path="src/Lho.Lambda.Local/Lho.Lambda.Local.csproj" />
+    <Project Path="src/Lho.Lambda.Observability/Lho.Lambda.Observability.csproj" />
     <Project Path="src/Lho.Lambda.Tests/Lho.Lambda.Tests.csproj" />
     <Project Path="src/Lho.Lambda/Lho.Lambda.csproj" />
   </Folder>

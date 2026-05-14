@@ -54,6 +54,8 @@ runs:
         SPOTIFY_REFRESH_TOKEN: op://ci-cd/lho-lambda/SPOTIFY_REFRESH_TOKEN
         LASTFM_API_KEY: op://ci-cd/lho-lambda/LASTFM_API_KEY
         LASTFM_USERNAME: op://ci-cd/lho-lambda/LASTFM_USERNAME
+        SENTRY_DSN: op://ci-cd/lho-lambda/SENTRY_DSN
+        PUSHGATEWAY_AUTH_HEADER: op://ci-cd/lho-lambda/PUSHGATEWAY_AUTH_HEADER
         OP_ENV_FILE: ".env"
 
     - name: Set Terraform variables
@@ -64,6 +66,8 @@ runs:
         echo "TF_VAR_spotify_refresh_token=$SPOTIFY_REFRESH_TOKEN" >> $GITHUB_ENV
         echo "TF_VAR_lastfm_api_key=$LASTFM_API_KEY" >> $GITHUB_ENV
         echo "TF_VAR_lastfm_username=$LASTFM_USERNAME" >> $GITHUB_ENV
+        echo "TF_VAR_sentry_dsn=$SENTRY_DSN" >> $GITHUB_ENV
+        echo "TF_VAR_pushgateway_auth_header=$PUSHGATEWAY_AUTH_HEADER" >> $GITHUB_ENV
 
     - name: Terraform init
       shell: bash
@@ -116,6 +120,26 @@ runs:
           APP_VERSION="${{ inputs.environment }}-${SHORT_SHA}"
           echo "Using generated version: $APP_VERSION"
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+        fi
+
+    - name: Import existing authorizer log group
+      shell: bash
+      working-directory: terraform
+      run: |
+        set -euo pipefail
+
+        project_name="${TF_VAR_project_name:-now-playing}"
+        log_group_name="/aws/lambda/${project_name}-api-authorizer-${{ inputs.environment }}"
+
+        if terraform state show aws_cloudwatch_log_group.auth_logs >/dev/null 2>&1; then
+          echo "Authorizer log group is already managed by Terraform"
+          exit 0
+        fi
+
+        if aws logs describe-log-groups --log-group-name-prefix "$log_group_name" --query 'logGroups[].logGroupName' --output text | tr '\t' '\n' | grep -Fxq "$log_group_name"; then
+          terraform import -input=false aws_cloudwatch_log_group.auth_logs "$log_group_name"
+        else
+          echo "No existing authorizer log group to import"
         fi
 
     - name: Terraform plan

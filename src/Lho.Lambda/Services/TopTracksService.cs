@@ -1,6 +1,7 @@
 using Amazon.Lambda.Core;
 using Lho.Lambda.Clients.Spotify;
 using Lho.Lambda.Models;
+using Lho.Lambda.Observability;
 
 namespace Lho.Lambda.Services;
 
@@ -25,6 +26,11 @@ public class TopTracksService(SpotifyApi spotifyApi, ILambdaLogger logger)
     catch (Exception exception)
     {
       logger.LogLine($"Top tracks fetch failed: {exception}");
+      await SentryTelemetry.CaptureExceptionAsync(exception, logger, new Dictionary<string, string?>
+      {
+        ["operation"] = "top-tracks",
+        ["time_range"] = timeRange
+      });
       throw;
     }
   }

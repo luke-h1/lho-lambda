@@ -26,13 +26,10 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# data "aws_iam_policy" "aws_xray_write_only_access" {
-#   arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
-# }
-# resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
-#   role       = aws_iam_role.lambda_exec.name
-#   policy_arn = data.aws_iam_policy.aws_xray_write_only_access.arn
-# }
+resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "${var.project_name}-lambda-${var.env}"
@@ -42,23 +39,33 @@ resource "aws_lambda_function" "lambda" {
   filename         = "${path.module}/../lambda.zip"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
   timeout          = 30
-  # tracing_config {
-  #   mode = "Active"
-  # }
+  tracing_config {
+    mode = "Active"
+  }
+
   description   = "Now playing Lambda ${var.env}"
   memory_size   = 256
   architectures = ["x86_64"]
   environment {
     variables = {
-      SPOTIFY_CLIENT_ID     = var.spotify_client_id
-      SPOTIFY_CLIENT_SECRET = var.spotify_client_secret
-      SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
-      LASTFM_API_KEY        = var.lastfm_api_key
-      LASTFM_USERNAME       = var.lastfm_username
-      VERSION               = var.app_version
-      DEPLOYED_AT           = timestamp()
-      DEPLOYED_BY           = var.deployed_by
-      GIT_SHA               = var.git_sha
+      SPOTIFY_CLIENT_ID       = var.spotify_client_id
+      SPOTIFY_CLIENT_SECRET   = var.spotify_client_secret
+      SPOTIFY_REFRESH_TOKEN   = var.spotify_refresh_token
+      LASTFM_API_KEY          = var.lastfm_api_key
+      LASTFM_USERNAME         = var.lastfm_username
+      SERVICE_NAME            = "now-playing"
+      ENVIRONMENT             = var.env
+      VERSION                 = var.app_version
+      DEPLOYED_AT             = timestamp()
+      DEPLOYED_BY             = var.deployed_by
+      GIT_SHA                 = var.git_sha
+      SENTRY_DSN              = var.sentry_dsn
+      SENTRY_ENVIRONMENT      = var.env
+      SENTRY_RELEASE          = var.app_version
+      PUSHGATEWAY_URL         = var.pushgateway_url
+      PUSHGATEWAY_AUTH_HEADER = var.pushgateway_auth_header
+      PROMETHEUS_JOB          = "now-playing"
+      METRICS_ENABLED         = tostring(var.monitoring_enabled)
     }
   }
   tags = merge(var.tags, {
