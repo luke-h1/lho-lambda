@@ -4,9 +4,13 @@ data "archive_file" "auth_archive" {
   output_path = "${path.module}/../authorizer.zip"
 }
 
+locals {
+  authorizer_function_name = "${var.project_name}-api-authorizer-${var.env}"
+}
+
 resource "aws_lambda_function" "api_authorizer" {
   filename         = "${path.module}/../authorizer.zip"
-  function_name    = "${var.project_name}-api-authorizer-${var.env}"
+  function_name    = local.authorizer_function_name
   role             = aws_iam_role.lambda_exec.arn
   handler          = "Lho.Lambda.Authorizer::Lho.Lambda.Authorizer.Functions.AuthorizerFunction::FunctionHandler"
   source_code_hash = data.archive_file.auth_archive.output_base64sha256
@@ -39,10 +43,12 @@ resource "aws_lambda_function" "api_authorizer" {
   tags = merge(var.tags, {
     ENVIRONMENT = var.env
   })
+
+  depends_on = [aws_cloudwatch_log_group.auth_logs]
 }
 
 resource "aws_cloudwatch_log_group" "auth_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.api_authorizer.function_name}"
+  name              = "/aws/lambda/${local.authorizer_function_name}"
   retention_in_days = 1
   log_group_class   = "STANDARD"
 

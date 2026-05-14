@@ -23,7 +23,7 @@ public static class PrometheusMetrics
 
     try
     {
-      var counterKey = $"{metric.FunctionName}|{metric.Operation}|{metric.Route}|{metric.Method}|{metric.StatusCode}|{metric.Outcome}|{metric.Consumer}";
+      var counterKey = $"{metric.FunctionName}|{metric.Operation}|{metric.Route}|{metric.Method}|{metric.StatusCode}|{metric.Outcome}|{metric.Consumer}|{metric.Provider}";
       var count = Counters.AddOrUpdate(counterKey, 1, (_, current) => current + 1);
       var body = BuildBody(metric, count);
       var endpoint = BuildPushgatewayEndpoint(metric.FunctionName);

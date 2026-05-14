@@ -122,6 +122,26 @@ runs:
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
         fi
 
+    - name: Import existing authorizer log group
+      shell: bash
+      working-directory: terraform
+      run: |
+        set -euo pipefail
+
+        project_name="${TF_VAR_project_name:-now-playing}"
+        log_group_name="/aws/lambda/${project_name}-api-authorizer-${{ inputs.environment }}"
+
+        if terraform state show aws_cloudwatch_log_group.auth_logs >/dev/null 2>&1; then
+          echo "Authorizer log group is already managed by Terraform"
+          exit 0
+        fi
+
+        if aws logs describe-log-groups --log-group-name-prefix "$log_group_name" --query 'logGroups[].logGroupName' --output text | tr '\t' '\n' | grep -Fxq "$log_group_name"; then
+          terraform import -input=false aws_cloudwatch_log_group.auth_logs "$log_group_name"
+        else
+          echo "No existing authorizer log group to import"
+        fi
+
     - name: Terraform plan
       id: plan
       shell: bash
