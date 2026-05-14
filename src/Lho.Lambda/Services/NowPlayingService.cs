@@ -9,108 +9,108 @@ namespace Lho.Lambda.Services;
 
 public class NowPlayingService(MemoryCache cache, SpotifyApi spotifyApi, LastFmApi lastFmApi, ILambdaLogger logger)
 {
-    private const string LastFmProvider = "lastfm";
-    private const string SpotifyProvider = "spotify";
+  private const string LastFmProvider = "lastfm";
+  private const string SpotifyProvider = "spotify";
 
-    public async Task<NowPlayingResponse> HandleNowPlaying(string provider = LastFmProvider)
+  public async Task<NowPlayingResponse> HandleNowPlaying(string provider = LastFmProvider)
+  {
+    try
     {
-        try
-        {
-            var cacheKey = $"NowPlaying:{provider}";
-            var cachedResponse = cache.Get<NowPlayingResponse>(cacheKey);
-            if (cachedResponse is not null)
-            {
-                logger.LogLine("Returning cached now playing response");
-                return cachedResponse;
-            }
+      var cacheKey = $"NowPlaying:{provider}";
+      var cachedResponse = cache.Get<NowPlayingResponse>(cacheKey);
+      if (cachedResponse is not null)
+      {
+        logger.LogLine("Returning cached now playing response");
+        return cachedResponse;
+      }
 
-            var response = provider switch
-            {
-                SpotifyProvider => await HandleSpotifyNowPlaying(),
-                _ => await HandleLastFmNowPlaying()
-            };
+      var response = provider switch
+      {
+        SpotifyProvider => await HandleSpotifyNowPlaying(),
+        _ => await HandleLastFmNowPlaying()
+      };
 
-            if (response.Status == 200 && !string.IsNullOrEmpty(response.Title))
-            {
-                cache.Set(cacheKey, response, TimeSpan.FromSeconds(5));
-            }
+      if (response.Status == 200 && !string.IsNullOrEmpty(response.Title))
+      {
+        cache.Set(cacheKey, response, TimeSpan.FromSeconds(5));
+      }
 
-            return response;
-        }
-        catch (Exception exception)
-        {
-            logger.LogLine($"Error fetching now playing data from {provider}: {exception}");
-            await SentryTelemetry.CaptureExceptionAsync(exception, logger, new Dictionary<string, string?>
-            {
-                ["operation"] = "now-playing",
-                ["provider"] = provider
-            });
-            return EmptyResponse(maintenance: null, status: 500);
-        }
+      return response;
+    }
+    catch (Exception exception)
+    {
+      logger.LogLine($"Error fetching now playing data from {provider}: {exception}");
+      await SentryTelemetry.CaptureExceptionAsync(exception, logger, new Dictionary<string, string?>
+      {
+        ["operation"] = "now-playing",
+        ["provider"] = provider
+      });
+      return EmptyResponse(maintenance: null, status: 500);
+    }
+  }
+
+  private async Task<NowPlayingResponse> HandleLastFmNowPlaying()
+  {
+    var recentTracksResponse = await lastFmApi.GetRecentTracks();
+    var track = recentTracksResponse.RecentTracks.Tracks.FirstOrDefault();
+    if (track is null || !IsNowPlaying(track))
+    {
+      logger.LogLine("No song currently playing");
+      return EmptyResponse(maintenance: null, status: 200);
     }
 
-    private async Task<NowPlayingResponse> HandleLastFmNowPlaying()
-    {
-        var recentTracksResponse = await lastFmApi.GetRecentTracks();
-        var track = recentTracksResponse.RecentTracks.Tracks.FirstOrDefault();
-        if (track is null || !IsNowPlaying(track))
-        {
-            logger.LogLine("No song currently playing");
-            return EmptyResponse(maintenance: null, status: 200);
-        }
+    return new NowPlayingResponse(
+        IsPlaying: true,
+        Maintenance: null,
+        Status: 200,
+        Album: track.Album.Text,
+        AlbumImageUrl: track.Images.LastOrDefault(image => !string.IsNullOrEmpty(image.Url))?.Url ?? "",
+        Artist: track.Artist.Text,
+        SongUrl: track.Url,
+        Title: track.Name);
+  }
 
-        return new NowPlayingResponse(
-            IsPlaying: true,
-            Maintenance: null,
-            Status: 200,
-            Album: track.Album.Text,
-            AlbumImageUrl: track.Images.LastOrDefault(image => !string.IsNullOrEmpty(image.Url))?.Url ?? "",
-            Artist: track.Artist.Text,
-            SongUrl: track.Url,
-            Title: track.Name);
+  private async Task<NowPlayingResponse> HandleSpotifyNowPlaying()
+  {
+    if (!EnvironmentConfig.ShouldCallSpotify)
+    {
+      return EmptyResponse(maintenance: true, status: 200);
     }
 
-    private async Task<NowPlayingResponse> HandleSpotifyNowPlaying()
+    var nowPlayingResponse = await spotifyApi.GetNowPlaying();
+    if (nowPlayingResponse?.Item is null || !nowPlayingResponse.IsPlaying)
     {
-        if (!EnvironmentConfig.ShouldCallSpotify)
-        {
-            return EmptyResponse(maintenance: true, status: 200);
-        }
-
-        var nowPlayingResponse = await spotifyApi.GetNowPlaying();
-        if (nowPlayingResponse?.Item is null || !nowPlayingResponse.IsPlaying)
-        {
-            logger.LogLine("No song currently playing");
-            return EmptyResponse(maintenance: null, status: 200);
-        }
-
-        var item = nowPlayingResponse.Item;
-        return new NowPlayingResponse(
-            IsPlaying: nowPlayingResponse.IsPlaying,
-            Maintenance: null,
-            Status: 200,
-            Album: item.Album.Name,
-            AlbumImageUrl: item.Album.Images.FirstOrDefault()?.Url ?? "",
-            Artist: string.Join(", ", item.Artists.Select(artist => artist.Name)),
-            SongUrl: item.ExternalUrls.Spotify,
-            Title: item.Name);
+      logger.LogLine("No song currently playing");
+      return EmptyResponse(maintenance: null, status: 200);
     }
 
-    private static bool IsNowPlaying(LastFmTrack track)
-    {
-        return string.Equals(track.Attributes?.NowPlaying, "true", StringComparison.OrdinalIgnoreCase);
-    }
+    var item = nowPlayingResponse.Item;
+    return new NowPlayingResponse(
+        IsPlaying: nowPlayingResponse.IsPlaying,
+        Maintenance: null,
+        Status: 200,
+        Album: item.Album.Name,
+        AlbumImageUrl: item.Album.Images.FirstOrDefault()?.Url ?? "",
+        Artist: string.Join(", ", item.Artists.Select(artist => artist.Name)),
+        SongUrl: item.ExternalUrls.Spotify,
+        Title: item.Name);
+  }
 
-    private static NowPlayingResponse EmptyResponse(bool? maintenance, int status)
-    {
-        return new NowPlayingResponse(
-            IsPlaying: false,
-            Maintenance: maintenance,
-            Status: status,
-            Album: "",
-            AlbumImageUrl: "",
-            Artist: "",
-            SongUrl: "",
-            Title: "");
-    }
+  private static bool IsNowPlaying(LastFmTrack track)
+  {
+    return string.Equals(track.Attributes?.NowPlaying, "true", StringComparison.OrdinalIgnoreCase);
+  }
+
+  private static NowPlayingResponse EmptyResponse(bool? maintenance, int status)
+  {
+    return new NowPlayingResponse(
+        IsPlaying: false,
+        Maintenance: maintenance,
+        Status: status,
+        Album: "",
+        AlbumImageUrl: "",
+        Artist: "",
+        SongUrl: "",
+        Title: "");
+  }
 }

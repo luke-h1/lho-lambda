@@ -1,0 +1,38 @@
+# Pre-commit hooks. Install: uv tool install pre-commit && uv tool install commitizen && pre-commit install && pre-commit install --hook-type commit-msg
+
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+  - repo: local
+    hooks:
+      - id: dotnet-format-lambda
+        name: dotnet format lambda
+        entry: dotnet format src/Lho.Lambda/Lho.Lambda.csproj --verify-no-changes --no-restore --include
+        language: system
+        files: ^src/Lho\.Lambda/.*\.cs$
+      - id: dotnet-format-authorizer
+        name: dotnet format authorizer
+        entry: dotnet format src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj --verify-no-changes --no-restore --include
+        language: system
+        files: ^src/Lho\.Lambda\.Authorizer/.*\.cs$
+      - id: dotnet-format-observability
+        name: dotnet format observability
+        entry: dotnet format src/Lho.Lambda.Observability/Lho.Lambda.Observability.csproj --verify-no-changes --no-restore --include
+        language: system
+        files: ^src/Lho\.Lambda\.Observability/.*\.cs$
+      - id: dotnet-format-local
+        name: dotnet format local app
+        entry: dotnet format src/Lho.Lambda.Local/Lho.Lambda.Local.csproj --verify-no-changes --no-restore --include
+        language: system
+        files: ^src/Lho\.Lambda\.Local/.*\.cs$
+      - id: dotnet-format-tests
+        name: dotnet format tests
+        entry: dotnet format src/Lho.Lambda.Tests/Lho.Lambda.Tests.csproj --verify-no-changes --no-restore --include
+        language: system
+        files: ^src/Lho\.Lambda\.Tests/.*\.cs$
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.13.9
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
