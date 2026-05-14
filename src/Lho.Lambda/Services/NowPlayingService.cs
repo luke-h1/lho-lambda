@@ -2,6 +2,7 @@ using Amazon.Lambda.Core;
 using Lho.Lambda.Clients.LastFm;
 using Lho.Lambda.Clients.Spotify;
 using Lho.Lambda.Models;
+using Lho.Lambda.Observability;
 using Lho.Lambda.Utils;
 
 namespace Lho.Lambda.Services;
@@ -39,6 +40,11 @@ public class NowPlayingService(MemoryCache cache, SpotifyApi spotifyApi, LastFmA
         catch (Exception exception)
         {
             logger.LogLine($"Error fetching now playing data from {provider}: {exception}");
+            await SentryTelemetry.CaptureExceptionAsync(exception, logger, new Dictionary<string, string?>
+            {
+                ["operation"] = "now-playing",
+                ["provider"] = provider
+            });
             return EmptyResponse(maintenance: null, status: 500);
         }
     }

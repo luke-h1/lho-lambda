@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Lho.Lambda.Clients.LastFm;
 using Lho.Lambda.Clients.Spotify;
+using Lho.Lambda.Observability;
 using Lho.Lambda.Services;
 using Lho.Lambda.Utils;
 
@@ -36,35 +38,79 @@ public class ApiFunction
     ILambdaContext ctx
   )
   {
+    var stopwatch = Stopwatch.StartNew();
     var method = request.RequestContext?.Http?.Method ?? "GET";
     var path = NormalisePath(request.RawPath);
-    ctx.Logger.LogLine($"Request {method} {path}");
-
-    if (!string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
+    var consumer = NormaliseConsumer(GetHeaderValue(request.Headers, "x-consumer"));
+    var provider = path == "/api/now-playing"
+      ? QueryStringParser.Get(request.RawQueryString, "provider", "lastfm", ["lastfm", "spotify"])
+      : null;
+    APIGatewayHttpApiV2ProxyResponse response;
+    Exception? capturedException = null;
+    SentryTelemetry.Initialise(ctx.Logger);
+    using var transaction = SentryTelemetry.StartTransaction(ctx.Logger, $"{method} {path}", "http.server", new Dictionary<string, string?>
     {
-      return ResponseBuilder.ErrorResponse(404, "Not Found");
+      ["function"] = ctx.FunctionName,
+      ["request_id"] = ctx.AwsRequestId,
+      ["route"] = path,
+      ["method"] = method,
+      ["consumer"] = consumer,
+      ["provider"] = provider
+    });
+
+    try
+    {
+      if (!string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
+      {
+        response = ResponseBuilder.ErrorResponse(404, "Not Found");
+      }
+      else
+      {
+        response = path switch
+        {
+          "/api/health" => ResponseBuilder.CreateResponse(new { status = "OK" }, includeCacheControl: false),
+          "/api/version" => ResponseBuilder.CreateResponse(VersionService.GetVersion(), includeCacheControl: false),
+          "/api/now-playing" => await HandleNowPlaying(request, ctx, provider!),
+          "/api/top-tracks" => await HandleTopTracks(request, ctx),
+          _ => ResponseBuilder.ErrorResponse(404, "Not Found")
+        };
+      }
+    }
+    catch (Exception exception)
+    {
+      capturedException = exception;
+      response = ResponseBuilder.ErrorResponse(500, "Internal Server Error");
+      StructuredLog.Error(ctx.Logger, "api.request.error", exception, new Dictionary<string, object?>
+      {
+        ["requestId"] = ctx.AwsRequestId,
+        ["method"] = method,
+        ["route"] = path,
+        ["consumer"] = consumer,
+        ["provider"] = provider
+      });
+      await SentryTelemetry.CaptureExceptionAsync(exception, ctx.Logger, new Dictionary<string, string?>
+      {
+        ["function"] = ctx.FunctionName,
+        ["request_id"] = ctx.AwsRequestId,
+        ["route"] = path,
+        ["method"] = method,
+        ["consumer"] = consumer,
+        ["provider"] = provider
+      });
     }
 
-    return path switch
-    {
-      "/api/health" => ResponseBuilder.CreateResponse(new { status = "OK" }, includeCacheControl: false),
-      "/api/version" => ResponseBuilder.CreateResponse(VersionService.GetVersion(), includeCacheControl: false),
-      "/api/now-playing" => await HandleNowPlaying(request, ctx),
-      "/api/top-tracks" => await HandleTopTracks(request, ctx),
-      _ => ResponseBuilder.ErrorResponse(404, "Not Found")
-    };
+    stopwatch.Stop();
+    transaction?.Finish(response.StatusCode, capturedException);
+    await RecordInvocation(ctx, method, path, response.StatusCode, stopwatch.Elapsed.TotalMilliseconds, consumer, provider);
+    return response;
   }
 
 
   private async Task<APIGatewayHttpApiV2ProxyResponse> HandleNowPlaying(
     APIGatewayHttpApiV2ProxyRequest request,
-    ILambdaContext context)
+    ILambdaContext context,
+    string provider)
   {
-    var provider = QueryStringParser.Get(
-      request.RawQueryString,
-      "provider",
-      "lastfm",
-      ["lastfm", "spotify"]);
     var response = await new NowPlayingService(_cache, _spotifyApi, _lastFmApi, context.Logger).HandleNowPlaying(provider);
 
     return ResponseBuilder.CreateResponse(response, revalidateSeconds: 3);
@@ -82,16 +128,46 @@ public class ApiFunction
     var rawLimit = QueryStringParser.Get(request.RawQueryString, "limit", "20");
     var limit = int.TryParse(rawLimit, out var parsedLimit) ? Math.Clamp(parsedLimit, 1, 50) : 20;
 
-    try
+    var response = await new TopTracksService(_spotifyApi, context.Logger).HandleTopTracks(timeRange, limit);
+    return ResponseBuilder.CreateResponse(response, revalidateSeconds: 300);
+  }
+
+  private static async Task RecordInvocation(
+    ILambdaContext context,
+    string method,
+    string path,
+    int statusCode,
+    double durationMs,
+    string? consumer,
+    string? provider)
+  {
+    var outcome = statusCode >= 500 ? "error" : statusCode >= 400 ? "client_error" : "success";
+    StructuredLog.Info(context.Logger, "api.request", new Dictionary<string, object?>
     {
-      var response = await new TopTracksService(_spotifyApi, context.Logger).HandleTopTracks(timeRange, limit);
-      return ResponseBuilder.CreateResponse(response, revalidateSeconds: 300);
-    }
-    catch (Exception exception)
-    {
-      context.Logger.LogLine($"Top tracks failed: {exception}");
-      return ResponseBuilder.ErrorResponse(500, "Unable to fetch top tracks");
-    }
+      ["requestId"] = context.AwsRequestId,
+      ["function"] = context.FunctionName,
+      ["method"] = method,
+      ["route"] = path,
+      ["statusCode"] = statusCode,
+      ["durationMs"] = Math.Round(durationMs, 2),
+      ["outcome"] = outcome,
+      ["consumer"] = consumer,
+      ["provider"] = provider
+    });
+
+    var metric = new InvocationMetric(
+      FunctionName: context.FunctionName,
+      Operation: "api",
+      Route: path,
+      Method: method,
+      StatusCode: statusCode,
+      DurationMs: durationMs,
+      Outcome: outcome,
+      Consumer: consumer,
+      Provider: provider);
+
+    await PrometheusMetrics.PushInvocationAsync(metric, context.Logger);
+    await SentryTelemetry.RecordInvocationAsync(metric, context.Logger);
   }
 
   private static string NormalisePath(string? rawPath)
@@ -125,6 +201,34 @@ public class ApiFunction
       "" => "/",
       var value when value.StartsWith("/", StringComparison.Ordinal) => value,
       _ => "/" + path
+    };
+  }
+
+  private static string? GetHeaderValue(IDictionary<string, string>? headers, string key)
+  {
+    if (headers is null)
+    {
+      return null;
+    }
+
+    foreach (var (headerKey, value) in headers)
+    {
+      if (string.Equals(headerKey, key, StringComparison.OrdinalIgnoreCase))
+      {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
+  private static string? NormaliseConsumer(string? consumer)
+  {
+    return consumer switch
+    {
+      "lhowsam-prod" or "lhowsam-dev" or "lhowsam-local" => consumer,
+      null or "" => null,
+      _ => "unknown"
     };
   }
 }

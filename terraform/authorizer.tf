@@ -15,17 +15,42 @@ resource "aws_lambda_function" "api_authorizer" {
   architectures    = ["x86_64"]
   timeout          = 10
 
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {
-      API_KEY     = var.api_key
-      ENVIRONMENT = var.env
+      API_KEY                 = var.api_key
+      SERVICE_NAME            = "now-playing"
+      ENVIRONMENT             = var.env
+      VERSION                 = var.app_version
+      GIT_SHA                 = var.git_sha
+      SENTRY_DSN              = var.sentry_dsn
+      SENTRY_ENVIRONMENT      = var.env
+      SENTRY_RELEASE          = var.app_version
+      PUSHGATEWAY_URL         = var.pushgateway_url
+      PUSHGATEWAY_AUTH_HEADER = var.pushgateway_auth_header
+      PROMETHEUS_JOB          = "now-playing-authorizer"
+      METRICS_ENABLED         = tostring(var.monitoring_enabled)
     }
   }
 
   tags = merge(var.tags, {
     ENVIRONMENT = var.env
   })
+}
+
+resource "aws_cloudwatch_log_group" "auth_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.api_authorizer.function_name}"
+  retention_in_days = 1
+  log_group_class   = "STANDARD"
+
+  tags = {
+    Environment = var.env
+    Service     = "nowplaying"
+    s3export    = "true"
+  }
 }
 
 resource "aws_apigatewayv2_authorizer" "api_key" {
