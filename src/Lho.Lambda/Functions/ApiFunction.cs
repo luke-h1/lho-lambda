@@ -60,7 +60,7 @@ public class ApiFunction
 
     try
     {
-      if (!string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
+      if (!IsSupportedMethod(method, path))
       {
         response = ResponseBuilder.ErrorResponse(404, "Not Found");
       }
@@ -230,5 +230,15 @@ public class ApiFunction
       null or "" => null,
       _ => "unknown"
     };
+  }
+
+  private static bool IsSupportedMethod(string method, string path)
+  {
+    if (string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
+    {
+      return true;
+    }
+
+    return string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase) && path == "/api/health";
   }
 }

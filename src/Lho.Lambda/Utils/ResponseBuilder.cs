@@ -16,7 +16,7 @@ public static class ResponseBuilder
   {
     ["content-type"] = "application/json",
     ["Access-Control-Allow-Origin"] = "*",
-    ["Access-Control-Allow-Methods"] = "GET,OPTIONS,POST,PUT,DELETE"
+    ["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS,POST,PUT,DELETE"
   };
 
   public static APIGatewayHttpApiV2ProxyResponse CreateResponse<T>(
