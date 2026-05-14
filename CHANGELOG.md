@@ -1,3 +1,9 @@
+# [live.772bbc4](https://github.com/luke-h1/lho-lambda/compare/vlive.611ba63...vlive.772bbc4) (2026-05-14)
+
+### Other Changes
+
+* **api:** add c# formatting to pre-commit ([772bbc4](https://github.com/luke-h1/lho-lambda/commit/772bbc4e82915fa0846bf62250d6ea4e1f30f960))
+
 # [live.611ba63](https://github.com/luke-h1/lho-lambda/compare/vlive.65ec19f...vlive.611ba63) (2026-05-14)
 
 ### Features
