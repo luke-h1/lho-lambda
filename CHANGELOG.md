@@ -1,3 +1,11 @@
+# [live.611ba63](https://github.com/luke-h1/lho-lambda/compare/vlive.65ec19f...vlive.611ba63) (2026-05-14)
+
+### Features
+
+* **lambda:** add observability ([f4630b2](https://github.com/luke-h1/lho-lambda/commit/f4630b2c6ab20556f5a5ce47d7c727c50cf8b8b7))
+* **lambda:** add observability ([c76f7fa](https://github.com/luke-h1/lho-lambda/commit/c76f7fa64a0e632b362fe4a3d1656e9aee8ba157))
+* **lambda:** add observability ([9226f00](https://github.com/luke-h1/lho-lambda/commit/9226f006afbd2633c04332a0d1f1b0b435e23f7e))
+
 # [live.65ec19f](https://github.com/luke-h1/lho-lambda/compare/v1.4.2...vlive.65ec19f) (2026-05-13)
 
 ### Features
