@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Lho.Lambda.Models;
-using Lho.Lambda.Utils;
+using Lho.Lambda.RuntimeConfiguration.Options;
 
 namespace Lho.Lambda.Clients.Spotify;
 
@@ -15,32 +15,19 @@ public class SpotifyApi
   };
 
   private readonly HttpClient _httpClient;
-  private readonly string _baseUrl;
-  private readonly string? _accessToken;
-  private readonly string? _clientId;
-  private readonly string? _clientSecret;
-  private readonly string? _refreshToken;
+  private readonly SpotifyOptions _spotifyOptions;
   private string? _cachedAccessToken;
   private DateTimeOffset? _tokenExpiresAt;
 
-  public SpotifyApi()
-      : this(new HttpClient { Timeout = TimeSpan.FromSeconds(10) }, "https://api.spotify.com/v1")
-  {
-  }
-
-  public SpotifyApi(HttpClient httpClient, string baseUrl, string? accessToken = null)
+  public SpotifyApi(HttpClient httpClient, SpotifyOptions spotifyOptions)
   {
     _httpClient = httpClient;
-    _baseUrl = baseUrl;
-    _accessToken = accessToken ?? EnvironmentConfig.Spotify.AccessToken;
-    _clientId = EnvironmentConfig.Spotify.ClientId;
-    _clientSecret = EnvironmentConfig.Spotify.ClientSecret;
-    _refreshToken = EnvironmentConfig.Spotify.RefreshToken;
+    _spotifyOptions = spotifyOptions;
   }
 
   public async Task<SpotifyResponse?> GetNowPlaying()
   {
-    var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/me/player/currently-playing");
+    var request = new HttpRequestMessage(HttpMethod.Get, "me/player/currently-playing");
     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -57,7 +44,7 @@ public class SpotifyApi
   public async Task<SpotifyTopTracksResponse> GetTopTracks(string timeRange = "medium_term", int limit = 10)
   {
     var boundedLimit = Math.Clamp(limit, 1, 50);
-    var requestUri = $"{_baseUrl}/me/top/tracks?time_range={Uri.EscapeDataString(timeRange)}&limit={boundedLimit}";
+    var requestUri = $"me/top/tracks?time_range={Uri.EscapeDataString(timeRange)}&limit={boundedLimit}";
     var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -71,9 +58,9 @@ public class SpotifyApi
 
   private async Task<string> GetAccessToken()
   {
-    if (!string.IsNullOrEmpty(_accessToken))
+    if (!string.IsNullOrEmpty(_spotifyOptions.AccessToken))
     {
-      return _accessToken;
+      return _spotifyOptions.AccessToken;
     }
 
     if (!string.IsNullOrEmpty(_cachedAccessToken) && _tokenExpiresAt > DateTimeOffset.UtcNow)
@@ -81,23 +68,15 @@ public class SpotifyApi
       return _cachedAccessToken;
     }
 
-    if (string.IsNullOrEmpty(_refreshToken))
-    {
-      throw new SpotifyServiceException("Missing Spotify refresh token");
-    }
-
-    if (string.IsNullOrEmpty(_clientId) || string.IsNullOrEmpty(_clientSecret))
-    {
-      throw new SpotifyServiceException("Missing Spotify client ID or client secret");
-    }
+    var credentials = _spotifyOptions.RequireRefreshCredentials();
 
     using var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
-    var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
-    request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+    var encodedCredentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{credentials.ClientId}:{credentials.ClientSecret}"));
+    request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encodedCredentials);
     request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
     {
       ["grant_type"] = "refresh_token",
-      ["refresh_token"] = _refreshToken
+      ["refresh_token"] = credentials.RefreshToken
     });
 
     var response = await _httpClient.SendAsync(request);

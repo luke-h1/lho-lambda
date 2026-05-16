@@ -1,5 +1,6 @@
 using Lho.Lambda.Authorizer.Functions;
 using Lho.Lambda.Authorizer.Models;
+using Lho.Lambda.RuntimeConfiguration.Options;
 using Xunit;
 
 namespace Lho.Lambda.Tests;
@@ -67,6 +68,22 @@ public class AuthorizerFunctionTests
       new TestLambdaContext());
 
     Assert.False(response.IsAuthorized);
+  }
+
+  [Fact]
+  public async Task UsesInjectedAuthorizerOptions()
+  {
+    Environment.SetEnvironmentVariable("API_KEY", "environment-secret");
+    var function = new AuthorizerFunction(new AuthorizerOptions { ApiKey = "injected-secret" });
+
+    var response = await function.FunctionHandler(
+      CreateRequest(new Dictionary<string, string>
+      {
+        ["x-api-key"] = "injected-secret"
+      }),
+      new TestLambdaContext());
+
+    Assert.True(response.IsAuthorized);
   }
 
   private static AuthorizerRequest CreateRequest(Dictionary<string, string> headers)

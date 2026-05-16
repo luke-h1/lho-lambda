@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Lho.Lambda.Models;
-using Lho.Lambda.Utils;
+using Lho.Lambda.RuntimeConfiguration.Options;
 
 namespace Lho.Lambda.Clients.LastFm;
 
@@ -12,37 +12,19 @@ public class LastFmApi
   };
 
   private readonly HttpClient _httpClient;
-  private readonly string _baseUrl;
-  private readonly string? _apiKey;
-  private readonly string? _username;
+  private readonly LastFmOptions _lastFmOptions;
 
-
-  public LastFmApi()
-    : this(new HttpClient { Timeout = TimeSpan.FromSeconds(10) }, "https://ws.audioscrobbler.com/2.0/")
-  {
-  }
-
-  public LastFmApi(HttpClient httpClient, string baseUrl, string? apiKey = null, string? username = null)
+  public LastFmApi(HttpClient httpClient, LastFmOptions lastFmOptions)
   {
     _httpClient = httpClient;
-    _baseUrl = baseUrl;
-    _apiKey = apiKey ?? EnvironmentConfig.LastFm.ApiKey;
-    _username = username ?? EnvironmentConfig.LastFm.Username;
+    _lastFmOptions = lastFmOptions;
   }
 
   public async Task<LastFmRecentTracksResponse> GetRecentTracks()
   {
-    if (string.IsNullOrEmpty(_apiKey))
-    {
-      throw new LastFmServiceException("Missing Last.fm API key");
-    }
+    var credentials = _lastFmOptions.RequireCredentials();
 
-    if (string.IsNullOrEmpty(_username))
-    {
-      throw new LastFmServiceException("Missing Last.fm username");
-    }
-
-    var requestUri = $"{_baseUrl}?method=user.getrecenttracks&user={Uri.EscapeDataString(_username)}&api_key={Uri.EscapeDataString(_apiKey)}&format=json&limit=1";
+    var requestUri = $"?method=user.getrecenttracks&user={Uri.EscapeDataString(credentials.Username)}&api_key={Uri.EscapeDataString(credentials.ApiKey)}&format=json&limit=1";
 
     var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, requestUri));
     await EnsureSuccess(response);

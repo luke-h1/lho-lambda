@@ -4,12 +4,27 @@ using System.Text;
 using Amazon.Lambda.Core;
 using Lho.Lambda.Authorizer.Models;
 using Lho.Lambda.Observability;
+using Lho.Lambda.RuntimeConfiguration;
+using Lho.Lambda.RuntimeConfiguration.Options;
 
 namespace Lho.Lambda.Authorizer.Functions;
 
 public class AuthorizerFunction
 {
   private static readonly HashSet<string> ValidConsumers = ["lhowsam-dev", "lhowsam-prod", "lhowsam-local"];
+
+  private readonly AuthorizerOptions _authorizerOptions;
+
+  public AuthorizerFunction()
+    : this(RuntimeConfig.Current.Authorizer)
+  {
+
+  }
+
+  public AuthorizerFunction(AuthorizerOptions authorizerOptions)
+  {
+    _authorizerOptions = authorizerOptions;
+  }
 
   public async Task<AuthorizerSimpleResponse> FunctionHandler(AuthorizerRequest request, ILambdaContext context)
   {
@@ -34,7 +49,7 @@ public class AuthorizerFunction
     try
     {
       var apiKey = GetHeaderValue(request.Headers, "x-api-key");
-      var validKey = Environment.GetEnvironmentVariable("API_KEY");
+      var validKey = _authorizerOptions.ApiKey;
 
       if (!SecureCompare(apiKey, validKey))
       {

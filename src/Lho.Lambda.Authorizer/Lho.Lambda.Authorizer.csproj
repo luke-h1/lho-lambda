@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Lho.Lambda.RuntimeConfiguration\Lho.Lambda.RuntimeConfiguration.csproj" />
     <ProjectReference Include="..\Lho.Lambda.Observability\Lho.Lambda.Observability.csproj" />
   </ItemGroup>
 </Project>

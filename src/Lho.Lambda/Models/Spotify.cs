@@ -4,7 +4,7 @@ namespace Lho.Lambda.Models;
 
 public record NowPlayingResponse(
   bool IsPlaying,
-  bool? Maintenance,
+  bool Maintenance,
   int Status,
   string Album,
   string AlbumImageUrl,
