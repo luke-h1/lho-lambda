@@ -68,7 +68,7 @@ public class NowPlayingService(
         ["operation"] = "now-playing",
         ["provider"] = provider
       });
-      return EmptyResponse(maintenance: null, status: 500);
+      return EmptyResponse(status: 500);
     }
   }
 
@@ -79,12 +79,12 @@ public class NowPlayingService(
     if (track is null || !IsNowPlaying(track))
     {
       logger.LogLine("No song currently playing");
-      return EmptyResponse(maintenance: null, status: 200);
+      return EmptyResponse(status: 200);
     }
 
     return new NowPlayingResponse(
         IsPlaying: true,
-        Maintenance: null,
+        Maintenance: false,
         Status: 200,
         Album: track.Album.Text,
         AlbumImageUrl: track.Images.LastOrDefault(image => !string.IsNullOrEmpty(image.Url))?.Url ?? "",
@@ -104,13 +104,13 @@ public class NowPlayingService(
     if (nowPlayingResponse?.Item is null || !nowPlayingResponse.IsPlaying)
     {
       logger.LogLine("No song currently playing");
-      return EmptyResponse(maintenance: null, status: 200);
+      return EmptyResponse(status: 200);
     }
 
     var item = nowPlayingResponse.Item;
     return new NowPlayingResponse(
         IsPlaying: nowPlayingResponse.IsPlaying,
-        Maintenance: null,
+        Maintenance: false,
         Status: 200,
         Album: item.Album.Name,
         AlbumImageUrl: item.Album.Images.FirstOrDefault()?.Url ?? "",
@@ -124,7 +124,7 @@ public class NowPlayingService(
     return string.Equals(track.Attributes?.NowPlaying, "true", StringComparison.OrdinalIgnoreCase);
   }
 
-  private static NowPlayingResponse EmptyResponse(bool? maintenance, int status)
+  private static NowPlayingResponse EmptyResponse(int status, bool maintenance = false)
   {
     return new NowPlayingResponse(
         IsPlaying: false,

@@ -57,7 +57,7 @@ public class NowPlayingServiceTests
     var response = await service.GetNowPlaying();
 
     Assert.False(response.IsPlaying);
-    Assert.Null(response.Maintenance);
+    Assert.False(response.Maintenance);
     Assert.Equal(500, response.Status);
     Assert.Equal("", response.Album);
     Assert.Equal("", response.AlbumImageUrl);
@@ -133,7 +133,7 @@ public class NowPlayingServiceTests
     var response = await service.HandleNowPlaying("spotify");
 
     Assert.False(response.IsPlaying);
-    Assert.Null(response.Maintenance);
+    Assert.False(response.Maintenance);
     Assert.Equal(200, response.Status);
     Assert.Equal("", response.Album);
     Assert.Equal("", response.AlbumImageUrl);
