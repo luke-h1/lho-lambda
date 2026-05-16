@@ -3,20 +3,47 @@ using Lho.Lambda.Clients.LastFm;
 using Lho.Lambda.Clients.Spotify;
 using Lho.Lambda.Models;
 using Lho.Lambda.Observability;
+using Lho.Lambda.RuntimeConfiguration.Options;
 using Lho.Lambda.Utils;
 
 namespace Lho.Lambda.Services;
 
-public class NowPlayingService(MemoryCache cache, SpotifyApi spotifyApi, LastFmApi lastFmApi, ILambdaLogger logger)
+public class NowPlayingService(
+  MemoryCache cache,
+  SpotifyApi spotifyApi,
+  LastFmApi lastFmApi,
+  ILambdaLogger logger,
+  FeatureFlagsOptions featureFlags)
 {
   private const string LastFmProvider = "lastfm";
   private const string SpotifyProvider = "spotify";
+  private const string LastFmCacheKey = "NowPlaying:lastfm";
+  private const string SpotifyCacheKey = "NowPlaying:spotify";
 
   public async Task<NowPlayingResponse> HandleNowPlaying(string provider = LastFmProvider)
   {
+    return string.Equals(provider, SpotifyProvider, StringComparison.OrdinalIgnoreCase)
+      ? await GetSpotifyNowPlaying()
+      : await GetNowPlaying();
+  }
+
+  public async Task<NowPlayingResponse> GetNowPlaying()
+  {
+    return await GetCachedNowPlaying(LastFmCacheKey, LastFmProvider, HandleLastFmNowPlaying);
+  }
+
+  public async Task<NowPlayingResponse> GetSpotifyNowPlaying()
+  {
+    return await GetCachedNowPlaying(SpotifyCacheKey, SpotifyProvider, HandleSpotifyNowPlaying);
+  }
+
+  private async Task<NowPlayingResponse> GetCachedNowPlaying(
+    string cacheKey,
+    string provider,
+    Func<Task<NowPlayingResponse>> fetch)
+  {
     try
     {
-      var cacheKey = $"NowPlaying:{provider}";
       var cachedResponse = cache.Get<NowPlayingResponse>(cacheKey);
       if (cachedResponse is not null)
       {
@@ -24,11 +51,7 @@ public class NowPlayingService(MemoryCache cache, SpotifyApi spotifyApi, LastFmA
         return cachedResponse;
       }
 
-      var response = provider switch
-      {
-        SpotifyProvider => await HandleSpotifyNowPlaying(),
-        _ => await HandleLastFmNowPlaying()
-      };
+      var response = await fetch();
 
       if (response.Status == 200 && !string.IsNullOrEmpty(response.Title))
       {
@@ -72,7 +95,7 @@ public class NowPlayingService(MemoryCache cache, SpotifyApi spotifyApi, LastFmA
 
   private async Task<NowPlayingResponse> HandleSpotifyNowPlaying()
   {
-    if (!EnvironmentConfig.ShouldCallSpotify)
+    if (!featureFlags.ShouldCallSpotify)
     {
       return EmptyResponse(maintenance: true, status: 200);
     }

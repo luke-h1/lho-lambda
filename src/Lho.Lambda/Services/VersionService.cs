@@ -1,16 +1,16 @@
 using Lho.Lambda.Models;
-using Lho.Lambda.Utils;
+using Lho.Lambda.RuntimeConfiguration.Options;
 
 namespace Lho.Lambda.Services;
 
-public static class VersionService
+public class VersionService(DeploymentOptions deployment)
 {
-  public static VersionResponse GetVersion()
+  public VersionResponse GetVersion()
   {
     return new VersionResponse(
-      Version: EnvironmentConfig.Deploy.Version,
-      DeployedAt: EnvironmentConfig.Deploy.DeployedAt,
-      DeployedBy: EnvironmentConfig.Deploy.DeployedBy,
-      GitSha: EnvironmentConfig.Deploy.GitSha);
+      Version: deployment.Version,
+      DeployedAt: deployment.DeployedAt,
+      DeployedBy: deployment.DeployedBy,
+      GitSha: deployment.GitSha);
   }
 }

@@ -4,6 +4,7 @@ using Amazon.Lambda.Core;
 using Lho.Lambda.Clients.LastFm;
 using Lho.Lambda.Clients.Spotify;
 using Lho.Lambda.Observability;
+using Lho.Lambda.RuntimeConfiguration;
 using Lho.Lambda.Services;
 using Lho.Lambda.Utils;
 
@@ -12,22 +13,30 @@ namespace Lho.Lambda.Functions;
 
 public class ApiFunction
 {
-  private static readonly MemoryCache Cache = new();
-  private static readonly SpotifyApi SpotifyApi = new();
-  private static readonly LastFmApi LastFmApi = new();
-
+  private readonly RuntimeConfig _runtimeConfig;
   private readonly MemoryCache _cache;
   private readonly SpotifyApi _spotifyApi;
   private readonly LastFmApi _lastFmApi;
 
   public ApiFunction()
-    : this(Cache, SpotifyApi, LastFmApi)
+    : this(RuntimeConfig.Current)
   {
 
   }
 
-  public ApiFunction(MemoryCache cache, SpotifyApi spotifyApi, LastFmApi lastFmApi)
+  public ApiFunction(RuntimeConfig runtimeConfig)
+    : this(
+      runtimeConfig,
+      new MemoryCache(),
+      new SpotifyApi(CreateHttpClient("https://api.spotify.com/v1/"), runtimeConfig.Spotify),
+      new LastFmApi(CreateHttpClient("https://ws.audioscrobbler.com/2.0/"), runtimeConfig.LastFm))
   {
+
+  }
+
+  public ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, SpotifyApi spotifyApi, LastFmApi lastFmApi)
+  {
+    _runtimeConfig = runtimeConfig;
     _cache = cache;
     _spotifyApi = spotifyApi;
     _lastFmApi = lastFmApi;
@@ -69,8 +78,8 @@ public class ApiFunction
         response = path switch
         {
           "/api/health" => ResponseBuilder.CreateResponse(new { status = "OK" }, includeCacheControl: false),
-          "/api/version" => ResponseBuilder.CreateResponse(VersionService.GetVersion(), includeCacheControl: false),
-          "/api/now-playing" => await HandleNowPlaying(request, ctx, provider!),
+          "/api/version" => ResponseBuilder.CreateResponse(new VersionService(_runtimeConfig.Deployment).GetVersion(), includeCacheControl: false),
+          "/api/now-playing" => await HandleNowPlaying(ctx, provider!),
           "/api/top-tracks" => await HandleTopTracks(request, ctx),
           _ => ResponseBuilder.ErrorResponse(404, "Not Found")
         };
@@ -107,11 +116,13 @@ public class ApiFunction
 
 
   private async Task<APIGatewayHttpApiV2ProxyResponse> HandleNowPlaying(
-    APIGatewayHttpApiV2ProxyRequest request,
     ILambdaContext context,
     string provider)
   {
-    var response = await new NowPlayingService(_cache, _spotifyApi, _lastFmApi, context.Logger).HandleNowPlaying(provider);
+    var service = new NowPlayingService(_cache, _spotifyApi, _lastFmApi, context.Logger, _runtimeConfig.Features);
+    var response = string.Equals(provider, "spotify", StringComparison.OrdinalIgnoreCase)
+      ? await service.GetSpotifyNowPlaying()
+      : await service.GetNowPlaying();
 
     return ResponseBuilder.CreateResponse(response, revalidateSeconds: 3);
   }
@@ -240,5 +251,14 @@ public class ApiFunction
     }
 
     return string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase) && path == "/api/health";
+  }
+
+  private static HttpClient CreateHttpClient(string baseAddress)
+  {
+    return new HttpClient
+    {
+      BaseAddress = new Uri(baseAddress),
+      Timeout = TimeSpan.FromSeconds(10)
+    };
   }
 }
