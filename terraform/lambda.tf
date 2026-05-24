@@ -33,7 +33,7 @@ resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "${var.project_name}-lambda-${var.env}"
-  runtime          = "dotnet8"
+  runtime          = "dotnet10"
   handler          = "Lho.Lambda::Lho.Lambda.Functions.ApiFunction::FunctionHandler"
   role             = aws_iam_role.lambda_exec.arn
   filename         = "${path.module}/../lambda.zip"
