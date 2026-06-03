@@ -56,6 +56,7 @@ resource "aws_lambda_function" "lambda" {
       SERVICE_NAME            = "now-playing"
       ENVIRONMENT             = var.env
       VERSION                 = var.app_version
+      DOTNET_ROLL_FORWARD     = "Major"
       DEPLOYED_AT             = timestamp()
       DEPLOYED_BY             = var.deployed_by
       GIT_SHA                 = var.git_sha

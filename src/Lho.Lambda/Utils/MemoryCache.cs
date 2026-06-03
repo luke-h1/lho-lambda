@@ -2,7 +2,7 @@ namespace Lho.Lambda.Utils;
 
 public class MemoryCache
 {
-  private readonly object _lock = new();
+  private readonly Lock _lock = new();
   private readonly Dictionary<string, CacheEntry> _cache = [];
 
   public T? Get<T>(string key)

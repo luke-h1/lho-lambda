@@ -1,11 +1,10 @@
 using Amazon.Lambda.Core;
-using Sentry;
 
 namespace Lho.Lambda.Observability;
 
 public static class SentryTelemetry
 {
-  private static readonly object InitLock = new();
+  private static readonly Lock InitLock = new();
   private static bool _initialised;
 
   public static bool Initialise(ILambdaLogger logger)
