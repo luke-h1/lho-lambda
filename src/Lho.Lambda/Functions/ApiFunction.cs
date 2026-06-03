@@ -210,7 +210,7 @@ public class ApiFunction
     return path switch
     {
       "" => "/",
-      var value when value.StartsWith("/", StringComparison.Ordinal) => value,
+      _ when path.StartsWith("/", StringComparison.Ordinal) => path,
       _ => "/" + path
     };
   }

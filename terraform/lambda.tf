@@ -33,7 +33,7 @@ resource "aws_iam_role_policy_attachment" "aws_xray_write_only_access" {
 
 resource "aws_lambda_function" "lambda" {
   function_name    = "${var.project_name}-lambda-${var.env}"
-  runtime          = "dotnet8"
+  runtime          = "dotnet10"
   handler          = "Lho.Lambda::Lho.Lambda.Functions.ApiFunction::FunctionHandler"
   role             = aws_iam_role.lambda_exec.arn
   filename         = "${path.module}/../lambda.zip"
@@ -56,6 +56,7 @@ resource "aws_lambda_function" "lambda" {
       SERVICE_NAME            = "now-playing"
       ENVIRONMENT             = var.env
       VERSION                 = var.app_version
+      DOTNET_ROLL_FORWARD     = "Major"
       DEPLOYED_AT             = timestamp()
       DEPLOYED_BY             = var.deployed_by
       GIT_SHA                 = var.git_sha
