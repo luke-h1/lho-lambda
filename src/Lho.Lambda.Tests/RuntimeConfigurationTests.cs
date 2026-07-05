@@ -18,8 +18,6 @@ public class RuntimeConfigurationTests
       ["DEPLOYED_BY"] = "tests",
       ["GIT_SHA"] = "abc123",
       ["SENTRY_DSN"] = "https://sentry.example",
-      ["PUSHGATEWAY_URL"] = "https://pushgateway.example",
-      ["PUSHGATEWAY_AUTH_HEADER"] = "Authorization=Basic abc",
       ["API_KEY"] = "authorizer-key",
       ["SHOULD_CALL_SPOTIFY"] = "false"
     });
@@ -32,8 +30,6 @@ public class RuntimeConfigurationTests
     Assert.Equal("tests", config.Deployment.DeployedBy);
     Assert.Equal("abc123", config.Deployment.GitSha);
     Assert.Equal("https://sentry.example", config.Observability.SentryDsn);
-    Assert.Equal("https://pushgateway.example", config.Observability.PushgatewayUrl);
-    Assert.Equal("Authorization=Basic abc", config.Observability.PushgatewayAuthHeader);
     Assert.Equal("authorizer-key", config.Authorizer.ApiKey);
     Assert.False(config.Features.ShouldCallSpotify);
   }
@@ -73,8 +69,25 @@ public class RuntimeConfigurationTests
     var config = RuntimeConfig.FromEnvironment(new Dictionary<string, string?>());
 
     Assert.Null(config.Observability.SentryDsn);
-    Assert.Null(config.Observability.PushgatewayUrl);
-    Assert.False(config.Observability.MetricsEnabled);
+  }
+
+  [Theory]
+  [InlineData("lhowsam-prod", "lhowsam-prod")]
+  [InlineData("lhowsam-dev", "lhowsam-dev")]
+  [InlineData("lhowsam-local", "lhowsam-local")]
+  [InlineData(null, null)]
+  [InlineData("", null)]
+  [InlineData("someone-else", "unknown")]
+  public void ConsumerNormalisationMapsHeaderValues(string? consumer, string? expected)
+  {
+    Assert.Equal(expected, Consumers.Normalise(consumer));
+  }
+
+  [Fact]
+  public void UnknownConsumerIsNotValid()
+  {
+    Assert.True(Consumers.IsValid("lhowsam-prod"));
+    Assert.False(Consumers.IsValid(Consumers.Unknown));
   }
 
   [Fact]

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Amazon.Lambda.Core;
@@ -11,40 +10,32 @@ namespace Lho.Lambda.Authorizer.Functions;
 
 public class AuthorizerFunction
 {
-  private static readonly HashSet<string> ValidConsumers = ["lhowsam-dev", "lhowsam-prod", "lhowsam-local"];
-
   private readonly AuthorizerOptions _authorizerOptions;
+  private readonly ObservabilityOptions _observabilityOptions;
 
   public AuthorizerFunction()
-    : this(RuntimeConfig.Current.Authorizer)
+    : this(RuntimeConfig.Current.Authorizer, RuntimeConfig.Current.Observability)
   {
 
   }
 
-  public AuthorizerFunction(AuthorizerOptions authorizerOptions)
+  public AuthorizerFunction(AuthorizerOptions authorizerOptions, ObservabilityOptions observabilityOptions)
   {
     _authorizerOptions = authorizerOptions;
+    _observabilityOptions = observabilityOptions;
   }
 
   public async Task<AuthorizerSimpleResponse> FunctionHandler(AuthorizerRequest request, ILambdaContext context)
   {
-    var stopwatch = Stopwatch.StartNew();
-    var consumer = NormaliseConsumer(GetHeaderValue(request.Headers, "x-consumer"));
+    var consumer = Consumers.Normalise(GetHeaderValue(request.Headers, "x-consumer"));
     var route = request.RouteKey ?? request.RequestContext?.Http?.Path ?? "authorizer";
     var method = request.RequestContext?.Http?.Method ?? "AUTH";
-    var reason = "allowed";
     var isAuthorized = false;
-    Exception? capturedException = null;
-    SentryTelemetry.Initialise(context.Logger);
-    using var transaction = SentryTelemetry.StartTransaction(context.Logger, $"{method} {route}", "http.server", new Dictionary<string, string?>
-    {
-      ["function"] = context.FunctionName,
-      ["request_id"] = context.AwsRequestId,
-      ["operation"] = "authorizer",
-      ["route"] = route,
-      ["method"] = method,
-      ["consumer"] = consumer
-    });
+
+    await using var invocation = LambdaInvocation.Begin(
+      context,
+      new InvocationDescriptor("authorizer", route, method, consumer, LogEventPrefix: "authorizer.request"),
+      _observabilityOptions);
 
     try
     {
@@ -53,72 +44,31 @@ public class AuthorizerFunction
 
       if (!SecureCompare(apiKey, validKey))
       {
-        reason = "invalid_api_key";
+        invocation.SetReason("invalid_api_key");
         return new AuthorizerSimpleResponse(false);
       }
 
-      if (consumer is not null && !ValidConsumers.Contains(consumer))
+      if (consumer is not null && !Consumers.IsValid(consumer))
       {
-        reason = "invalid_consumer";
+        invocation.SetReason("invalid_consumer");
         return new AuthorizerSimpleResponse(false);
       }
 
       isAuthorized = true;
+      invocation.SetReason("allowed");
       return new AuthorizerSimpleResponse(true);
     }
     catch (Exception exception)
     {
-      capturedException = exception;
-      reason = "exception";
-      StructuredLog.Error(context.Logger, "authorizer.error", exception, new Dictionary<string, object?>
-      {
-        ["requestId"] = context.AwsRequestId,
-        ["function"] = context.FunctionName,
-        ["route"] = route,
-        ["method"] = method,
-        ["consumer"] = consumer
-      });
-      await SentryTelemetry.CaptureExceptionAsync(exception, context.Logger, new Dictionary<string, string?>
-      {
-        ["function"] = context.FunctionName,
-        ["request_id"] = context.AwsRequestId,
-        ["operation"] = "authorizer",
-        ["route"] = route,
-        ["consumer"] = consumer
-      });
+      invocation.SetReason("exception");
+      await invocation.RecordFailureAsync(exception);
       throw;
     }
     finally
     {
-      stopwatch.Stop();
-      var statusCode = isAuthorized ? 200 : 401;
-      var outcome = isAuthorized ? "success" : "denied";
-      StructuredLog.Info(context.Logger, "authorizer.request", new Dictionary<string, object?>
-      {
-        ["requestId"] = context.AwsRequestId,
-        ["function"] = context.FunctionName,
-        ["route"] = route,
-        ["method"] = method,
-        ["statusCode"] = statusCode,
-        ["durationMs"] = Math.Round(stopwatch.Elapsed.TotalMilliseconds, 2),
-        ["outcome"] = outcome,
-        ["reason"] = reason,
-        ["consumer"] = consumer
-      });
-
-      var metric = new InvocationMetric(
-          FunctionName: context.FunctionName,
-          Operation: "authorizer",
-          Route: route,
-          Method: method,
-          StatusCode: statusCode,
-          DurationMs: stopwatch.Elapsed.TotalMilliseconds,
-          Outcome: outcome,
-          Consumer: consumer);
-
-      transaction?.Finish(statusCode, capturedException);
-      await PrometheusMetrics.PushInvocationAsync(metric, context.Logger);
-      await SentryTelemetry.RecordInvocationAsync(metric, context.Logger);
+      await invocation.CompleteAsync(
+        isAuthorized ? 200 : 401,
+        isAuthorized ? "success" : "denied");
     }
   }
 
@@ -152,15 +102,5 @@ public class AuthorizerFunction
 
     return firstBytes.Length == secondBytes.Length &&
            CryptographicOperations.FixedTimeEquals(firstBytes, secondBytes);
-  }
-
-  private static string? NormaliseConsumer(string? consumer)
-  {
-    return consumer switch
-    {
-      "lhowsam-prod" or "lhowsam-dev" or "lhowsam-local" => consumer,
-      null or "" => null,
-      _ => "unknown"
-    };
   }
 }

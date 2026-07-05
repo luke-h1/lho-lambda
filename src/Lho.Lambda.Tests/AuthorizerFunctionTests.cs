@@ -10,8 +10,7 @@ public class AuthorizerFunctionTests
   [Fact]
   public async Task AuthorizesKnownConsumerWithMatchingApiKey()
   {
-    Environment.SetEnvironmentVariable("API_KEY", "secret");
-    var function = new AuthorizerFunction();
+    var function = CreateFunction(apiKey: "secret");
 
     var response = await function.FunctionHandler(
       CreateRequest(new Dictionary<string, string>
@@ -27,8 +26,7 @@ public class AuthorizerFunctionTests
   [Fact]
   public async Task DeniesUnknownConsumer()
   {
-    Environment.SetEnvironmentVariable("API_KEY", "secret");
-    var function = new AuthorizerFunction();
+    var function = CreateFunction(apiKey: "secret");
 
     var response = await function.FunctionHandler(
       CreateRequest(new Dictionary<string, string>
@@ -44,8 +42,7 @@ public class AuthorizerFunctionTests
   [Fact]
   public async Task DeniesMismatchedApiKey()
   {
-    Environment.SetEnvironmentVariable("API_KEY", "secret");
-    var function = new AuthorizerFunction();
+    var function = CreateFunction(apiKey: "secret");
 
     var response = await function.FunctionHandler(
       CreateRequest(new Dictionary<string, string>
@@ -60,8 +57,7 @@ public class AuthorizerFunctionTests
   [Fact]
   public async Task DeniesMissingApiKeyConfiguration()
   {
-    Environment.SetEnvironmentVariable("API_KEY", null);
-    var function = new AuthorizerFunction();
+    var function = CreateFunction(apiKey: null);
 
     var response = await function.FunctionHandler(
       CreateRequest([]),
@@ -70,20 +66,11 @@ public class AuthorizerFunctionTests
     Assert.False(response.IsAuthorized);
   }
 
-  [Fact]
-  public async Task UsesInjectedAuthorizerOptions()
+  private static AuthorizerFunction CreateFunction(string? apiKey)
   {
-    Environment.SetEnvironmentVariable("API_KEY", "environment-secret");
-    var function = new AuthorizerFunction(new AuthorizerOptions { ApiKey = "injected-secret" });
-
-    var response = await function.FunctionHandler(
-      CreateRequest(new Dictionary<string, string>
-      {
-        ["x-api-key"] = "injected-secret"
-      }),
-      new TestLambdaContext());
-
-    Assert.True(response.IsAuthorized);
+    return new AuthorizerFunction(
+      new AuthorizerOptions { ApiKey = apiKey },
+      new ObservabilityOptions());
   }
 
   private static AuthorizerRequest CreateRequest(Dictionary<string, string> headers)

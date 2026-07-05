@@ -8,33 +8,36 @@ using Lho.Lambda.Utils;
 
 namespace Lho.Lambda.Services;
 
+public sealed record NowPlayingResult(NowPlayingResponse Response, string Provider);
+
 public class NowPlayingService(
   MemoryCache cache,
   SpotifyApi spotifyApi,
   LastFmApi lastFmApi,
   ILambdaLogger logger,
-  FeatureFlagsOptions featureFlags)
+  FeatureFlagsOptions featureFlags,
+  ObservabilityOptions observability)
 {
   private const string LastFmProvider = "lastfm";
   private const string SpotifyProvider = "spotify";
   private const string LastFmCacheKey = "NowPlaying:lastfm";
   private const string SpotifyCacheKey = "NowPlaying:spotify";
 
-  public async Task<NowPlayingResponse> HandleNowPlaying(string provider = LastFmProvider)
+  public async Task<NowPlayingResult> HandleNowPlaying(string? rawProvider)
   {
-    return string.Equals(provider, SpotifyProvider, StringComparison.OrdinalIgnoreCase)
-      ? await GetSpotifyNowPlaying()
-      : await GetNowPlaying();
+    var provider = NormaliseProvider(rawProvider);
+    var response = provider == SpotifyProvider
+      ? await GetCachedNowPlaying(SpotifyCacheKey, SpotifyProvider, HandleSpotifyNowPlaying)
+      : await GetCachedNowPlaying(LastFmCacheKey, LastFmProvider, HandleLastFmNowPlaying);
+
+    return new NowPlayingResult(response, provider);
   }
 
-  public async Task<NowPlayingResponse> GetNowPlaying()
+  private static string NormaliseProvider(string? rawProvider)
   {
-    return await GetCachedNowPlaying(LastFmCacheKey, LastFmProvider, HandleLastFmNowPlaying);
-  }
-
-  public async Task<NowPlayingResponse> GetSpotifyNowPlaying()
-  {
-    return await GetCachedNowPlaying(SpotifyCacheKey, SpotifyProvider, HandleSpotifyNowPlaying);
+    return string.Equals(rawProvider, SpotifyProvider, StringComparison.OrdinalIgnoreCase)
+      ? SpotifyProvider
+      : LastFmProvider;
   }
 
   private async Task<NowPlayingResponse> GetCachedNowPlaying(
@@ -53,7 +56,7 @@ public class NowPlayingService(
 
       var response = await fetch();
 
-      if (response.Status == 200 && !string.IsNullOrEmpty(response.Title))
+      if (response.Status == 200)
       {
         cache.Set(cacheKey, response, TimeSpan.FromSeconds(5));
       }
@@ -63,10 +66,10 @@ public class NowPlayingService(
     catch (Exception exception)
     {
       logger.LogLine($"Error fetching now playing data from {provider}: {exception}");
-      await SentryTelemetry.CaptureExceptionAsync(exception, logger, new Dictionary<string, string?>
+      await SentryTelemetry.CaptureExceptionAsync(exception, observability, logger, new Dictionary<string, string?>
       {
-        ["operation"] = "now-playing",
-        ["provider"] = provider
+        [InvocationTags.Operation] = "now-playing",
+        [InvocationTags.Provider] = provider
       });
       return EmptyResponse(status: 500);
     }

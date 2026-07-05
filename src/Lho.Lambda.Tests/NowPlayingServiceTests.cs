@@ -35,16 +35,62 @@ public class NowPlayingServiceTests
       spotifyHandler: new StaticJsonHandler("{}"),
       lastFmHandler: lastFmHandler);
 
-    var first = await service.GetNowPlaying();
-    var second = await service.GetNowPlaying();
+    var first = await service.HandleNowPlaying(null);
+    var second = await service.HandleNowPlaying(null);
 
-    Assert.True(first.IsPlaying);
-    Assert.Equal("Last.fm song", first.Title);
-    Assert.Equal("Last.fm artist", first.Artist);
-    Assert.Equal("Last.fm album", first.Album);
-    Assert.Equal("https://example.com/large.jpg", first.AlbumImageUrl);
-    Assert.Same(first, second);
+    Assert.Equal("lastfm", first.Provider);
+    Assert.True(first.Response.IsPlaying);
+    Assert.Equal("Last.fm song", first.Response.Title);
+    Assert.Equal("Last.fm artist", first.Response.Artist);
+    Assert.Equal("Last.fm album", first.Response.Album);
+    Assert.Equal("https://example.com/large.jpg", first.Response.AlbumImageUrl);
+    Assert.Same(first.Response, second.Response);
     Assert.Equal(1, lastFmHandler.RequestCount);
+  }
+
+  [Fact]
+  public async Task NowPlayingCachesEmptyResponseWhenNothingIsPlaying()
+  {
+    var lastFmHandler = new StaticJsonHandler("""
+      {
+        "recenttracks": {
+          "track": [{
+            "name": "Older song",
+            "artist": { "#text": "Older artist" },
+            "album": { "#text": "Older album" },
+            "url": "https://last.fm/track/older",
+            "image": []
+          }]
+        }
+      }
+      """);
+    var service = CreateService(
+      spotifyHandler: new StaticJsonHandler("{}"),
+      lastFmHandler: lastFmHandler);
+
+    var first = await service.HandleNowPlaying(null);
+    var second = await service.HandleNowPlaying(null);
+
+    Assert.False(first.Response.IsPlaying);
+    Assert.Equal(200, first.Response.Status);
+    Assert.Same(first.Response, second.Response);
+    Assert.Equal(1, lastFmHandler.RequestCount);
+  }
+
+  [Fact]
+  public async Task NowPlayingDoesNotCacheFailureResponses()
+  {
+    var lastFmHandler = new StaticJsonHandler("lastfm failed", HttpStatusCode.InternalServerError);
+    var service = CreateService(
+      spotifyHandler: new StaticJsonHandler("{}"),
+      lastFmHandler: lastFmHandler);
+
+    var first = await service.HandleNowPlaying(null);
+    var second = await service.HandleNowPlaying(null);
+
+    Assert.Equal(500, first.Response.Status);
+    Assert.Equal(500, second.Response.Status);
+    Assert.Equal(2, lastFmHandler.RequestCount);
   }
 
   [Fact]
@@ -54,7 +100,8 @@ public class NowPlayingServiceTests
       spotifyHandler: new StaticJsonHandler("{}"),
       lastFmHandler: new StaticJsonHandler("lastfm failed", HttpStatusCode.InternalServerError));
 
-    var response = await service.GetNowPlaying();
+    var result = await service.HandleNowPlaying(null);
+    var response = result.Response;
 
     Assert.False(response.IsPlaying);
     Assert.False(response.Maintenance);
@@ -69,7 +116,6 @@ public class NowPlayingServiceTests
   [Fact]
   public async Task SpotifyNowPlayingUsesSpotifyAndCachesResult()
   {
-    Environment.SetEnvironmentVariable("SHOULD_CALL_SPOTIFY", "true");
     var spotifyHandler = new StaticJsonHandler("""
       {
         "is_playing": true,
@@ -88,22 +134,22 @@ public class NowPlayingServiceTests
       spotifyHandler: spotifyHandler,
       lastFmHandler: new StaticJsonHandler("{}"));
 
-    var first = await service.GetSpotifyNowPlaying();
-    var second = await service.GetSpotifyNowPlaying();
+    var first = await service.HandleNowPlaying("spotify");
+    var second = await service.HandleNowPlaying("spotify");
 
-    Assert.True(first.IsPlaying);
-    Assert.Equal("Spotify song", first.Title);
-    Assert.Equal("Spotify artist", first.Artist);
-    Assert.Equal("Spotify album", first.Album);
-    Assert.Equal("https://example.com/spotify.jpg", first.AlbumImageUrl);
-    Assert.Same(first, second);
+    Assert.Equal("spotify", first.Provider);
+    Assert.True(first.Response.IsPlaying);
+    Assert.Equal("Spotify song", first.Response.Title);
+    Assert.Equal("Spotify artist", first.Response.Artist);
+    Assert.Equal("Spotify album", first.Response.Album);
+    Assert.Equal("https://example.com/spotify.jpg", first.Response.AlbumImageUrl);
+    Assert.Same(first.Response, second.Response);
     Assert.Equal(1, spotifyHandler.RequestCount);
   }
 
   [Fact]
   public async Task SpotifyReturnsEmptyResponseWhenItemIsNotPlaying()
   {
-    Environment.SetEnvironmentVariable("SHOULD_CALL_SPOTIFY", "true");
     var spotifyApi = new SpotifyApi(
       CreateHttpClient(new StaticJsonHandler("""
       {
@@ -128,9 +174,10 @@ public class NowPlayingServiceTests
       spotifyApi,
       lastFmApi,
       new TestLambdaLogger(),
-      new FeatureFlagsOptions { ShouldCallSpotify = true });
+      new FeatureFlagsOptions { ShouldCallSpotify = true },
+      new ObservabilityOptions());
 
-    var response = await service.HandleNowPlaying("spotify");
+    var response = (await service.HandleNowPlaying("spotify")).Response;
 
     Assert.False(response.IsPlaying);
     Assert.False(response.Maintenance);
@@ -140,6 +187,50 @@ public class NowPlayingServiceTests
     Assert.Equal("", response.Artist);
     Assert.Equal("", response.SongUrl);
     Assert.Equal("", response.Title);
+  }
+
+  [Fact]
+  public async Task InvalidProviderFallsBackToLastFm()
+  {
+    var spotifyHandler = new StaticJsonHandler("{}");
+    var lastFmHandler = new StaticJsonHandler("""
+      { "recenttracks": { "track": [] } }
+      """);
+    var service = CreateService(spotifyHandler, lastFmHandler);
+
+    var result = await service.HandleNowPlaying("garbage");
+
+    Assert.Equal("lastfm", result.Provider);
+    Assert.Equal(1, lastFmHandler.RequestCount);
+    Assert.Equal(0, spotifyHandler.RequestCount);
+  }
+
+  [Fact]
+  public async Task SpotifyProviderIsCaseInsensitive()
+  {
+    var spotifyHandler = new StaticJsonHandler("""
+      {
+        "is_playing": true,
+        "item": {
+          "name": "Spotify song",
+          "artists": [{ "name": "Spotify artist" }],
+          "album": {
+            "name": "Spotify album",
+            "images": [{ "url": "https://example.com/spotify.jpg" }]
+          },
+          "external_urls": { "spotify": "https://open.spotify.com/track/spotify" }
+        }
+      }
+      """);
+    var service = CreateService(
+      spotifyHandler: spotifyHandler,
+      lastFmHandler: new StaticJsonHandler("{}"));
+
+    var result = await service.HandleNowPlaying("SPOTIFY");
+
+    Assert.Equal("spotify", result.Provider);
+    Assert.Equal("Spotify song", result.Response.Title);
+    Assert.Equal(1, spotifyHandler.RequestCount);
   }
 
   private static NowPlayingService CreateService(StaticJsonHandler spotifyHandler, StaticJsonHandler lastFmHandler)
@@ -156,7 +247,8 @@ public class NowPlayingServiceTests
       spotifyApi,
       lastFmApi,
       new TestLambdaLogger(),
-      new FeatureFlagsOptions { ShouldCallSpotify = true });
+      new FeatureFlagsOptions { ShouldCallSpotify = true },
+      new ObservabilityOptions());
   }
 
   private static HttpClient CreateHttpClient(HttpMessageHandler handler, string baseAddress = "https://api.spotify.test/v1/")

@@ -1,6 +1,7 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Amazon.Lambda.APIGatewayEvents;
+using Lho.Lambda.Models;
+using Lho.Lambda.Serialization;
 
 namespace Lho.Lambda.Utils;
 
@@ -9,7 +10,7 @@ public static class ResponseBuilder
   private static readonly JsonSerializerOptions JsonOptions = new()
   {
     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    DefaultIgnoreCondition = JsonIgnoreCondition.Never
+    TypeInfoResolver = ApiResponseJsonContext.Default
   };
 
   private static readonly Dictionary<string, string> DefaultCorsHeaders = new()
@@ -45,7 +46,7 @@ public static class ResponseBuilder
     {
       StatusCode = statusCode,
       Headers = new Dictionary<string, string>(DefaultCorsHeaders),
-      Body = JsonSerializer.Serialize(new { error = message }, JsonOptions)
+      Body = JsonSerializer.Serialize(new ErrorResponseBody(message), JsonOptions)
     };
   }
 }

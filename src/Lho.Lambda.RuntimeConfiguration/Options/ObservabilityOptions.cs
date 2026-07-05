@@ -18,15 +18,5 @@ public class ObservabilityOptions
 
   public string? SentryDsn { get; init; }
 
-  public string? PushgatewayUrl { get; init; }
-
-  public string? PushgatewayAuthHeader { get; init; }
-
-  public string PushgatewayJob { get; init; } = "now-playing";
-
-  public bool MetricsEnabledFlag { get; init; } = true;
-
   public double SentryTracesSampleRate { get; init; } = 0.5;
-
-  public bool MetricsEnabled => MetricsEnabledFlag && !string.IsNullOrEmpty(PushgatewayUrl);
 }

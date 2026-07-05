@@ -1,8 +1,9 @@
-using System.Diagnostics;
+using System.Web;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Lho.Lambda.Clients.LastFm;
 using Lho.Lambda.Clients.Spotify;
+using Lho.Lambda.Models;
 using Lho.Lambda.Observability;
 using Lho.Lambda.RuntimeConfiguration;
 using Lho.Lambda.Services;
@@ -47,25 +48,16 @@ public class ApiFunction
     ILambdaContext ctx
   )
   {
-    var stopwatch = Stopwatch.StartNew();
     var method = request.RequestContext?.Http?.Method ?? "GET";
     var path = NormalisePath(request.RawPath);
-    var consumer = NormaliseConsumer(GetHeaderValue(request.Headers, "x-consumer"));
-    var provider = path == "/api/now-playing"
-      ? QueryStringParser.Get(request.RawQueryString, "provider", "lastfm", ["lastfm", "spotify"])
-      : null;
+    var consumer = Consumers.Normalise(GetHeaderValue(request.Headers, "x-consumer"));
+
+    await using var invocation = LambdaInvocation.Begin(
+      ctx,
+      new InvocationDescriptor("api", path, method, consumer),
+      _runtimeConfig.Observability);
+
     APIGatewayHttpApiV2ProxyResponse response;
-    Exception? capturedException = null;
-    SentryTelemetry.Initialise(ctx.Logger);
-    using var transaction = SentryTelemetry.StartTransaction(ctx.Logger, $"{method} {path}", "http.server", new Dictionary<string, string?>
-    {
-      ["function"] = ctx.FunctionName,
-      ["request_id"] = ctx.AwsRequestId,
-      ["route"] = path,
-      ["method"] = method,
-      ["consumer"] = consumer,
-      ["provider"] = provider
-    });
 
     try
     {
@@ -77,116 +69,100 @@ public class ApiFunction
       {
         response = path switch
         {
-          "/api/health" => ResponseBuilder.CreateResponse(new { status = "OK" }, includeCacheControl: false),
-          "/api/version" => ResponseBuilder.CreateResponse(new VersionService(_runtimeConfig.Deployment).GetVersion(), includeCacheControl: false),
-          "/api/now-playing" => await HandleNowPlaying(ctx, provider!),
-          "/api/top-tracks" => await HandleTopTracks(request, ctx),
+          "/api/health" => ResponseBuilder.CreateResponse(new HealthResponse("OK"), includeCacheControl: false),
+          "/api/version" => ResponseBuilder.CreateResponse(BuildVersionResponse(), includeCacheControl: false),
+          "/api/now-playing" => await HandleNowPlaying(request, ctx, invocation),
+          "/api/top-tracks" => await HandleTopTracks(request, ctx, invocation),
           _ => ResponseBuilder.ErrorResponse(404, "Not Found")
         };
       }
     }
     catch (Exception exception)
     {
-      capturedException = exception;
       response = ResponseBuilder.ErrorResponse(500, "Internal Server Error");
-      StructuredLog.Error(ctx.Logger, "api.request.error", exception, new Dictionary<string, object?>
-      {
-        ["requestId"] = ctx.AwsRequestId,
-        ["method"] = method,
-        ["route"] = path,
-        ["consumer"] = consumer,
-        ["provider"] = provider
-      });
-      await SentryTelemetry.CaptureExceptionAsync(exception, ctx.Logger, new Dictionary<string, string?>
-      {
-        ["function"] = ctx.FunctionName,
-        ["request_id"] = ctx.AwsRequestId,
-        ["route"] = path,
-        ["method"] = method,
-        ["consumer"] = consumer,
-        ["provider"] = provider
-      });
+      await invocation.RecordFailureAsync(exception);
     }
 
-    stopwatch.Stop();
-    transaction?.Finish(response.StatusCode, capturedException);
-    await RecordInvocation(ctx, method, path, response.StatusCode, stopwatch.Elapsed.TotalMilliseconds, consumer, provider);
+    await invocation.CompleteAsync(response.StatusCode);
     return response;
   }
 
 
   private async Task<APIGatewayHttpApiV2ProxyResponse> HandleNowPlaying(
+    APIGatewayHttpApiV2ProxyRequest request,
     ILambdaContext context,
-    string provider)
+    LambdaInvocation invocation)
   {
-    var service = new NowPlayingService(_cache, _spotifyApi, _lastFmApi, context.Logger, _runtimeConfig.Features);
-    var response = string.Equals(provider, "spotify", StringComparison.OrdinalIgnoreCase)
-      ? await service.GetSpotifyNowPlaying()
-      : await service.GetNowPlaying();
+    var service = new NowPlayingService(_cache, _spotifyApi, _lastFmApi, context.Logger, _runtimeConfig.Features, _runtimeConfig.Observability);
+    var result = await service.HandleNowPlaying(GetQueryParam(request.RawQueryString, "provider"));
+    invocation.SetProvider(result.Provider);
 
-    return ResponseBuilder.CreateResponse(response, revalidateSeconds: 3);
+    return ResponseBuilder.CreateResponse(result.Response, revalidateSeconds: 3);
   }
 
   private async Task<APIGatewayHttpApiV2ProxyResponse> HandleTopTracks(
     APIGatewayHttpApiV2ProxyRequest request,
-    ILambdaContext context)
+    ILambdaContext context,
+    LambdaInvocation invocation)
   {
-    var timeRange = QueryStringParser.Get(
+    var timeRange = GetQueryParam(
       request.RawQueryString,
       "time_range",
       "medium_term",
       ["short_term", "medium_term", "long_term"]);
-    var rawLimit = QueryStringParser.Get(request.RawQueryString, "limit", "20");
-    var limit = int.TryParse(rawLimit, out var parsedLimit) ? Math.Clamp(parsedLimit, 1, 50) : 20;
+    invocation.SetTag(InvocationTags.TimeRange, timeRange);
+    var limit = int.TryParse(GetQueryParam(request.RawQueryString, "limit"), out var parsedLimit) ? parsedLimit : 20;
 
-    var response = await new TopTracksService(_spotifyApi, context.Logger).HandleTopTracks(timeRange, limit);
-    return ResponseBuilder.CreateResponse(response, revalidateSeconds: 300);
+    var topTracks = await _spotifyApi.GetTopTracks(timeRange, limit);
+    var tracks = topTracks.Items
+      .Select(item => new TopTrackResponseItem(
+        Title: item.Name,
+        Artist: string.Join(", ", item.Artists.Select(artist => artist.Name)),
+        Album: item.Album.Name,
+        AlbumImageUrl: item.Album.Images.FirstOrDefault()?.Url ?? "",
+        SongUrl: item.ExternalUrls.Spotify))
+      .ToArray();
+
+    return ResponseBuilder.CreateResponse(new TopTracksApiResponse(tracks), revalidateSeconds: 300);
   }
 
-  private static async Task RecordInvocation(
-    ILambdaContext context,
-    string method,
-    string path,
-    int statusCode,
-    double durationMs,
-    string? consumer,
-    string? provider)
+  private VersionResponse BuildVersionResponse()
   {
-    var outcome = statusCode >= 500 ? "error" : statusCode >= 400 ? "client_error" : "success";
-    StructuredLog.Info(context.Logger, "api.request", new Dictionary<string, object?>
-    {
-      ["requestId"] = context.AwsRequestId,
-      ["function"] = context.FunctionName,
-      ["method"] = method,
-      ["route"] = path,
-      ["statusCode"] = statusCode,
-      ["durationMs"] = Math.Round(durationMs, 2),
-      ["outcome"] = outcome,
-      ["consumer"] = consumer,
-      ["provider"] = provider
-    });
-
-    var metric = new InvocationMetric(
-      FunctionName: context.FunctionName,
-      Operation: "api",
-      Route: path,
-      Method: method,
-      StatusCode: statusCode,
-      DurationMs: durationMs,
-      Outcome: outcome,
-      Consumer: consumer,
-      Provider: provider);
-
-    await PrometheusMetrics.PushInvocationAsync(metric, context.Logger);
-    await SentryTelemetry.RecordInvocationAsync(metric, context.Logger);
+    return new VersionResponse(
+      Version: _runtimeConfig.Deployment.Version,
+      DeployedAt: _runtimeConfig.Deployment.DeployedAt,
+      DeployedBy: _runtimeConfig.Deployment.DeployedBy,
+      GitSha: _runtimeConfig.Deployment.GitSha);
   }
+
+  private static string? GetQueryParam(string? rawQueryString, string key)
+  {
+    if (string.IsNullOrEmpty(rawQueryString))
+    {
+      return null;
+    }
+
+    var value = HttpUtility.ParseQueryString(rawQueryString)[key];
+    return string.IsNullOrEmpty(value) ? null : value;
+  }
+
+  private static string GetQueryParam(
+    string? rawQueryString,
+    string key,
+    string defaultValue,
+    IReadOnlyCollection<string> allowedValues)
+  {
+    var value = GetQueryParam(rawQueryString, key);
+    return value is not null && allowedValues.Contains(value) ? value : defaultValue;
+  }
+
+  private static readonly string[] KnownStages = ["/test", "/staging", "/live", "/prod"];
 
   private static string NormalisePath(string? rawPath)
   {
     var path = string.IsNullOrEmpty(rawPath) ? "/" : rawPath;
-    var knownStages = new[] { "/test", "/staging", "/live", "/prod" };
 
-    foreach (var stage in knownStages)
+    foreach (var stage in KnownStages)
     {
       if (path.StartsWith(stage + "/", StringComparison.Ordinal))
       {
@@ -233,16 +209,6 @@ public class ApiFunction
     return null;
   }
 
-  private static string? NormaliseConsumer(string? consumer)
-  {
-    return consumer switch
-    {
-      "lhowsam-prod" or "lhowsam-dev" or "lhowsam-local" => consumer,
-      null or "" => null,
-      _ => "unknown"
-    };
-  }
-
   private static bool IsSupportedMethod(string method, string path)
   {
     if (string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
@@ -255,7 +221,15 @@ public class ApiFunction
 
   private static HttpClient CreateHttpClient(string baseAddress)
   {
-    return new HttpClient
+    // Recycle pooled connections so a thawed container does not reuse sockets
+    // that went stale while the Lambda was frozen.
+    var handler = new SocketsHttpHandler
+    {
+      PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+      ConnectTimeout = TimeSpan.FromSeconds(2)
+    };
+
+    return new HttpClient(handler)
     {
       BaseAddress = new Uri(baseAddress),
       Timeout = TimeSpan.FromSeconds(10)
