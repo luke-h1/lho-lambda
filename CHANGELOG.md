@@ -1,3 +1,10 @@
+# [live.077b233](https://github.com/luke-h1/lho-lambda/compare/vlive.de19d60...vlive.077b233) (2026-07-05)
+
+### Other Changes
+
+* **api:** update to dotnet 10 (#217) ([26c47f7](https://github.com/luke-h1/lho-lambda/commit/26c47f77d4dba617c78a11cebfe857c1a2b321c5))
+* **api:** remote push gw (#218) ([077b233](https://github.com/luke-h1/lho-lambda/commit/077b233f1f78a0710ab9a747cdb55c0a84ebad3a))
+
 # [live.de19d60](https://github.com/luke-h1/lho-lambda/compare/vlive.772bbc4...vlive.de19d60) (2026-05-16)
 
 ### Other Changes
