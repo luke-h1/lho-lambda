@@ -15,7 +15,7 @@ resource "aws_lambda_function" "api_authorizer" {
   handler          = "Lho.Lambda.Authorizer::Lho.Lambda.Authorizer.Functions.AuthorizerFunction::FunctionHandler"
   source_code_hash = data.archive_file.auth_archive.output_base64sha256
   runtime          = "dotnet10"
-  memory_size      = 256
+  memory_size      = 512
   architectures    = ["x86_64"]
   timeout          = 10
 
@@ -25,19 +25,15 @@ resource "aws_lambda_function" "api_authorizer" {
 
   environment {
     variables = {
-      API_KEY                 = var.api_key
-      SERVICE_NAME            = "now-playing"
-      ENVIRONMENT             = var.env
-      VERSION                 = var.app_version
-      DOTNET_ROLL_FORWARD     = "Major"
-      GIT_SHA                 = var.git_sha
-      SENTRY_DSN              = var.sentry_dsn
-      SENTRY_ENVIRONMENT      = var.env
-      SENTRY_RELEASE          = var.app_version
-      PUSHGATEWAY_URL         = var.pushgateway_url
-      PUSHGATEWAY_AUTH_HEADER = var.pushgateway_auth_header
-      PROMETHEUS_JOB          = "now-playing-authorizer"
-      METRICS_ENABLED         = tostring(var.monitoring_enabled)
+      API_KEY             = var.api_key
+      SERVICE_NAME        = "now-playing"
+      ENVIRONMENT         = var.env
+      VERSION             = var.app_version
+      DOTNET_ROLL_FORWARD = "Major"
+      GIT_SHA             = var.git_sha
+      SENTRY_DSN          = var.sentry_dsn
+      SENTRY_ENVIRONMENT  = var.env
+      SENTRY_RELEASE      = var.app_version
     }
   }
 

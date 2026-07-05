@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Lho.Lambda.Models;
 using Lho.Lambda.RuntimeConfiguration.Options;
+using Lho.Lambda.Serialization;
 
 namespace Lho.Lambda.Clients.Spotify;
 
@@ -11,18 +12,21 @@ public class SpotifyApi
 {
   private static readonly JsonSerializerOptions JsonOptions = new()
   {
-    PropertyNameCaseInsensitive = true
+    PropertyNameCaseInsensitive = true,
+    TypeInfoResolver = SpotifyJsonContext.Default
   };
 
   private readonly HttpClient _httpClient;
   private readonly SpotifyOptions _spotifyOptions;
+  private readonly TimeProvider _timeProvider;
   private string? _cachedAccessToken;
   private DateTimeOffset? _tokenExpiresAt;
 
-  public SpotifyApi(HttpClient httpClient, SpotifyOptions spotifyOptions)
+  public SpotifyApi(HttpClient httpClient, SpotifyOptions spotifyOptions, TimeProvider? timeProvider = null)
   {
     _httpClient = httpClient;
     _spotifyOptions = spotifyOptions;
+    _timeProvider = timeProvider ?? TimeProvider.System;
   }
 
   public async Task<SpotifyResponse?> GetNowPlaying()
@@ -63,7 +67,7 @@ public class SpotifyApi
       return _spotifyOptions.AccessToken;
     }
 
-    if (!string.IsNullOrEmpty(_cachedAccessToken) && _tokenExpiresAt > DateTimeOffset.UtcNow)
+    if (!string.IsNullOrEmpty(_cachedAccessToken) && _tokenExpiresAt > _timeProvider.GetUtcNow())
     {
       return _cachedAccessToken;
     }
@@ -86,7 +90,7 @@ public class SpotifyApi
         ?? throw new SpotifyServiceException("Empty response from token endpoint");
 
     _cachedAccessToken = tokenResponse.AccessToken;
-    _tokenExpiresAt = DateTimeOffset.UtcNow.AddSeconds(tokenResponse.ExpiresIn - 60);
+    _tokenExpiresAt = _timeProvider.GetUtcNow().AddSeconds(tokenResponse.ExpiresIn - 60);
 
     return tokenResponse.AccessToken;
   }

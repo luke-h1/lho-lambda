@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
@@ -72,7 +71,6 @@ public class ApiFunctionTests
   [Fact]
   public async Task NowPlayingSpotifyProviderUsesSpotifyPath()
   {
-    Environment.SetEnvironmentVariable("SHOULD_CALL_SPOTIFY", "true");
     var function = CreateFunction(
       spotifyHandler: new StaticJsonHandler("""
       {
@@ -116,7 +114,6 @@ public class ApiFunctionTests
   [Fact]
   public async Task NowPlayingUsesInjectedFeatureFlags()
   {
-    Environment.SetEnvironmentVariable("SHOULD_CALL_SPOTIFY", "true");
     var spotifyHandler = new StaticJsonHandler("""
       {
         "is_playing": true,
@@ -156,41 +153,17 @@ public class ApiFunctionTests
     Assert.Equal(0, spotifyHandler.RequestCount);
   }
 
-  [Fact]
-  public async Task ApiHealthAndVersionRoutesPushInvocationMetrics()
+  [Theory]
+  [InlineData("/api/health", "GET")]
+  [InlineData("/api/health", "HEAD")]
+  [InlineData("/api/version", "GET")]
+  public async Task ApiHealthAndVersionRoutesReturnOk(string path, string method)
   {
-    var port = GetFreePort();
-    using var listener = new HttpListener();
-    listener.Prefixes.Add($"http://127.0.0.1:{port}/");
-    listener.Start();
+    var function = new ApiFunction();
 
-    ConfigureMetrics(port);
-    try
-    {
-      var function = new ApiFunction();
+    var response = await function.FunctionHandler(CreateRequest(path, method), new TestLambdaContext());
 
-      var healthGetMetric = await InvokeAndReadMetric(listener, function, CreateRequest("/api/health"));
-      var healthHeadMetric = await InvokeAndReadMetric(listener, function, CreateRequest("/api/health", "HEAD"));
-      var versionMetric = await InvokeAndReadMetric(listener, function, CreateRequest("/api/version"));
-
-      Assert.Contains("route=\"/api/health\"", healthGetMetric);
-      Assert.Contains("method=\"GET\"", healthGetMetric);
-      Assert.Contains("status=\"200\"", healthGetMetric);
-      Assert.Contains("route=\"/api/health\"", healthHeadMetric);
-      Assert.Contains("method=\"HEAD\"", healthHeadMetric);
-      Assert.Contains("status=\"200\"", healthHeadMetric);
-      Assert.Contains("route=\"/api/version\"", versionMetric);
-      Assert.Contains("method=\"GET\"", versionMetric);
-      Assert.Contains("status=\"200\"", versionMetric);
-    }
-    finally
-    {
-      Environment.SetEnvironmentVariable("METRICS_ENABLED", null);
-      Environment.SetEnvironmentVariable("PUSHGATEWAY_URL", null);
-      Environment.SetEnvironmentVariable("PUSHGATEWAY_AUTH_HEADER", null);
-      Environment.SetEnvironmentVariable("PROMETHEUS_JOB", null);
-      Environment.SetEnvironmentVariable("ENVIRONMENT", null);
-    }
+    Assert.Equal((int)HttpStatusCode.OK, response.StatusCode);
   }
 
   private static APIGatewayHttpApiV2ProxyRequest CreateRequest(
@@ -211,15 +184,6 @@ public class ApiFunctionTests
         }
       }
     };
-  }
-
-  private static void ConfigureMetrics(int port)
-  {
-    Environment.SetEnvironmentVariable("METRICS_ENABLED", "true");
-    Environment.SetEnvironmentVariable("PUSHGATEWAY_URL", $"http://127.0.0.1:{port}");
-    Environment.SetEnvironmentVariable("PUSHGATEWAY_AUTH_HEADER", null);
-    Environment.SetEnvironmentVariable("PROMETHEUS_JOB", "test-job");
-    Environment.SetEnvironmentVariable("ENVIRONMENT", "test");
   }
 
   private static ApiFunction CreateFunction(StaticJsonHandler spotifyHandler, StaticJsonHandler lastFmHandler)
@@ -247,33 +211,6 @@ public class ApiFunctionTests
     {
       BaseAddress = new Uri(baseAddress)
     };
-  }
-
-  private static async Task<string> InvokeAndReadMetric(
-    HttpListener listener,
-    ApiFunction function,
-    APIGatewayHttpApiV2ProxyRequest request)
-  {
-    var requestTask = listener.GetContextAsync();
-    var responseTask = function.FunctionHandler(request, new TestLambdaContext());
-
-    var context = await requestTask.WaitAsync(TimeSpan.FromSeconds(2));
-    using var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
-    var body = await reader.ReadToEndAsync();
-    context.Response.StatusCode = (int)HttpStatusCode.Accepted;
-    context.Response.Close();
-
-    var response = await responseTask.WaitAsync(TimeSpan.FromSeconds(2));
-    Assert.Equal((int)HttpStatusCode.OK, response.StatusCode);
-
-    return body;
-  }
-
-  private static int GetFreePort()
-  {
-    using var listener = new TcpListener(IPAddress.Loopback, 0);
-    listener.Start();
-    return ((IPEndPoint)listener.LocalEndpoint).Port;
   }
 
   private sealed class StaticJsonHandler(string json) : HttpMessageHandler

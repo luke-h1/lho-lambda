@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Lho.Lambda.Models;
 using Lho.Lambda.RuntimeConfiguration.Options;
+using Lho.Lambda.Serialization;
 
 namespace Lho.Lambda.Clients.LastFm;
 
@@ -8,7 +9,8 @@ public class LastFmApi
 {
   private static readonly JsonSerializerOptions JsonOptions = new()
   {
-    PropertyNameCaseInsensitive = true
+    PropertyNameCaseInsensitive = true,
+    TypeInfoResolver = LastFmJsonContext.Default
   };
 
   private readonly HttpClient _httpClient;

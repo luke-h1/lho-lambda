@@ -16,7 +16,9 @@ public class RuntimeConfig
 
   public FeatureFlagsOptions Features { get; init; } = new();
 
-  public static RuntimeConfig Current => FromEnvironment(Environment.GetEnvironmentVariable);
+  private static readonly Lazy<RuntimeConfig> Cached = new(() => FromEnvironment(Environment.GetEnvironmentVariable));
+
+  public static RuntimeConfig Current => Cached.Value;
 
   public static RuntimeConfig FromEnvironment(IReadOnlyDictionary<string, string?> environment)
   {
@@ -59,10 +61,6 @@ public class RuntimeConfig
         SentryEnvironment = String(getEnvironmentVariable, "SENTRY_ENVIRONMENT", environmentName),
         SentryRelease = String(getEnvironmentVariable, "SENTRY_RELEASE", version),
         SentryDsn = OptionalString(getEnvironmentVariable, "SENTRY_DSN"),
-        PushgatewayUrl = OptionalString(getEnvironmentVariable, "PUSHGATEWAY_URL"),
-        PushgatewayAuthHeader = OptionalString(getEnvironmentVariable, "PUSHGATEWAY_AUTH_HEADER"),
-        PushgatewayJob = String(getEnvironmentVariable, "PROMETHEUS_JOB", serviceName),
-        MetricsEnabledFlag = Bool(getEnvironmentVariable, "METRICS_ENABLED", defaultValue: true),
         SentryTracesSampleRate = Double(getEnvironmentVariable, "SENTRY_TRACES_SAMPLE_RATE", defaultValue: 0.5)
       },
       Authorizer = new AuthorizerOptions

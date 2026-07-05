@@ -3,5 +3,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseSharedCompilation>false</UseSharedCompilation>
+    <!-- The API serves ASCII/JSON only; skipping ICU load shortens Lambda cold start. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 </Project>

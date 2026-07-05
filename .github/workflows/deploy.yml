@@ -43,6 +43,8 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
+          # PAT with contents write; GITHUB_TOKEN cannot push to main under the main_protect ruleset
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Fetch latest commits
         run: git stash && git fetch && git pull

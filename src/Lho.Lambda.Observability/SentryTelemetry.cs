@@ -1,34 +1,39 @@
 using Amazon.Lambda.Core;
+using Lho.Lambda.RuntimeConfiguration.Options;
 
 namespace Lho.Lambda.Observability;
 
 public static class SentryTelemetry
 {
+  // Happy-path flushes sit on the request critical path; keep the wait short.
+  private static readonly TimeSpan FlushTimeout = TimeSpan.FromMilliseconds(500);
+  private static readonly TimeSpan ErrorFlushTimeout = TimeSpan.FromSeconds(2);
   private static readonly Lock InitLock = new();
   private static bool _initialised;
 
-  public static bool Initialise(ILambdaLogger logger)
+  public static bool Initialise(ObservabilityOptions options, ILambdaLogger logger)
   {
-    return EnsureInitialised(logger);
+    return EnsureInitialised(options, logger);
   }
 
   public static SentryTransactionScope? StartTransaction(
+    ObservabilityOptions options,
     ILambdaLogger logger,
     string name,
     string operation,
     IReadOnlyDictionary<string, string?> tags)
   {
-    if (!EnsureInitialised(logger))
+    if (!EnsureInitialised(options, logger))
     {
       return null;
     }
 
     var transaction = SentrySdk.StartTransaction(name, operation);
-    ApplyTags(transaction, tags);
+    ApplyTags(transaction, options, tags);
     SentrySdk.ConfigureScope(scope =>
     {
       scope.Transaction = transaction;
-      ApplyTags(scope, tags);
+      ApplyTags(scope, options, tags);
     });
 
     return new SentryTransactionScope(transaction);
@@ -36,47 +41,48 @@ public static class SentryTelemetry
 
   public static async Task CaptureExceptionAsync(
     Exception exception,
+    ObservabilityOptions options,
     ILambdaLogger logger,
     IReadOnlyDictionary<string, string?> tags)
   {
-    if (!EnsureInitialised(logger))
+    if (!EnsureInitialised(options, logger))
     {
       return;
     }
 
     SentrySdk.CaptureException(exception, scope =>
     {
-      ApplyTags(scope, tags);
+      ApplyTags(scope, options, tags);
     });
 
-    await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
+    await SentrySdk.FlushAsync(ErrorFlushTimeout);
   }
 
-  public static async Task RecordInvocationAsync(InvocationMetric metric, ILambdaLogger logger)
+  public static async Task RecordInvocationAsync(InvocationMetric metric, ObservabilityOptions options, ILambdaLogger logger)
   {
-    if (!EnsureInitialised(logger))
+    if (!EnsureInitialised(options, logger))
     {
       return;
     }
 
-    var attributes = MetricAttributes(metric);
+    var attributes = MetricAttributes(metric, options);
 
     SentrySdk.Metrics.EmitCounter("lambda.invocation", 1, attributes, null);
     SentrySdk.Metrics.EmitDistribution("lambda.invocation.duration", metric.DurationMs, MeasurementUnit.Duration.Millisecond, attributes, null);
-    await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
+    await SentrySdk.FlushAsync(FlushTimeout);
   }
 
-  public static async Task FlushAsync(ILambdaLogger logger)
+  public static async Task FlushAsync(ObservabilityOptions options, ILambdaLogger logger)
   {
-    if (!EnsureInitialised(logger))
+    if (!EnsureInitialised(options, logger))
     {
       return;
     }
 
-    await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
+    await SentrySdk.FlushAsync(FlushTimeout);
   }
 
-  private static bool EnsureInitialised(ILambdaLogger logger)
+  private static bool EnsureInitialised(ObservabilityOptions options, ILambdaLogger logger)
   {
     lock (InitLock)
     {
@@ -86,7 +92,7 @@ public static class SentryTelemetry
       }
     }
 
-    var dsn = ObservabilityConfig.SentryDsn;
+    var dsn = options.SentryDsn;
     if (string.IsNullOrWhiteSpace(dsn))
     {
       return false;
@@ -101,17 +107,17 @@ public static class SentryTelemetry
 
       try
       {
-        SentrySdk.Init(options =>
+        SentrySdk.Init(sentryOptions =>
         {
-          options.Dsn = dsn;
-          options.Environment = ObservabilityConfig.SentryEnvironment;
-          options.Release = ObservabilityConfig.SentryRelease;
-          options.AttachStacktrace = true;
-          options.SampleRate = 1.0f;
-          options.EnableMetrics = true;
-          options.MaxBreadcrumbs = 50;
-          options.TracesSampleRate = ObservabilityConfig.SentryTracesSampleRate;
-          options.SendDefaultPii = false;
+          sentryOptions.Dsn = dsn;
+          sentryOptions.Environment = options.SentryEnvironment;
+          sentryOptions.Release = options.SentryRelease;
+          sentryOptions.AttachStacktrace = true;
+          sentryOptions.SampleRate = 1.0f;
+          sentryOptions.EnableMetrics = true;
+          sentryOptions.MaxBreadcrumbs = 50;
+          sentryOptions.TracesSampleRate = options.SentryTracesSampleRate;
+          sentryOptions.SendDefaultPii = false;
         });
         _initialised = true;
       }
@@ -125,41 +131,41 @@ public static class SentryTelemetry
     return true;
   }
 
-  private static Dictionary<string, object> MetricAttributes(InvocationMetric metric)
+  private static Dictionary<string, object> MetricAttributes(InvocationMetric metric, ObservabilityOptions options)
   {
     var attributes = new Dictionary<string, object>
     {
-      ["service"] = ObservabilityConfig.ServiceName,
-      ["environment"] = ObservabilityConfig.EnvironmentName,
-      ["version"] = ObservabilityConfig.Version,
-      ["git_sha"] = ObservabilityConfig.GitSha,
-      ["function"] = metric.FunctionName,
-      ["operation"] = metric.Operation,
-      ["route"] = metric.Route,
-      ["method"] = metric.Method,
-      ["status"] = metric.StatusCode.ToString(),
-      ["outcome"] = metric.Outcome
+      ["service"] = options.ServiceName,
+      ["environment"] = options.EnvironmentName,
+      ["version"] = options.Version,
+      ["git_sha"] = options.GitSha,
+      [InvocationTags.Function] = metric.FunctionName,
+      [InvocationTags.Operation] = metric.Operation,
+      [InvocationTags.Route] = metric.Route,
+      [InvocationTags.Method] = metric.Method,
+      [InvocationTags.StatusCode] = metric.StatusCode.ToString(),
+      [InvocationTags.Outcome] = metric.Outcome
     };
 
     if (!string.IsNullOrWhiteSpace(metric.Consumer))
     {
-      attributes["consumer"] = metric.Consumer;
+      attributes[InvocationTags.Consumer] = metric.Consumer;
     }
 
     if (!string.IsNullOrWhiteSpace(metric.Provider))
     {
-      attributes["provider"] = metric.Provider;
+      attributes[InvocationTags.Provider] = metric.Provider;
     }
 
     return attributes;
   }
 
-  private static void ApplyTags(IHasTags target, IReadOnlyDictionary<string, string?> tags)
+  private static void ApplyTags(IHasTags target, ObservabilityOptions options, IReadOnlyDictionary<string, string?> tags)
   {
-    target.SetTag("service", ObservabilityConfig.ServiceName);
-    target.SetTag("environment", ObservabilityConfig.SentryEnvironment);
-    target.SetTag("version", ObservabilityConfig.SentryRelease);
-    target.SetTag("git_sha", ObservabilityConfig.GitSha);
+    target.SetTag("service", options.ServiceName);
+    target.SetTag("environment", options.SentryEnvironment);
+    target.SetTag("version", options.SentryRelease);
+    target.SetTag("git_sha", options.GitSha);
 
     foreach (var (key, value) in tags)
     {
@@ -186,6 +192,17 @@ public static class SentryTelemetry
   public sealed class SentryTransactionScope(ITransactionTracer transaction) : IDisposable
   {
     private bool _finished;
+
+    public void SetTag(string key, string value)
+    {
+      if (_finished)
+      {
+        return;
+      }
+
+      transaction.SetTag(key, value);
+      SentrySdk.ConfigureScope(scope => scope.SetTag(key, value));
+    }
 
     public void Finish(int statusCode, Exception? exception = null)
     {

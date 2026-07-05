@@ -44,29 +44,25 @@ resource "aws_lambda_function" "lambda" {
   }
 
   description   = "Now playing Lambda ${var.env}"
-  memory_size   = 256
+  memory_size   = 512
   architectures = ["x86_64"]
   environment {
     variables = {
-      SPOTIFY_CLIENT_ID       = var.spotify_client_id
-      SPOTIFY_CLIENT_SECRET   = var.spotify_client_secret
-      SPOTIFY_REFRESH_TOKEN   = var.spotify_refresh_token
-      LASTFM_API_KEY          = var.lastfm_api_key
-      LASTFM_USERNAME         = var.lastfm_username
-      SERVICE_NAME            = "now-playing"
-      ENVIRONMENT             = var.env
-      VERSION                 = var.app_version
-      DOTNET_ROLL_FORWARD     = "Major"
-      DEPLOYED_AT             = timestamp()
-      DEPLOYED_BY             = var.deployed_by
-      GIT_SHA                 = var.git_sha
-      SENTRY_DSN              = var.sentry_dsn
-      SENTRY_ENVIRONMENT      = var.env
-      SENTRY_RELEASE          = var.app_version
-      PUSHGATEWAY_URL         = var.pushgateway_url
-      PUSHGATEWAY_AUTH_HEADER = var.pushgateway_auth_header
-      PROMETHEUS_JOB          = "now-playing"
-      METRICS_ENABLED         = tostring(var.monitoring_enabled)
+      SPOTIFY_CLIENT_ID     = var.spotify_client_id
+      SPOTIFY_CLIENT_SECRET = var.spotify_client_secret
+      SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
+      LASTFM_API_KEY        = var.lastfm_api_key
+      LASTFM_USERNAME       = var.lastfm_username
+      SERVICE_NAME          = "now-playing"
+      ENVIRONMENT           = var.env
+      VERSION               = var.app_version
+      DOTNET_ROLL_FORWARD   = "Major"
+      DEPLOYED_AT           = timestamp()
+      DEPLOYED_BY           = var.deployed_by
+      GIT_SHA               = var.git_sha
+      SENTRY_DSN            = var.sentry_dsn
+      SENTRY_ENVIRONMENT    = var.env
+      SENTRY_RELEASE        = var.app_version
     }
   }
   tags = merge(var.tags, {

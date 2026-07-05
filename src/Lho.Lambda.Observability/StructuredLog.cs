@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Amazon.Lambda.Core;
+using Lho.Lambda.RuntimeConfiguration.Options;
 
 namespace Lho.Lambda.Observability;
 
@@ -10,33 +11,33 @@ public static class StructuredLog
     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
   };
 
-  public static void Info(ILambdaLogger logger, string eventName, IReadOnlyDictionary<string, object?> fields)
+  public static void Info(ILambdaLogger logger, string eventName, ObservabilityOptions options, IReadOnlyDictionary<string, object?> fields)
   {
-    Write(logger, "info", eventName, fields);
+    Write(logger, "info", eventName, options, fields);
   }
 
-  public static void Error(ILambdaLogger logger, string eventName, Exception exception, IReadOnlyDictionary<string, object?> fields)
+  public static void Error(ILambdaLogger logger, string eventName, Exception exception, ObservabilityOptions options, IReadOnlyDictionary<string, object?> fields)
   {
     var enrichedFields = new Dictionary<string, object?>(fields)
     {
-      ["errorType"] = exception.GetType().Name,
-      ["errorMessage"] = exception.Message
+      [InvocationTags.ErrorType] = exception.GetType().Name,
+      [InvocationTags.ErrorMessage] = exception.Message
     };
 
-    Write(logger, "error", eventName, enrichedFields);
+    Write(logger, "error", eventName, options, enrichedFields);
   }
 
-  private static void Write(ILambdaLogger logger, string level, string eventName, IReadOnlyDictionary<string, object?> fields)
+  private static void Write(ILambdaLogger logger, string level, string eventName, ObservabilityOptions options, IReadOnlyDictionary<string, object?> fields)
   {
     var payload = new Dictionary<string, object?>
     {
       ["timestamp"] = DateTimeOffset.UtcNow.ToString("O"),
       ["level"] = level,
       ["event"] = eventName,
-      ["service"] = ObservabilityConfig.ServiceName,
-      ["environment"] = ObservabilityConfig.EnvironmentName,
-      ["version"] = ObservabilityConfig.Version,
-      ["gitSha"] = ObservabilityConfig.GitSha
+      ["service"] = options.ServiceName,
+      ["environment"] = options.EnvironmentName,
+      ["version"] = options.Version,
+      ["git_sha"] = options.GitSha
     };
 
     foreach (var (key, value) in fields)
