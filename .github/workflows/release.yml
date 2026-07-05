@@ -39,6 +39,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # PAT with contents write; GITHUB_TOKEN cannot push to main under the main_protect ruleset
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
