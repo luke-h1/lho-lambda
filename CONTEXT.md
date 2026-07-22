@@ -24,6 +24,10 @@ When the Last.fm lookup fails, `/api/now-playing` should still return an empty N
 
 Both Last.fm Now Playing and the explicit Spotify path should be cached. Cache behaviour belongs inside the Now Playing module so callers do not need to know provider-specific cache keys or freshness rules.
 
+### Recently Played
+
+The list of tracks most recently scrobbled to Last.fm, exposed at `/api/recent-tracks`. It is sourced from the same Last.fm recent-tracks feed as Now Playing but returns the whole list rather than only the current track. Each item carries a `nowPlaying` flag (the currently playing track, when present, has no `playedAt`) and a `playedAt` unix timestamp for historical scrobbles. The route accepts an optional `limit` query parameter (1-50, default 10) and is CDN-cached with a short revalidation window.
+
 ### Runtime Configuration
 
 Runtime Configuration is the environment-backed settings required by the Lambda functions at execution time. It includes music provider credentials, deployment metadata, observability settings, and feature flags.

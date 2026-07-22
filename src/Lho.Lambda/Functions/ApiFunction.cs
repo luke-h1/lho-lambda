@@ -72,6 +72,7 @@ public class ApiFunction
           "/api/health" => ResponseBuilder.CreateResponse(new HealthResponse("OK"), includeCacheControl: false),
           "/api/version" => ResponseBuilder.CreateResponse(BuildVersionResponse(), includeCacheControl: false),
           "/api/now-playing" => await HandleNowPlaying(request, ctx, invocation),
+          "/api/recent-tracks" => await HandleRecentTracks(request),
           "/api/top-tracks" => await HandleTopTracks(request, ctx, invocation),
           _ => ResponseBuilder.ErrorResponse(404, "Not Found")
         };
@@ -98,6 +99,28 @@ public class ApiFunction
     invocation.SetProvider(result.Provider);
 
     return ResponseBuilder.CreateResponse(result.Response, revalidateSeconds: 3);
+  }
+
+  private async Task<APIGatewayHttpApiV2ProxyResponse> HandleRecentTracks(
+    APIGatewayHttpApiV2ProxyRequest request)
+  {
+    var limit = int.TryParse(GetQueryParam(request.RawQueryString, "limit"), out var parsedLimit)
+      ? Math.Clamp(parsedLimit, 1, 50)
+      : 10;
+
+    var recentTracks = await _lastFmApi.GetRecentTracks(limit);
+    var tracks = recentTracks.RecentTracks.Tracks
+      .Select(track => new RecentTrackResponseItem(
+        Title: track.Name,
+        Artist: track.Artist.Text,
+        Album: track.Album.Text,
+        AlbumImageUrl: track.Images.LastOrDefault(image => !string.IsNullOrEmpty(image.Url))?.Url ?? "",
+        SongUrl: track.Url,
+        NowPlaying: string.Equals(track.Attributes?.NowPlaying, "true", StringComparison.OrdinalIgnoreCase),
+        PlayedAt: long.TryParse(track.Date?.Uts, out var uts) ? uts : null))
+      .ToArray();
+
+    return ResponseBuilder.CreateResponse(new RecentTracksApiResponse(tracks), revalidateSeconds: 30);
   }
 
   private async Task<APIGatewayHttpApiV2ProxyResponse> HandleTopTracks(

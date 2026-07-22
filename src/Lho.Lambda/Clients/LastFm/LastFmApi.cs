@@ -22,11 +22,12 @@ public class LastFmApi
     _lastFmOptions = lastFmOptions;
   }
 
-  public async Task<LastFmRecentTracksResponse> GetRecentTracks()
+  public async Task<LastFmRecentTracksResponse> GetRecentTracks(int limit = 1)
   {
     var credentials = _lastFmOptions.RequireCredentials();
 
-    var requestUri = $"?method=user.getrecenttracks&user={Uri.EscapeDataString(credentials.Username)}&api_key={Uri.EscapeDataString(credentials.ApiKey)}&format=json&limit=1";
+    var boundedLimit = Math.Clamp(limit, 1, 50);
+    var requestUri = $"?method=user.getrecenttracks&user={Uri.EscapeDataString(credentials.Username)}&api_key={Uri.EscapeDataString(credentials.ApiKey)}&format=json&limit={boundedLimit}";
 
     var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, requestUri));
     await EnsureSuccess(response);

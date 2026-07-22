@@ -6,6 +6,7 @@ namespace Lho.Lambda.Serialization;
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(NowPlayingResponse))]
 [JsonSerializable(typeof(TopTracksApiResponse))]
+[JsonSerializable(typeof(RecentTracksApiResponse))]
 [JsonSerializable(typeof(VersionResponse))]
 [JsonSerializable(typeof(HealthResponse))]
 [JsonSerializable(typeof(ErrorResponseBody))]
