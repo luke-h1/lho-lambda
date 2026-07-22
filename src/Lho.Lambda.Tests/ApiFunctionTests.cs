@@ -153,6 +153,60 @@ public class ApiFunctionTests
     Assert.Equal(0, spotifyHandler.RequestCount);
   }
 
+  [Fact]
+  public async Task RecentTracksReturnsMappedListWithNowPlayingAndTimestamps()
+  {
+    var function = CreateFunction(
+      spotifyHandler: new StaticJsonHandler("{}"),
+      lastFmHandler: new StaticJsonHandler("""
+      {
+        "recenttracks": {
+          "track": [
+            {
+              "name": "Live song",
+              "artist": { "#text": "Live artist" },
+              "album": { "#text": "Live album" },
+              "url": "https://last.fm/track/live",
+              "image": [
+                { "#text": "https://example.com/small.jpg", "size": "small" },
+                { "#text": "https://example.com/large.jpg", "size": "large" }
+              ],
+              "@attr": { "nowplaying": "true" }
+            },
+            {
+              "name": "Older song",
+              "artist": { "#text": "Older artist" },
+              "album": { "#text": "Older album" },
+              "url": "https://last.fm/track/older",
+              "image": [{ "#text": "https://example.com/older.jpg", "size": "large" }],
+              "date": { "uts": "1687000000", "#text": "17 Jun 2023, 12:00" }
+            }
+          ]
+        }
+      }
+      """));
+
+    var response = await function.FunctionHandler(
+      CreateRequest("/api/recent-tracks", rawQueryString: "limit=10"),
+      new TestLambdaContext());
+    var tracks = JsonDocument.Parse(response.Body).RootElement.GetProperty("tracks");
+
+    Assert.Equal((int)HttpStatusCode.OK, response.StatusCode);
+    Assert.Equal(2, tracks.GetArrayLength());
+
+    var first = tracks[0];
+    Assert.Equal("Live song", first.GetProperty("title").GetString());
+    Assert.Equal("Live artist", first.GetProperty("artist").GetString());
+    Assert.Equal("https://example.com/large.jpg", first.GetProperty("albumImageUrl").GetString());
+    Assert.True(first.GetProperty("nowPlaying").GetBoolean());
+    Assert.Equal(JsonValueKind.Null, first.GetProperty("playedAt").ValueKind);
+
+    var second = tracks[1];
+    Assert.Equal("Older song", second.GetProperty("title").GetString());
+    Assert.False(second.GetProperty("nowPlaying").GetBoolean());
+    Assert.Equal(1687000000L, second.GetProperty("playedAt").GetInt64());
+  }
+
   [Theory]
   [InlineData("/api/health", "GET")]
   [InlineData("/api/health", "HEAD")]
