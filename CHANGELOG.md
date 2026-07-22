@@ -1,3 +1,9 @@
+# [live.4037bc6](https://github.com/luke-h1/lho-lambda/compare/vlive.077b233...vlive.4037bc6) (2026-07-22)
+
+### Features
+
+* **api:** add recent-tracks endpoint (#219) ([4037bc6](https://github.com/luke-h1/lho-lambda/commit/4037bc6736c1cac7f8d4cfeb906f7d0b77f95be8))
+
 # [live.077b233](https://github.com/luke-h1/lho-lambda/compare/vlive.de19d60...vlive.077b233) (2026-07-05)
 
 ### Other Changes
