@@ -2,7 +2,6 @@ using System.Web;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Lho.Lambda.Clients.LastFm;
-using Lho.Lambda.Clients.Spotify;
 using Lho.Lambda.Models;
 using Lho.Lambda.Observability;
 using Lho.Lambda.RuntimeConfiguration;
@@ -11,11 +10,10 @@ using Lho.Lambda.Utils;
 
 namespace Lho.Lambda.Functions;
 
-public class ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, SpotifyApi spotifyApi, LastFmApi lastFmApi)
+public class ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, LastFmApi lastFmApi)
 {
     private readonly RuntimeConfig _runtimeConfig = runtimeConfig;
     private readonly MemoryCache _cache = cache;
-    private readonly SpotifyApi _spotifyApi = spotifyApi;
     private readonly LastFmApi _lastFmApi = lastFmApi;
 
     public ApiFunction()
@@ -28,7 +26,6 @@ public class ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, Spotify
       : this(
         runtimeConfig,
         new MemoryCache(),
-        new SpotifyApi(CreateHttpClient("https://api.spotify.com/v1/"), runtimeConfig.Spotify),
         new LastFmApi(CreateHttpClient("https://ws.audioscrobbler.com/2.0/"), runtimeConfig.LastFm))
     {
 
@@ -58,7 +55,7 @@ public class ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, Spotify
                 {
                     "/api/health" => ResponseBuilder.CreateResponse(new HealthResponse("OK"), includeCacheControl: false),
                     "/api/version" => ResponseBuilder.CreateResponse(BuildVersionResponse(), includeCacheControl: false),
-                    "/api/now-playing" => await HandleNowPlaying(request, ctx, invocation),
+                    "/api/now-playing" => await HandleNowPlaying(ctx, invocation),
                     "/api/recent-tracks" => await HandleRecentTracks(request),
                     "/api/top-tracks" => await HandleTopTracks(request, invocation),
                     _ => ResponseBuilder.ErrorResponse(404, "Not Found")
@@ -76,12 +73,11 @@ public class ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, Spotify
 
 
     private async Task<APIGatewayHttpApiV2ProxyResponse> HandleNowPlaying(
-      APIGatewayHttpApiV2ProxyRequest request,
       ILambdaContext context,
       LambdaInvocation invocation)
     {
-        var service = new NowPlayingService(_cache, _spotifyApi, _lastFmApi, context.Logger, _runtimeConfig.Features, _runtimeConfig.Observability);
-        var result = await service.HandleNowPlaying(GetQueryParam(request.RawQueryString, "provider"));
+        var service = new NowPlayingService(_cache, _lastFmApi, context.Logger, _runtimeConfig.Observability);
+        var result = await service.HandleNowPlaying();
         invocation.SetProvider(result.Provider);
 
         return ResponseBuilder.CreateResponse(result.Response, revalidateSeconds: 3);

@@ -9,24 +9,6 @@ variable "env" {
   description = "The environment to deploy to"
 }
 
-variable "spotify_client_id" {
-  type        = string
-  description = "Spotify client ID"
-  sensitive   = true
-}
-
-variable "spotify_client_secret" {
-  type        = string
-  description = "Spotify client secret"
-  sensitive   = true
-}
-
-variable "spotify_refresh_token" {
-  type        = string
-  description = "Spotify refresh token"
-  sensitive   = true
-}
-
 variable "lastfm_api_key" {
   type        = string
   description = "Last.fm API key"

@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
 using Lho.Lambda.Clients.LastFm;
-using Lho.Lambda.Clients.Spotify;
 using Lho.Lambda.Functions;
 using Lho.Lambda.RuntimeConfiguration;
 using Lho.Lambda.RuntimeConfiguration.Options;
@@ -26,24 +25,9 @@ public class ApiFunctionTests
     }
 
     [Fact]
-    public async Task NowPlayingLastFmProviderUsesMainLastFmPath()
+    public async Task NowPlayingReturnsCurrentLastFmTrack()
     {
-        var function = CreateFunction(
-          spotifyHandler: new StaticJsonHandler("""
-      {
-        "is_playing": true,
-        "item": {
-          "name": "Spotify song",
-          "artists": [{ "name": "Spotify artist" }],
-          "album": {
-            "name": "Spotify album",
-            "images": [{ "url": "https://example.com/spotify.jpg" }]
-          },
-          "external_urls": { "spotify": "https://open.spotify.com/track/spotify" }
-        }
-      }
-      """),
-          lastFmHandler: new StaticJsonHandler("""
+        var function = CreateFunction(new StaticJsonHandler("""
       {
         "recenttracks": {
           "track": [{
@@ -59,7 +43,7 @@ public class ApiFunctionTests
       """));
 
         var response = await function.FunctionHandler(
-          CreateRequest("/api/now-playing", rawQueryString: "provider=lastfm"),
+          CreateRequest("/api/now-playing"),
           new TestLambdaContext());
         var body = JsonDocument.Parse(response.Body).RootElement;
 
@@ -69,96 +53,9 @@ public class ApiFunctionTests
     }
 
     [Fact]
-    public async Task NowPlayingSpotifyProviderUsesSpotifyPath()
-    {
-        var function = CreateFunction(
-          spotifyHandler: new StaticJsonHandler(/*lang=json,strict*/ """
-      {
-        "is_playing": true,
-        "item": {
-          "name": "Spotify song",
-          "artists": [{ "name": "Spotify artist" }],
-          "album": {
-            "name": "Spotify album",
-            "images": [{ "url": "https://example.com/spotify.jpg" }]
-          },
-          "external_urls": { "spotify": "https://open.spotify.com/track/spotify" }
-        }
-      }
-      """),
-          lastFmHandler: new StaticJsonHandler(/*lang=json,strict*/ """
-      {
-        "recenttracks": {
-          "track": [{
-            "name": "Last.fm song",
-            "artist": { "#text": "Last.fm artist" },
-            "album": { "#text": "Last.fm album" },
-            "url": "https://last.fm/track/current",
-            "image": [{ "#text": "https://example.com/lastfm.jpg", "size": "large" }],
-            "@attr": { "nowplaying": "true" }
-          }]
-        }
-      }
-      """));
-
-        var response = await function.FunctionHandler(
-          CreateRequest("/api/now-playing", rawQueryString: "provider=spotify"),
-          new TestLambdaContext());
-        var body = JsonDocument.Parse(response.Body).RootElement;
-
-        Assert.Equal((int)HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("Spotify song", body.GetProperty("title").GetString());
-        Assert.Equal("Spotify artist", body.GetProperty("artist").GetString());
-    }
-
-    [Fact]
-    public async Task NowPlayingUsesInjectedFeatureFlags()
-    {
-        var spotifyHandler = new StaticJsonHandler(/*lang=json,strict*/ """
-      {
-        "is_playing": true,
-        "item": {
-          "name": "Spotify song",
-          "artists": [{ "name": "Spotify artist" }],
-          "album": {
-            "name": "Spotify album",
-            "images": [{ "url": "https://example.com/spotify.jpg" }]
-          },
-          "external_urls": { "spotify": "https://open.spotify.com/track/spotify" }
-        }
-      }
-      """);
-        var spotifyApi = new SpotifyApi(
-          CreateHttpClient(spotifyHandler),
-          new SpotifyOptions { AccessToken = "test-token" });
-        var function = new ApiFunction(
-          new RuntimeConfig
-          {
-              Features = new FeatureFlagsOptions { ShouldCallSpotify = false }
-          },
-          new MemoryCache(),
-          spotifyApi,
-          new LastFmApi(
-            CreateHttpClient(new StaticJsonHandler("{}"), "https://lastfm.test/"),
-            new LastFmOptions { ApiKey = "api-key", Username = "user" }));
-
-        var response = await function.FunctionHandler(
-          CreateRequest("/api/now-playing", rawQueryString: "provider=spotify"),
-          new TestLambdaContext());
-        var body = JsonDocument.Parse(response.Body).RootElement;
-
-        Assert.Equal((int)HttpStatusCode.OK, response.StatusCode);
-        Assert.False(body.GetProperty("isPlaying").GetBoolean());
-        Assert.True(body.GetProperty("maintenance").GetBoolean());
-        Assert.Equal(0, spotifyHandler.RequestCount);
-    }
-
-    [Fact]
     public async Task RecentTracksReturnsMappedListWithNowPlayingAndTimestamps()
     {
-        var function = CreateFunction(
-          spotifyHandler: new StaticJsonHandler("{}"),
-          lastFmHandler: new StaticJsonHandler(/*lang=json,strict*/ """
+        var function = CreateFunction(new StaticJsonHandler(/*lang=json,strict*/ """
       {
         "recenttracks": {
           "track": [
@@ -241,9 +138,7 @@ public class ApiFunctionTests
           }
         }
         """);
-        var function = CreateFunction(
-          spotifyHandler: new StaticJsonHandler("{}"),
-          lastFmHandler: lastFmHandler);
+        var function = CreateFunction(lastFmHandler);
 
         var response = await function.FunctionHandler(
           CreateRequest("/api/top-tracks", rawQueryString: "time_range=short_term&limit=5"),
@@ -283,30 +178,23 @@ public class ApiFunctionTests
         };
     }
 
-    private static ApiFunction CreateFunction(StaticJsonHandler spotifyHandler, StaticJsonHandler lastFmHandler)
+    private static ApiFunction CreateFunction(StaticJsonHandler lastFmHandler)
     {
-        var spotifyApi = new SpotifyApi(
-          CreateHttpClient(spotifyHandler),
-          new SpotifyOptions { AccessToken = "test-token" });
         var lastFmApi = new LastFmApi(
-          CreateHttpClient(lastFmHandler, "https://lastfm.test/"),
+          CreateHttpClient(lastFmHandler),
           new LastFmOptions { ApiKey = "api-key", Username = "user" });
 
         return new ApiFunction(
-          new RuntimeConfig
-          {
-              Features = new FeatureFlagsOptions { ShouldCallSpotify = true }
-          },
+          new RuntimeConfig(),
           new MemoryCache(),
-          spotifyApi,
           lastFmApi);
     }
 
-    private static HttpClient CreateHttpClient(HttpMessageHandler handler, string baseAddress = "https://api.spotify.test/v1/")
+    private static HttpClient CreateHttpClient(HttpMessageHandler handler)
     {
         return new HttpClient(handler)
         {
-            BaseAddress = new Uri(baseAddress)
+            BaseAddress = new Uri("https://lastfm.test/")
         };
     }
 

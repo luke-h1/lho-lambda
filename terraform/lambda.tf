@@ -48,22 +48,18 @@ resource "aws_lambda_function" "lambda" {
   architectures = ["arm64"]
   environment {
     variables = {
-      SPOTIFY_CLIENT_ID     = var.spotify_client_id
-      SPOTIFY_CLIENT_SECRET = var.spotify_client_secret
-      SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
-      LASTFM_API_KEY        = var.lastfm_api_key
-      LASTFM_USERNAME       = var.lastfm_username
-      SHOULD_CALL_SPOTIFY   = "false"
-      SERVICE_NAME          = "now-playing"
-      ENVIRONMENT           = var.env
-      VERSION               = var.app_version
-      DOTNET_ROLL_FORWARD   = "Major"
-      DEPLOYED_AT           = timestamp()
-      DEPLOYED_BY           = var.deployed_by
-      GIT_SHA               = var.git_sha
-      SENTRY_DSN            = var.sentry_dsn
-      SENTRY_ENVIRONMENT    = var.env
-      SENTRY_RELEASE        = var.app_version
+      LASTFM_API_KEY      = var.lastfm_api_key
+      LASTFM_USERNAME     = var.lastfm_username
+      SERVICE_NAME        = "now-playing"
+      ENVIRONMENT         = var.env
+      VERSION             = var.app_version
+      DOTNET_ROLL_FORWARD = "Major"
+      DEPLOYED_AT         = timestamp()
+      DEPLOYED_BY         = var.deployed_by
+      GIT_SHA             = var.git_sha
+      SENTRY_DSN          = var.sentry_dsn
+      SENTRY_ENVIRONMENT  = var.env
+      SENTRY_RELEASE      = var.app_version
     }
   }
   tags = merge(var.tags, {

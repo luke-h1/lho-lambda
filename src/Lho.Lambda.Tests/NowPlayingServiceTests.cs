@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text;
 using Lho.Lambda.Clients.LastFm;
-using Lho.Lambda.Clients.Spotify;
 using Lho.Lambda.RuntimeConfiguration.Options;
 using Lho.Lambda.Services;
 using Lho.Lambda.Utils;
@@ -31,12 +30,10 @@ public class NowPlayingServiceTests
         }
       }
       """);
-        var service = CreateService(
-          spotifyHandler: new StaticJsonHandler("{}"),
-          lastFmHandler: lastFmHandler);
+        var service = CreateService(lastFmHandler);
 
-        var first = await service.HandleNowPlaying(null);
-        var second = await service.HandleNowPlaying(null);
+        var first = await service.HandleNowPlaying();
+        var second = await service.HandleNowPlaying();
 
         Assert.Equal("lastfm", first.Provider);
         Assert.True(first.Response.IsPlaying);
@@ -64,12 +61,10 @@ public class NowPlayingServiceTests
         }
       }
       """);
-        var service = CreateService(
-          spotifyHandler: new StaticJsonHandler("{}"),
-          lastFmHandler: lastFmHandler);
+        var service = CreateService(lastFmHandler);
 
-        var first = await service.HandleNowPlaying(null);
-        var second = await service.HandleNowPlaying(null);
+        var first = await service.HandleNowPlaying();
+        var second = await service.HandleNowPlaying();
 
         Assert.False(first.Response.IsPlaying);
         Assert.Equal(200, first.Response.Status);
@@ -81,12 +76,10 @@ public class NowPlayingServiceTests
     public async Task NowPlayingDoesNotCacheFailureResponses()
     {
         var lastFmHandler = new StaticJsonHandler("lastfm failed", HttpStatusCode.InternalServerError);
-        var service = CreateService(
-          spotifyHandler: new StaticJsonHandler("{}"),
-          lastFmHandler: lastFmHandler);
+        var service = CreateService(lastFmHandler);
 
-        var first = await service.HandleNowPlaying(null);
-        var second = await service.HandleNowPlaying(null);
+        var first = await service.HandleNowPlaying();
+        var second = await service.HandleNowPlaying();
 
         Assert.Equal(500, first.Response.Status);
         Assert.Equal(500, second.Response.Status);
@@ -96,11 +89,9 @@ public class NowPlayingServiceTests
     [Fact]
     public async Task NowPlayingFailureReturnsEmptyStatus500ViewModel()
     {
-        var service = CreateService(
-          spotifyHandler: new StaticJsonHandler("{}"),
-          lastFmHandler: new StaticJsonHandler("lastfm failed", HttpStatusCode.InternalServerError));
+        var service = CreateService(new StaticJsonHandler("lastfm failed", HttpStatusCode.InternalServerError));
 
-        var result = await service.HandleNowPlaying(null);
+        var result = await service.HandleNowPlaying();
         var response = result.Response;
 
         Assert.False(response.IsPlaying);
@@ -114,148 +105,39 @@ public class NowPlayingServiceTests
     }
 
     [Fact]
-    public async Task SpotifyNowPlayingUsesSpotifyAndCachesResult()
+    public async Task NowPlayingReturnsEmptyResponseWhenNoTracks()
     {
-        var spotifyHandler = new StaticJsonHandler(/*lang=json,strict*/ """
-      {
-        "is_playing": true,
-        "item": {
-          "name": "Spotify song",
-          "artists": [{ "name": "Spotify artist" }],
-          "album": {
-            "name": "Spotify album",
-            "images": [{ "url": "https://example.com/spotify.jpg" }]
-          },
-          "external_urls": { "spotify": "https://open.spotify.com/track/spotify" }
-        }
-      }
-      """);
-        var service = CreateService(
-          spotifyHandler: spotifyHandler,
-          lastFmHandler: new StaticJsonHandler("{}"));
-
-        var first = await service.HandleNowPlaying("spotify");
-        var second = await service.HandleNowPlaying("spotify");
-
-        Assert.Equal("spotify", first.Provider);
-        Assert.True(first.Response.IsPlaying);
-        Assert.Equal("Spotify song", first.Response.Title);
-        Assert.Equal("Spotify artist", first.Response.Artist);
-        Assert.Equal("Spotify album", first.Response.Album);
-        Assert.Equal("https://example.com/spotify.jpg", first.Response.AlbumImageUrl);
-        Assert.Same(first.Response, second.Response);
-        Assert.Equal(1, spotifyHandler.RequestCount);
-    }
-
-    [Fact]
-    public async Task SpotifyReturnsEmptyResponseWhenItemIsNotPlaying()
-    {
-        var spotifyApi = new SpotifyApi(
-          CreateHttpClient(new StaticJsonHandler(/*lang=json,strict*/ """
-      {
-        "is_playing": false,
-        "item": {
-          "name": "Paused song",
-          "artists": [{ "name": "Paused artist" }],
-          "album": {
-            "name": "Paused album",
-            "images": [{ "url": "https://example.com/cover.jpg" }]
-          },
-          "external_urls": { "spotify": "https://open.spotify.com/track/paused" }
-        }
-      }
-      """)),
-          new SpotifyOptions { AccessToken = "test-token" });
-        var lastFmApi = new LastFmApi(
-          CreateHttpClient(new StaticJsonHandler("{}"), "https://lastfm.test/"),
-          new LastFmOptions { ApiKey = "api-key", Username = "user" });
-        var service = new NowPlayingService(
-          new MemoryCache(),
-          spotifyApi,
-          lastFmApi,
-          new TestLambdaLogger(),
-          new FeatureFlagsOptions { ShouldCallSpotify = true },
-          new ObservabilityOptions());
-
-        var response = (await service.HandleNowPlaying("spotify")).Response;
-
-        Assert.False(response.IsPlaying);
-        Assert.False(response.Maintenance);
-        Assert.Equal(200, response.Status);
-        Assert.Equal("", response.Album);
-        Assert.Equal("", response.AlbumImageUrl);
-        Assert.Equal("", response.Artist);
-        Assert.Equal("", response.SongUrl);
-        Assert.Equal("", response.Title);
-    }
-
-    [Fact]
-    public async Task InvalidProviderFallsBackToLastFm()
-    {
-        var spotifyHandler = new StaticJsonHandler("{}");
         var lastFmHandler = new StaticJsonHandler(/*lang=json,strict*/ """
       { "recenttracks": { "track": [] } }
       """);
-        var service = CreateService(spotifyHandler, lastFmHandler);
+        var service = CreateService(lastFmHandler);
 
-        var result = await service.HandleNowPlaying("garbage");
+        var result = await service.HandleNowPlaying();
 
         Assert.Equal("lastfm", result.Provider);
+        Assert.False(result.Response.IsPlaying);
+        Assert.Equal(200, result.Response.Status);
         Assert.Equal(1, lastFmHandler.RequestCount);
-        Assert.Equal(0, spotifyHandler.RequestCount);
     }
 
-    [Fact]
-    public async Task SpotifyProviderIsCaseInsensitive()
+    private static NowPlayingService CreateService(StaticJsonHandler lastFmHandler)
     {
-        var spotifyHandler = new StaticJsonHandler(/*lang=json,strict*/ """
-      {
-        "is_playing": true,
-        "item": {
-          "name": "Spotify song",
-          "artists": [{ "name": "Spotify artist" }],
-          "album": {
-            "name": "Spotify album",
-            "images": [{ "url": "https://example.com/spotify.jpg" }]
-          },
-          "external_urls": { "spotify": "https://open.spotify.com/track/spotify" }
-        }
-      }
-      """);
-        var service = CreateService(
-          spotifyHandler: spotifyHandler,
-          lastFmHandler: new StaticJsonHandler("{}"));
-
-        var result = await service.HandleNowPlaying("SPOTIFY");
-
-        Assert.Equal("spotify", result.Provider);
-        Assert.Equal("Spotify song", result.Response.Title);
-        Assert.Equal(1, spotifyHandler.RequestCount);
-    }
-
-    private static NowPlayingService CreateService(StaticJsonHandler spotifyHandler, StaticJsonHandler lastFmHandler)
-    {
-        var spotifyApi = new SpotifyApi(
-          CreateHttpClient(spotifyHandler),
-          new SpotifyOptions { AccessToken = "test-token" });
         var lastFmApi = new LastFmApi(
-          CreateHttpClient(lastFmHandler, "https://lastfm.test/"),
+          CreateHttpClient(lastFmHandler),
           new LastFmOptions { ApiKey = "api-key", Username = "user" });
 
         return new NowPlayingService(
           new MemoryCache(),
-          spotifyApi,
           lastFmApi,
           new TestLambdaLogger(),
-          new FeatureFlagsOptions { ShouldCallSpotify = true },
           new ObservabilityOptions());
     }
 
-    private static HttpClient CreateHttpClient(HttpMessageHandler handler, string baseAddress = "https://api.spotify.test/v1/")
+    private static HttpClient CreateHttpClient(HttpMessageHandler handler)
     {
         return new HttpClient(handler)
         {
-            BaseAddress = new Uri(baseAddress)
+            BaseAddress = new Uri("https://lastfm.test/")
         };
     }
 

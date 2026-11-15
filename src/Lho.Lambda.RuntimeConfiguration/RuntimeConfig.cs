@@ -6,15 +6,11 @@ public class RuntimeConfig
 {
     public LastFmOptions LastFm { get; init; } = new();
 
-    public SpotifyOptions Spotify { get; init; } = new();
-
     public DeploymentOptions Deployment { get; init; } = new();
 
     public ObservabilityOptions Observability { get; init; } = new();
 
     public AuthorizerOptions Authorizer { get; init; } = new();
-
-    public FeatureFlagsOptions Features { get; init; } = new();
 
     public AlarmNotifierOptions AlarmNotifier { get; init; } = new();
 
@@ -40,13 +36,6 @@ public class RuntimeConfig
                 ApiKey = OptionalString(getEnvironmentVariable, "LASTFM_API_KEY"),
                 Username = OptionalString(getEnvironmentVariable, "LASTFM_USERNAME")
             },
-            Spotify = new SpotifyOptions
-            {
-                ClientId = OptionalString(getEnvironmentVariable, "SPOTIFY_CLIENT_ID"),
-                ClientSecret = OptionalString(getEnvironmentVariable, "SPOTIFY_CLIENT_SECRET"),
-                RefreshToken = OptionalString(getEnvironmentVariable, "SPOTIFY_REFRESH_TOKEN"),
-                AccessToken = OptionalString(getEnvironmentVariable, "SPOTIFY_ACCESS_TOKEN")
-            },
             Deployment = new DeploymentOptions
             {
                 Version = version,
@@ -69,10 +58,6 @@ public class RuntimeConfig
             {
                 ApiKey = OptionalString(getEnvironmentVariable, "API_KEY")
             },
-            Features = new FeatureFlagsOptions
-            {
-                ShouldCallSpotify = Bool(getEnvironmentVariable, "SHOULD_CALL_SPOTIFY", defaultValue: true)
-            },
             AlarmNotifier = new AlarmNotifierOptions
             {
                 DiscordWebhookUrl = OptionalString(getEnvironmentVariable, "DISCORD_WEBHOOK_URL")
@@ -89,12 +74,6 @@ public class RuntimeConfig
     {
         var value = getEnvironmentVariable(key);
         return string.IsNullOrWhiteSpace(value) ? null : value;
-    }
-
-    private static bool Bool(Func<string, string?> getEnvironmentVariable, string key, bool defaultValue)
-    {
-        var value = getEnvironmentVariable(key);
-        return value is null ? defaultValue : string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
     }
 
     private static double Double(Func<string, string?> getEnvironmentVariable, string key, double defaultValue)
