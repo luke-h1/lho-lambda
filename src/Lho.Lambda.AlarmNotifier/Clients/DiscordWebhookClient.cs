@@ -29,7 +29,7 @@ public class DiscordWebhookClient(HttpClient httpClient, AlarmNotifierOptions op
         );
 
         var body = JsonSerializer.Serialize(payload, AlarmNotifierJsonContext.Default.DiscordWebhookPayload);
-        using var request = new HttpRequestMessage(HttpMethod.Post, _options.RequireDiscordWebhookUrl())
+        using var request = new HttpRequestMessage(HttpMethod.Post, WithWait(_options.RequireDiscordWebhookUrl()))
         {
             Content = new StringContent(body, Encoding.UTF8, "application/json")
         };
@@ -74,6 +74,14 @@ public class DiscordWebhookClient(HttpClient httpClient, AlarmNotifierOptions op
             "OK" => 0x57f287,
             _ => 0xfee75c
         };
+    }
+
+    // wait=true makes Discord confirm the message is saved; the default
+    // wait=false returns 204 even when the message is dropped.
+    private static string WithWait(string webhookUrl)
+    {
+        var separator = webhookUrl.Contains('?') ? '&' : '?';
+        return $"{webhookUrl}{separator}wait=true";
     }
 
     private static string Truncate(string value, int max)

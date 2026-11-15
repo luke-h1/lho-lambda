@@ -59,7 +59,7 @@ public class NowPlayingService(
     private async Task<NowPlayingResponse> HandleLastFmNowPlaying()
     {
         var recentTracksResponse = await lastFmApi.GetRecentTracks();
-        var tracks = recentTracksResponse.RecentTracks.Tracks;
+        var tracks = recentTracksResponse.RecentTracks?.Tracks ?? [];
         var track = tracks.Count > 0 ? tracks[0] : null;
         if (track is null || !IsNowPlaying(track))
         {

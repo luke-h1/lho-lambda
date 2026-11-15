@@ -21,7 +21,7 @@ public class AlarmNotifierFunctionTests
         await function.FunctionHandler(CreateEvent(AlarmMessage("ALARM")), new TestLambdaContext());
 
         var request = Assert.Single(handler.Requests);
-        Assert.Equal(WebhookUrl, request.Uri);
+        Assert.Equal($"{WebhookUrl}?wait=true", request.Uri);
 
         using var payload = JsonDocument.Parse(request.Body);
         Assert.Equal("CW alarm **now-playing-lambda-live-invocations-anomaly** -> `ALARM`", payload.RootElement.GetProperty("content").GetString());

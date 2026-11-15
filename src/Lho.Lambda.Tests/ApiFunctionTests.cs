@@ -158,6 +158,42 @@ public class ApiFunctionTests
         Assert.Contains("limit=5", lastFmHandler.LastRequestUri?.Query);
     }
 
+    [Theory]
+    [InlineData("""{ "toptracks": { "track": { "name": "Solo", "artist": { "name": "A" }, "url": "https://last.fm/t", "image": [] } } }""", 1)]
+    [InlineData("""{ "toptracks": { "track": [{ "name": "Solo", "artist": { "name": "A" }, "url": "https://last.fm/t", "image": [] }] } }""", 1)]
+    [InlineData("""{ "toptracks": { "track": [] } }""", 0)]
+    [InlineData("""{ "toptracks": { "track": null } }""", 0)]
+    [InlineData("""{ "toptracks": {} }""", 0)]
+    public async Task TopTracksNormalisesLastFmTrackShapes(string payload, int expectedCount)
+    {
+        var function = CreateFunction(new StaticJsonHandler(payload));
+
+        var response = await function.FunctionHandler(
+          CreateRequest("/api/top-tracks"),
+          new TestLambdaContext());
+        var tracks = JsonDocument.Parse(response.Body).RootElement.GetProperty("tracks");
+
+        Assert.Equal((int)HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(expectedCount, tracks.GetArrayLength());
+    }
+
+    [Theory]
+    [InlineData("""{ "recenttracks": { "track": { "name": "Solo", "artist": { "#text": "A" }, "album": { "#text": "B" }, "url": "https://last.fm/t", "image": [] } } }""", 1)]
+    [InlineData("""{ "recenttracks": { "track": [] } }""", 0)]
+    [InlineData("""{ "recenttracks": {} }""", 0)]
+    public async Task RecentTracksNormalisesLastFmTrackShapes(string payload, int expectedCount)
+    {
+        var function = CreateFunction(new StaticJsonHandler(payload));
+
+        var response = await function.FunctionHandler(
+          CreateRequest("/api/recent-tracks"),
+          new TestLambdaContext());
+        var tracks = JsonDocument.Parse(response.Body).RootElement.GetProperty("tracks");
+
+        Assert.Equal((int)HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(expectedCount, tracks.GetArrayLength());
+    }
+
     private static APIGatewayHttpApiV2ProxyRequest CreateRequest(
       string path,
       string method = "GET",

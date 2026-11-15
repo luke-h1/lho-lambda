@@ -91,7 +91,7 @@ public class ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, LastFmA
           : 10;
 
         var recentTracks = await _lastFmApi.GetRecentTracks(limit);
-        var tracks = recentTracks.RecentTracks.Tracks
+        var tracks = (recentTracks.RecentTracks?.Tracks ?? [])
           .Select(static track => new RecentTrackResponseItem(
             Title: track.Name,
             Artist: track.Artist.Text,
@@ -119,7 +119,7 @@ public class ApiFunction(RuntimeConfig runtimeConfig, MemoryCache cache, LastFmA
 
         var topTracks = await _lastFmApi.GetTopTracks(MapTimeRangeToPeriod(timeRange), limit);
 
-        var tracks = topTracks.TopTracks.Tracks.Select(static track => new TopTrackResponseItem(
+        var tracks = (topTracks.TopTracks?.Tracks ?? []).Select(static track => new TopTrackResponseItem(
           Title: track.Name,
           Artist: track.Artist.Name,
           Album: "",

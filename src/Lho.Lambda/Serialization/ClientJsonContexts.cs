@@ -6,4 +6,6 @@ namespace Lho.Lambda.Serialization;
 [JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
 [JsonSerializable(typeof(LastFmRecentTracksResponse))]
 [JsonSerializable(typeof(LastFmTopTracksResponse))]
+[JsonSerializable(typeof(LastFmTrack))]
+[JsonSerializable(typeof(LastFmTopTrack))]
 public partial class LastFmJsonContext : JsonSerializerContext;
