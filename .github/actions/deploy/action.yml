@@ -49,23 +49,19 @@ runs:
         export-env: true
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ inputs.op-service-account-token }}
-        SPOTIFY_CLIENT_ID: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_ID
-        SPOTIFY_CLIENT_SECRET: op://ci-cd/lho-lambda/SPOTIFY_CLIENT_SECRET
-        SPOTIFY_REFRESH_TOKEN: op://ci-cd/lho-lambda/SPOTIFY_REFRESH_TOKEN
         LASTFM_API_KEY: op://ci-cd/lho-lambda/LASTFM_API_KEY
         LASTFM_USERNAME: op://ci-cd/lho-lambda/LASTFM_USERNAME
         SENTRY_DSN: op://ci-cd/lho-lambda/SENTRY_DSN
+        DISCORD_WEBHOOK_URL: op://ci-cd/lho-lambda/DISCORD_WEBHOOK_URL
         OP_ENV_FILE: ".env"
 
     - name: Set Terraform variables
       shell: bash
       run: |
-        echo "TF_VAR_spotify_client_id=$SPOTIFY_CLIENT_ID" >> $GITHUB_ENV
-        echo "TF_VAR_spotify_client_secret=$SPOTIFY_CLIENT_SECRET" >> $GITHUB_ENV
-        echo "TF_VAR_spotify_refresh_token=$SPOTIFY_REFRESH_TOKEN" >> $GITHUB_ENV
         echo "TF_VAR_lastfm_api_key=$LASTFM_API_KEY" >> $GITHUB_ENV
         echo "TF_VAR_lastfm_username=$LASTFM_USERNAME" >> $GITHUB_ENV
         echo "TF_VAR_sentry_dsn=$SENTRY_DSN" >> $GITHUB_ENV
+        echo "TF_VAR_discord_webhook_url=$DISCORD_WEBHOOK_URL" >> $GITHUB_ENV
 
     - name: Terraform init
       shell: bash
@@ -93,16 +89,22 @@ runs:
       run: |
         dotnet publish src/Lho.Lambda/Lho.Lambda.csproj \
           --configuration Release \
-          --runtime linux-x64 \
+          --runtime linux-arm64 \
           --self-contained false \
           -p:PublishReadyToRun=true \
           --output .build/release/lambda-package
         dotnet publish src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj \
           --configuration Release \
-          --runtime linux-x64 \
+          --runtime linux-arm64 \
           --self-contained false \
           -p:PublishReadyToRun=true \
           --output .build/release/authorizer-package
+        dotnet publish src/Lho.Lambda.AlarmNotifier/Lho.Lambda.AlarmNotifier.csproj \
+          --configuration Release \
+          --runtime linux-arm64 \
+          --self-contained false \
+          -p:PublishReadyToRun=true \
+          --output .build/release/alarm-notifier-package
 
     - name: Get version
       id: version

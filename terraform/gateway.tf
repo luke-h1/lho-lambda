@@ -92,7 +92,7 @@ resource "aws_apigatewayv2_integration" "lambda" {
 
 
 
-# ROUTES 
+# ROUTES
 ##############################################################################
 resource "aws_apigatewayv2_route" "lambda_route_health" {
   api_id         = aws_apigatewayv2_api.lambda.id
@@ -132,8 +132,16 @@ resource "aws_apigatewayv2_route" "lambda_route_top_tracks" {
   authorizer_id      = aws_apigatewayv2_authorizer.api_key.id
   authorization_type = "CUSTOM"
 }
-##############################################################################
 
+resource "aws_apigatewayv2_route" "lambda_route_recent_tracks" {
+  api_id             = aws_apigatewayv2_api.lambda.id
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  route_key          = "GET /api/recent-tracks"
+  operation_name     = "recent-tracks"
+  authorizer_id      = aws_apigatewayv2_authorizer.api_key.id
+  authorization_type = "CUSTOM"
+}
+##############################################################################
 
 resource "aws_cloudwatch_log_group" "api_gw" {
   name              = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"

@@ -9,24 +9,6 @@ variable "env" {
   description = "The environment to deploy to"
 }
 
-variable "spotify_client_id" {
-  type        = string
-  description = "Spotify client ID"
-  sensitive   = true
-}
-
-variable "spotify_client_secret" {
-  type        = string
-  description = "Spotify client secret"
-  sensitive   = true
-}
-
-variable "spotify_refresh_token" {
-  type        = string
-  description = "Spotify refresh token"
-  sensitive   = true
-}
-
 variable "lastfm_api_key" {
   type        = string
   description = "Last.fm API key"
@@ -109,8 +91,19 @@ variable "api_key" {
   sensitive   = true
 }
 
+variable "invocations_alarm_threshold" {
+  type        = number
+  description = "Invocations per minute that trips the high-invocation alarm (3 of 5 periods)."
+  default     = 30
+
+  validation {
+    condition     = var.invocations_alarm_threshold >= 10 && floor(var.invocations_alarm_threshold) == var.invocations_alarm_threshold
+    error_message = "invocations_alarm_threshold must be an integer >= 10."
+  }
+}
+
 variable "discord_webhook_url" {
-  description = "Discord webhook URL for logging authorizer denials"
+  description = "Discord webhook URL that receives CloudWatch alarm notifications"
   type        = string
   sensitive   = true
 }

@@ -16,7 +16,7 @@ resource "aws_lambda_function" "api_authorizer" {
   source_code_hash = data.archive_file.auth_archive.output_base64sha256
   runtime          = "dotnet10"
   memory_size      = 512
-  architectures    = ["x86_64"]
+  architectures    = ["arm64"]
   timeout          = 10
 
   tracing_config {

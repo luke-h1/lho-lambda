@@ -1,12 +1,36 @@
 using System.Text.Json.Serialization;
+using Lho.Lambda.Serialization;
 
 namespace Lho.Lambda.Models;
 
+public record LastFmTopTracksResponse(
+    [property: JsonPropertyName("toptracks")] LastFmTopTracks? TopTracks
+);
+
+public record LastFmTopTracks(
+    [property: JsonPropertyName("track")]
+    [property: JsonConverter(typeof(SingleOrArrayConverter<LastFmTopTrack>))]
+    IReadOnlyList<LastFmTopTrack>? Tracks
+);
+
+public record LastFmTopTrack(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("artist")] LastFmTopTrackArtist Artist,
+    [property: JsonPropertyName("url")] string Url,
+    [property: JsonPropertyName("image")] IReadOnlyList<LastFmImage> Images
+);
+
+public record LastFmTopTrackArtist(
+    [property: JsonPropertyName("name")] string Name
+);
+
 public record LastFmRecentTracksResponse(
-  [property: JsonPropertyName("recenttracks")] LastFmRecentTracks RecentTracks);
+  [property: JsonPropertyName("recenttracks")] LastFmRecentTracks? RecentTracks);
 
 public record LastFmRecentTracks(
-  [property: JsonPropertyName("track")] IReadOnlyList<LastFmTrack> Tracks);
+  [property: JsonPropertyName("track")]
+  [property: JsonConverter(typeof(SingleOrArrayConverter<LastFmTrack>))]
+  IReadOnlyList<LastFmTrack>? Tracks);
 
 public record LastFmTrack(
   [property: JsonPropertyName("name")] string Name,
@@ -41,3 +65,14 @@ public record RecentTrackResponseItem(
   long? PlayedAt);
 
 public record RecentTracksApiResponse(IReadOnlyList<RecentTrackResponseItem> Tracks);
+
+
+public record TopTrackResponseItem(
+    string Title,
+    string Artist,
+    string Album,
+    string AlbumImageUrl,
+    string SongUrl
+);
+
+public record TopTracksApiResponse(IReadOnlyList<TopTrackResponseItem> Tracks);
