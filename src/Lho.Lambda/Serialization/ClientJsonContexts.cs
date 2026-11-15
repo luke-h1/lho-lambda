@@ -5,10 +5,10 @@ namespace Lho.Lambda.Serialization;
 
 [JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
 [JsonSerializable(typeof(LastFmRecentTracksResponse))]
+[JsonSerializable(typeof(LastFmTopTracksResponse))]
 public partial class LastFmJsonContext : JsonSerializerContext;
 
 [JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
 [JsonSerializable(typeof(SpotifyResponse))]
-[JsonSerializable(typeof(SpotifyTopTracksResponse))]
 [JsonSerializable(typeof(TokenResponse))]
 public partial class SpotifyJsonContext : JsonSerializerContext;

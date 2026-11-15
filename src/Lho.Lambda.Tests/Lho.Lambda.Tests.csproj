@@ -22,5 +22,6 @@
     <ProjectReference Include="..\Lho.Lambda.RuntimeConfiguration\Lho.Lambda.RuntimeConfiguration.csproj" />
     <ProjectReference Include="..\Lho.Lambda\Lho.Lambda.csproj" />
     <ProjectReference Include="..\Lho.Lambda.Authorizer\Lho.Lambda.Authorizer.csproj" />
+    <ProjectReference Include="..\Lho.Lambda.AlarmNotifier\Lho.Lambda.AlarmNotifier.csproj" />
   </ItemGroup>
 </Project>

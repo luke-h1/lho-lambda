@@ -55,6 +55,7 @@ runs:
         LASTFM_API_KEY: op://ci-cd/lho-lambda/LASTFM_API_KEY
         LASTFM_USERNAME: op://ci-cd/lho-lambda/LASTFM_USERNAME
         SENTRY_DSN: op://ci-cd/lho-lambda/SENTRY_DSN
+        DISCORD_WEBHOOK_URL: op://ci-cd/lho-lambda/DISCORD_WEBHOOK_URL
         OP_ENV_FILE: ".env"
 
     - name: Set Terraform variables
@@ -66,6 +67,7 @@ runs:
         echo "TF_VAR_lastfm_api_key=$LASTFM_API_KEY" >> $GITHUB_ENV
         echo "TF_VAR_lastfm_username=$LASTFM_USERNAME" >> $GITHUB_ENV
         echo "TF_VAR_sentry_dsn=$SENTRY_DSN" >> $GITHUB_ENV
+        echo "TF_VAR_discord_webhook_url=$DISCORD_WEBHOOK_URL" >> $GITHUB_ENV
 
     - name: Terraform init
       shell: bash
@@ -103,6 +105,12 @@ runs:
           --self-contained false \
           -p:PublishReadyToRun=true \
           --output .build/release/authorizer-package
+        dotnet publish src/Lho.Lambda.AlarmNotifier/Lho.Lambda.AlarmNotifier.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained false \
+          -p:PublishReadyToRun=true \
+          --output .build/release/alarm-notifier-package
 
     - name: Get version
       id: version

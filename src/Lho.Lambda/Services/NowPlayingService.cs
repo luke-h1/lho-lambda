@@ -18,125 +18,126 @@ public class NowPlayingService(
   FeatureFlagsOptions featureFlags,
   ObservabilityOptions observability)
 {
-  private const string LastFmProvider = "lastfm";
-  private const string SpotifyProvider = "spotify";
-  private const string LastFmCacheKey = "NowPlaying:lastfm";
-  private const string SpotifyCacheKey = "NowPlaying:spotify";
+    private const string LastFmProvider = "lastfm";
+    private const string SpotifyProvider = "spotify";
+    private const string LastFmCacheKey = "NowPlaying:lastfm";
+    private const string SpotifyCacheKey = "NowPlaying:spotify";
 
-  public async Task<NowPlayingResult> HandleNowPlaying(string? rawProvider)
-  {
-    var provider = NormaliseProvider(rawProvider);
-    var response = provider == SpotifyProvider
-      ? await GetCachedNowPlaying(SpotifyCacheKey, SpotifyProvider, HandleSpotifyNowPlaying)
-      : await GetCachedNowPlaying(LastFmCacheKey, LastFmProvider, HandleLastFmNowPlaying);
-
-    return new NowPlayingResult(response, provider);
-  }
-
-  private static string NormaliseProvider(string? rawProvider)
-  {
-    return string.Equals(rawProvider, SpotifyProvider, StringComparison.OrdinalIgnoreCase)
-      ? SpotifyProvider
-      : LastFmProvider;
-  }
-
-  private async Task<NowPlayingResponse> GetCachedNowPlaying(
-    string cacheKey,
-    string provider,
-    Func<Task<NowPlayingResponse>> fetch)
-  {
-    try
+    public async Task<NowPlayingResult> HandleNowPlaying(string? rawProvider)
     {
-      var cachedResponse = cache.Get<NowPlayingResponse>(cacheKey);
-      if (cachedResponse is not null)
-      {
-        logger.LogLine("Returning cached now playing response");
-        return cachedResponse;
-      }
+        var provider = NormaliseProvider(rawProvider);
+        var response = provider == SpotifyProvider
+          ? await GetCachedNowPlaying(SpotifyCacheKey, SpotifyProvider, HandleSpotifyNowPlaying)
+          : await GetCachedNowPlaying(LastFmCacheKey, LastFmProvider, HandleLastFmNowPlaying);
 
-      var response = await fetch();
-
-      if (response.Status == 200)
-      {
-        cache.Set(cacheKey, response, TimeSpan.FromSeconds(5));
-      }
-
-      return response;
-    }
-    catch (Exception exception)
-    {
-      logger.LogLine($"Error fetching now playing data from {provider}: {exception}");
-      await SentryTelemetry.CaptureExceptionAsync(exception, observability, logger, new Dictionary<string, string?>
-      {
-        [InvocationTags.Operation] = "now-playing",
-        [InvocationTags.Provider] = provider
-      });
-      return EmptyResponse(status: 500);
-    }
-  }
-
-  private async Task<NowPlayingResponse> HandleLastFmNowPlaying()
-  {
-    var recentTracksResponse = await lastFmApi.GetRecentTracks();
-    var track = recentTracksResponse.RecentTracks.Tracks.FirstOrDefault();
-    if (track is null || !IsNowPlaying(track))
-    {
-      logger.LogLine("No song currently playing");
-      return EmptyResponse(status: 200);
+        return new NowPlayingResult(response, provider);
     }
 
-    return new NowPlayingResponse(
-        IsPlaying: true,
-        Maintenance: false,
-        Status: 200,
-        Album: track.Album.Text,
-        AlbumImageUrl: track.Images.LastOrDefault(image => !string.IsNullOrEmpty(image.Url))?.Url ?? "",
-        Artist: track.Artist.Text,
-        SongUrl: track.Url,
-        Title: track.Name);
-  }
-
-  private async Task<NowPlayingResponse> HandleSpotifyNowPlaying()
-  {
-    if (!featureFlags.ShouldCallSpotify)
+    private static string NormaliseProvider(string? rawProvider)
     {
-      return EmptyResponse(maintenance: true, status: 200);
+        return string.Equals(rawProvider, SpotifyProvider, StringComparison.OrdinalIgnoreCase)
+          ? SpotifyProvider
+          : LastFmProvider;
     }
 
-    var nowPlayingResponse = await spotifyApi.GetNowPlaying();
-    if (nowPlayingResponse?.Item is null || !nowPlayingResponse.IsPlaying)
+    private async Task<NowPlayingResponse> GetCachedNowPlaying(
+      string cacheKey,
+      string provider,
+      Func<Task<NowPlayingResponse>> fetch)
     {
-      logger.LogLine("No song currently playing");
-      return EmptyResponse(status: 200);
+        try
+        {
+            var cachedResponse = cache.Get<NowPlayingResponse>(cacheKey);
+            if (cachedResponse is not null)
+            {
+                logger.LogLine("Returning cached now playing response");
+                return cachedResponse;
+            }
+
+            var response = await fetch();
+
+            if (response.Status == 200)
+            {
+                cache.Set(cacheKey, response, TimeSpan.FromSeconds(5));
+            }
+
+            return response;
+        }
+        catch (Exception exception)
+        {
+            logger.LogLine($"Error fetching now playing data from {provider}: {exception}");
+            await SentryTelemetry.CaptureExceptionAsync(exception, observability, logger, new Dictionary<string, string?>
+            {
+                [InvocationTags.Operation] = "now-playing",
+                [InvocationTags.Provider] = provider
+            });
+            return EmptyResponse(status: 500);
+        }
     }
 
-    var item = nowPlayingResponse.Item;
-    return new NowPlayingResponse(
-        IsPlaying: nowPlayingResponse.IsPlaying,
-        Maintenance: false,
-        Status: 200,
-        Album: item.Album.Name,
-        AlbumImageUrl: item.Album.Images.FirstOrDefault()?.Url ?? "",
-        Artist: string.Join(", ", item.Artists.Select(artist => artist.Name)),
-        SongUrl: item.ExternalUrls.Spotify,
-        Title: item.Name);
-  }
+    private async Task<NowPlayingResponse> HandleLastFmNowPlaying()
+    {
+        var recentTracksResponse = await lastFmApi.GetRecentTracks();
+        var tracks = recentTracksResponse.RecentTracks.Tracks;
+        var track = tracks.Count > 0 ? tracks[0] : null;
+        if (track is null || !IsNowPlaying(track))
+        {
+            logger.LogLine("No song currently playing");
+            return EmptyResponse(status: 200);
+        }
 
-  private static bool IsNowPlaying(LastFmTrack track)
-  {
-    return string.Equals(track.Attributes?.NowPlaying, "true", StringComparison.OrdinalIgnoreCase);
-  }
+        return new NowPlayingResponse(
+            IsPlaying: true,
+            Maintenance: false,
+            Status: 200,
+            Album: track.Album.Text,
+            AlbumImageUrl: track.Images.LastOrDefault(image => !string.IsNullOrEmpty(image.Url))?.Url ?? "",
+            Artist: track.Artist.Text,
+            SongUrl: track.Url,
+            Title: track.Name);
+    }
 
-  private static NowPlayingResponse EmptyResponse(int status, bool maintenance = false)
-  {
-    return new NowPlayingResponse(
-        IsPlaying: false,
-        Maintenance: maintenance,
-        Status: status,
-        Album: "",
-        AlbumImageUrl: "",
-        Artist: "",
-        SongUrl: "",
-        Title: "");
-  }
+    private async Task<NowPlayingResponse> HandleSpotifyNowPlaying()
+    {
+        if (!featureFlags.ShouldCallSpotify)
+        {
+            return EmptyResponse(maintenance: true, status: 200);
+        }
+
+        var nowPlayingResponse = await spotifyApi.GetNowPlaying();
+        if (nowPlayingResponse?.Item is null || !nowPlayingResponse.IsPlaying)
+        {
+            logger.LogLine("No song currently playing");
+            return EmptyResponse(status: 200);
+        }
+
+        var item = nowPlayingResponse.Item;
+        return new NowPlayingResponse(
+            IsPlaying: nowPlayingResponse.IsPlaying,
+            Maintenance: false,
+            Status: 200,
+            Album: item.Album.Name,
+            AlbumImageUrl: item.Album.Images.Count > 0 ? item.Album.Images[0].Url : "",
+            Artist: string.Join(", ", item.Artists.Select(artist => artist.Name)),
+            SongUrl: item.ExternalUrls.Spotify,
+            Title: item.Name);
+    }
+
+    private static bool IsNowPlaying(LastFmTrack track)
+    {
+        return string.Equals(track.Attributes?.NowPlaying, "true", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static NowPlayingResponse EmptyResponse(int status, bool maintenance = false)
+    {
+        return new NowPlayingResponse(
+            IsPlaying: false,
+            Maintenance: maintenance,
+            Status: status,
+            Album: "",
+            AlbumImageUrl: "",
+            Artist: "",
+            SongUrl: "",
+            Title: "");
+    }
 }

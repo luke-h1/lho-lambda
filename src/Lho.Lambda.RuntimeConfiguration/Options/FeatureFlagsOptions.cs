@@ -2,7 +2,7 @@ namespace Lho.Lambda.RuntimeConfiguration.Options;
 
 public class FeatureFlagsOptions
 {
-  public const string Section = "FeatureFlags";
+    public const string Section = "FeatureFlags";
 
-  public bool ShouldCallSpotify { get; init; } = true;
+    public bool ShouldCallSpotify { get; init; } = true;
 }

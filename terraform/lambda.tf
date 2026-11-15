@@ -53,6 +53,7 @@ resource "aws_lambda_function" "lambda" {
       SPOTIFY_REFRESH_TOKEN = var.spotify_refresh_token
       LASTFM_API_KEY        = var.lastfm_api_key
       LASTFM_USERNAME       = var.lastfm_username
+      SHOULD_CALL_SPOTIFY   = "false"
       SERVICE_NAME          = "now-playing"
       ENVIRONMENT           = var.env
       VERSION               = var.app_version

@@ -35,17 +35,6 @@ public record SpotifyAlbum(
 
 public record SpotifyExternalUrls(string Spotify);
 
-public record SpotifyTopTracksResponse(IReadOnlyList<SpotifyItem> Items);
-
-public record TopTrackResponseItem(
-  string Title,
-  string Artist,
-  string Album,
-  string AlbumImageUrl,
-  string SongUrl);
-
-public record TopTracksApiResponse(IReadOnlyList<TopTrackResponseItem> Tracks);
-
 public record VersionResponse(
   string Version,
   string DeployedAt,

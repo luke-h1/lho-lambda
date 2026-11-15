@@ -110,7 +110,7 @@ variable "api_key" {
 }
 
 variable "discord_webhook_url" {
-  description = "Discord webhook URL for logging authorizer denials"
+  description = "Discord webhook URL that receives CloudWatch alarm notifications"
   type        = string
   sensitive   = true
 }

@@ -2,6 +2,25 @@ using System.Text.Json.Serialization;
 
 namespace Lho.Lambda.Models;
 
+public record LastFmTopTracksResponse(
+    [property: JsonPropertyName("toptracks")] LastFmTopTracks TopTracks
+);
+
+public record LastFmTopTracks(
+    [property: JsonPropertyName("track")] IReadOnlyList<LastFmTopTrack> Tracks
+);
+
+public record LastFmTopTrack(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("artist")] LastFmTopTrackArtist Artist,
+    [property: JsonPropertyName("url")] string Url,
+    [property: JsonPropertyName("image")] IReadOnlyList<LastFmImage> Images
+);
+
+public record LastFmTopTrackArtist(
+    [property: JsonPropertyName("name")] string Name
+);
+
 public record LastFmRecentTracksResponse(
   [property: JsonPropertyName("recenttracks")] LastFmRecentTracks RecentTracks);
 
@@ -41,3 +60,14 @@ public record RecentTrackResponseItem(
   long? PlayedAt);
 
 public record RecentTracksApiResponse(IReadOnlyList<RecentTrackResponseItem> Tracks);
+
+
+public record TopTrackResponseItem(
+    string Title,
+    string Artist,
+    string Album,
+    string AlbumImageUrl,
+    string SongUrl
+);
+
+public record TopTracksApiResponse(IReadOnlyList<TopTrackResponseItem> Tracks);
