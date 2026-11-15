@@ -1,3 +1,9 @@
+# [live.e162ddb](https://github.com/luke-h1/lho-lambda/compare/vlive.4037bc6...vlive.e162ddb) (2026-11-15)
+
+### Bug Fixes
+
+* **api:** top tracks + now playing (#221) ([e162ddb](https://github.com/luke-h1/lho-lambda/commit/e162ddbbe48dacaf10464f3e7b372b71e4649997))
+
 # [live.4037bc6](https://github.com/luke-h1/lho-lambda/compare/vlive.077b233...vlive.4037bc6) (2026-07-22)
 
 ### Features
