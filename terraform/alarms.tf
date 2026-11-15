@@ -14,34 +14,14 @@ locals {
     Environment = var.env
   })
 
-  monitored_request_metrics = {
-    gateway = {
-      alarm_name  = "${aws_apigatewayv2_api.lambda.name}-requests-anomaly"
-      description = "Unusual request rate on the now-playing API Gateway (${var.env})"
-      namespace   = "AWS/ApiGateway"
-      metric_name = "Count"
-      dimensions = {
-        ApiId = aws_apigatewayv2_api.lambda.id
-        Stage = aws_apigatewayv2_stage.lambda.name
-      }
-    }
+  monitored_functions = {
     lambda = {
-      alarm_name  = "${aws_lambda_function.lambda.function_name}-invocations-anomaly"
-      description = "Unusual invocation rate on the now-playing Lambda (${var.env})"
-      namespace   = "AWS/Lambda"
-      metric_name = "Invocations"
-      dimensions = {
-        FunctionName = aws_lambda_function.lambda.function_name
-      }
+      function_name = aws_lambda_function.lambda.function_name
+      description   = "High invocation rate on the now-playing Lambda (${var.env}): >${var.invocations_alarm_threshold}/min"
     }
     authorizer = {
-      alarm_name  = "${aws_lambda_function.api_authorizer.function_name}-invocations-anomaly"
-      description = "Unusual invocation rate on the now-playing authorizer Lambda (${var.env})"
-      namespace   = "AWS/Lambda"
-      metric_name = "Invocations"
-      dimensions = {
-        FunctionName = aws_lambda_function.api_authorizer.function_name
-      }
+      function_name = aws_lambda_function.api_authorizer.function_name
+      description   = "High invocation rate on the now-playing authorizer Lambda (${var.env}): >${var.invocations_alarm_threshold}/min"
     }
   }
 }
@@ -142,7 +122,7 @@ resource "aws_lambda_function" "alarm_notifier" {
   source_code_hash = data.archive_file.alarm_notifier_archive.output_base64sha256
   timeout          = 30
   memory_size      = 256
-  architectures    = ["x86_64"]
+  architectures    = ["arm64"]
   description      = "Now playing CloudWatch alarm notifier ${var.env}"
 
   environment {
@@ -194,34 +174,26 @@ resource "aws_lambda_permission" "alarm_notifier_sns" {
   source_arn    = aws_sns_topic.alarms[0].arn
 }
 
-resource "aws_cloudwatch_metric_alarm" "requests_anomaly" {
-  for_each = local.notifications_enabled ? local.monitored_request_metrics : {}
+resource "aws_cloudwatch_metric_alarm" "invocations_high" {
+  for_each = local.notifications_enabled ? local.monitored_functions : {}
 
-  alarm_name          = each.value.alarm_name
+  alarm_name          = "${each.value.function_name}-invocations-high"
   alarm_description   = each.value.description
-  comparison_operator = "GreaterThanUpperThreshold"
-  evaluation_periods  = 2
-  threshold_metric_id = "ad1"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 5
+  datapoints_to_alarm = 3
+  threshold           = var.invocations_alarm_threshold
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_sns_topic.alarms[0].arn]
+  ok_actions          = [aws_sns_topic.alarms[0].arn]
 
-  metric_query {
-    id          = "ad1"
-    expression  = "ANOMALY_DETECTION_BAND(m1, 2)"
-    label       = "${each.value.metric_name} (expected)"
-    return_data = true
-  }
+  metric_name = "Invocations"
+  namespace   = "AWS/Lambda"
+  period      = 60
+  statistic   = "Sum"
 
-  metric_query {
-    id          = "m1"
-    return_data = true
-    metric {
-      metric_name = each.value.metric_name
-      namespace   = each.value.namespace
-      period      = 60
-      stat        = "Sum"
-      dimensions  = each.value.dimensions
-    }
+  dimensions = {
+    FunctionName = each.value.function_name
   }
 
   tags = local.alarm_tags
@@ -240,6 +212,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_notifier_errors" {
   threshold           = 1
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_sns_topic.alarms[0].arn]
+  ok_actions          = [aws_sns_topic.alarms[0].arn]
 
   dimensions = {
     FunctionName = aws_lambda_function.alarm_notifier[0].function_name
@@ -261,6 +234,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_notifier_dlq_depth" {
   threshold           = 1
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_sns_topic.alarms[0].arn]
+  ok_actions          = [aws_sns_topic.alarms[0].arn]
 
   dimensions = {
     QueueName = aws_sqs_queue.alarm_notifier_dlq[0].name

@@ -36,14 +36,18 @@ public class AlarmNotifierFunctionTests
     [Theory]
     [InlineData("OK")]
     [InlineData("INSUFFICIENT_DATA")]
-    public async Task SkipsNonAlarmStates(string state)
+    public async Task PostsEveryStateTransition(string state)
     {
         var handler = new RecordingHandler(HttpStatusCode.NoContent);
         var function = CreateFunction(handler);
 
         await function.FunctionHandler(CreateEvent(AlarmMessage(state)), new TestLambdaContext());
 
-        Assert.Empty(handler.Requests);
+        var request = Assert.Single(handler.Requests);
+        using var payload = JsonDocument.Parse(request.Body);
+        Assert.Equal(
+            $"CW alarm **now-playing-lambda-live-invocations-anomaly** -> `{state}`",
+            payload.RootElement.GetProperty("content").GetString());
     }
 
     [Fact]

@@ -95,19 +95,19 @@ runs:
       run: |
         dotnet publish src/Lho.Lambda/Lho.Lambda.csproj \
           --configuration Release \
-          --runtime linux-x64 \
+          --runtime linux-arm64 \
           --self-contained false \
           -p:PublishReadyToRun=true \
           --output .build/release/lambda-package
         dotnet publish src/Lho.Lambda.Authorizer/Lho.Lambda.Authorizer.csproj \
           --configuration Release \
-          --runtime linux-x64 \
+          --runtime linux-arm64 \
           --self-contained false \
           -p:PublishReadyToRun=true \
           --output .build/release/authorizer-package
         dotnet publish src/Lho.Lambda.AlarmNotifier/Lho.Lambda.AlarmNotifier.csproj \
           --configuration Release \
-          --runtime linux-x64 \
+          --runtime linux-arm64 \
           --self-contained false \
           -p:PublishReadyToRun=true \
           --output .build/release/alarm-notifier-package

@@ -45,7 +45,7 @@ resource "aws_lambda_function" "lambda" {
 
   description   = "Now playing Lambda ${var.env}"
   memory_size   = 512
-  architectures = ["x86_64"]
+  architectures = ["arm64"]
   environment {
     variables = {
       SPOTIFY_CLIENT_ID     = var.spotify_client_id

@@ -44,13 +44,6 @@ public class AlarmNotifierFunction(DiscordWebhookClient discord, string environm
             }
             context.Logger.LogLine($"alarm received {alarm.AlarmName} -> {alarm.NewStateValue} for reason -> {alarm.NewStateReason}");
 
-            if (!string.Equals(alarm.NewStateValue, "ALARM", StringComparison.OrdinalIgnoreCase))
-            {
-                context.Logger.LogLine($"skipping non-alarm state {alarm.NewStateValue} for {alarm.AlarmName}");
-                continue;
-            }
-
-
             try
             {
                 await _discord.SendAlarm(alarm, _environmentName);
