@@ -16,6 +16,12 @@ Last.fm is the source of truth for Now Playing. Spotify may still be used when e
 
 `/api/now-playing?provider=lastfm` is a compatibility alias for the main Now Playing path. It should behave the same as omitting the provider query parameter.
 
+### Last.fm Account Requirements
+
+The Lambda reads the account named by `LASTFM_USERNAME` with a public API key and no user session. The account must not hide its recent listening. If the account has "Hide recent listening information" enabled, Last.fm answers `user.getrecenttracks` with HTTP 403 and error code 17. Now Playing and Recently Played both depend on that call, so both fail. Top tracks and profile data stay readable.
+
+The Last.fm client maps error codes 6 (unknown user), 10 (invalid API key) and 17 (hidden listening) to messages that name the account and the setting to change. Other codes keep the raw Last.fm message.
+
 ### Empty Now-Playing View Model
 
 When the Last.fm lookup fails, `/api/now-playing` should still return an empty Now Playing view model with `status: 500` in the response body. This preserves the client-facing shape while making the failure visible to callers that inspect the model.
