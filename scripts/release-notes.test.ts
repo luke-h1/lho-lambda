@@ -135,6 +135,15 @@ describe('flags', () => {
     );
   });
 
+  test('does not take the next option as a value or touch any file', () => {
+    const dir = repo({ a: note('patch', 'First.') });
+    expect(() =>
+      run(dir, 'release', '--version', '--date', '2026-11-17'),
+    ).toThrow('--version needs a value');
+    expect(readFileSync(join(dir, 'CHANGELOG.md'), 'utf8')).toBe('# Changelog\n');
+    expect(existsSync(join(dir, '.changeset', 'a.md'))).toBe(true);
+  });
+
   test('rejects a level that is not a positive integer', () => {
     const dir = repo({});
     expect(() => run(dir, 'pending', '--level', '0')).toThrow(
