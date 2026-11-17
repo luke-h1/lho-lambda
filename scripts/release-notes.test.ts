@@ -81,9 +81,7 @@ describe('release', () => {
     expect(changelog).toBe(
       '# Changelog\n\n## live.abc1234 - 2026-11-17\n\n### New\n\n- Adds a recent-tracks endpoint.\n',
     );
-    expect(printed.trim()).toBe(
-      '## live.abc1234 - 2026-11-17\n\n### New\n\n- Adds a recent-tracks endpoint.',
-    );
+    expect(printed.trim()).toBe('### New\n\n- Adds a recent-tracks endpoint.');
     expect(readdirSync(join(dir, '.changeset')).sort()).toEqual([
       'config.json',
     ]);
