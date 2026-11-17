@@ -85,7 +85,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          bun scripts/release-notes.ts release --version "${VERSION}" > "$RUNNER_TEMP/release-notes.md"
+          if bun scripts/release-notes.ts show --version "${VERSION}" > /dev/null 2>&1; then
+            echo "CHANGELOG.md already has a section for ${VERSION}"
+          else
+            bun scripts/release-notes.ts release --version "${VERSION}"
+          fi
+          bun scripts/release-notes.ts show --version "${VERSION}" > "$RUNNER_TEMP/release-notes.md"
           echo "notes_path=$RUNNER_TEMP/release-notes.md" >> "$GITHUB_OUTPUT"
 
           git add CHANGELOG.md .changeset

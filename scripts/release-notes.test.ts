@@ -22,7 +22,7 @@ function repo(changesets: Record<string, string>): string {
 function run(dir: string, ...args: string[]): string {
   const result = Bun.spawnSync(['bun', SCRIPT, ...args], { cwd: dir });
   if (result.exitCode !== 0) {
-    throw new Error(result.stderr.toString());
+    throw new Error(result.stderr.toString().trim());
   }
   return result.stdout.toString();
 }
@@ -106,6 +106,39 @@ describe('release', () => {
     const changelog = readFileSync(join(dir, 'CHANGELOG.md'), 'utf8');
     expect(changelog.indexOf('live.bbbbbbb')).toBeLessThan(
       changelog.indexOf('live.aaaaaaa'),
+    );
+  });
+});
+
+describe('show', () => {
+  test('prints the body of a recorded section', () => {
+    const dir = repo({ a: note('patch', 'Caches the now-playing lookup.') });
+    run(dir, 'release', '--version', 'live.abc1234', '--date', '2026-11-17');
+    expect(run(dir, 'show', '--version', 'live.abc1234').trim()).toBe(
+      '### Fixed\n\n- Caches the now-playing lookup.',
+    );
+  });
+
+  test('fails when the version has no section', () => {
+    const dir = repo({});
+    expect(() => run(dir, 'show', '--version', 'live.abc1234')).toThrow(
+      'CHANGELOG.md has no section for live.abc1234',
+    );
+  });
+});
+
+describe('flags', () => {
+  test('fails when a flag has no value', () => {
+    const dir = repo({});
+    expect(() => run(dir, 'release', '--version')).toThrow(
+      '--version needs a value',
+    );
+  });
+
+  test('rejects a level that is not a positive integer', () => {
+    const dir = repo({});
+    expect(() => run(dir, 'pending', '--level', '0')).toThrow(
+      '--level must be a positive integer',
     );
   });
 });

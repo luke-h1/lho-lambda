@@ -16,7 +16,7 @@ Release notes are changesets. A pull request adds a `.changeset/*.md` file with:
 bun run changeset
 ```
 
-Write one or two sentences for the person who uses the API, and pick the bump type. `major`, `minor` and `patch` select the heading (Breaking changes, New, Fixed). A change with nothing to tell a user still has to pass the `Changeset present` check:
+Write one or two sentences for the person who uses the API, and pick the bump type. `major`, `minor` and `patch` select the heading (Breaking changes, New, Fixed). The `Changeset present` check fails a pull request that adds no changeset file, whatever it changes. A change with nothing to tell a user still has to add one:
 
 ```bash
 bun run changeset -- --empty
