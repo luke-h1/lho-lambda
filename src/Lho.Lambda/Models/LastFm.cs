@@ -55,6 +55,10 @@ public record LastFmDate(
   [property: JsonPropertyName("uts")] string? Uts,
   [property: JsonPropertyName("#text")] string? Text);
 
+public record LastFmErrorResponse(
+  [property: JsonPropertyName("error")] int Error,
+  [property: JsonPropertyName("message")] string? Message);
+
 public record RecentTrackResponseItem(
   string Title,
   string Artist,
