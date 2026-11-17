@@ -154,7 +154,7 @@ describe('malformed notes', () => {
   test('rejects text with no package and bump', () => {
     const dir = repo({ loose: '---\n---\n\nAdds a recent-tracks endpoint.\n' });
     expect(() => run(dir, 'pending')).toThrow(
-      '.changeset/loose.md has text but no package and bump; run bun run changeset',
+      '.changeset/loose.md has text but no package and bump; add them to the file or delete it and run bun run changeset',
     );
     expect(() => run(dir, 'release', '--version', 'live.abc1234')).toThrow(
       'has text but no package and bump',
@@ -165,7 +165,7 @@ describe('malformed notes', () => {
   test('rejects a bump with no text', () => {
     const dir = repo({ blank: note('patch', '') });
     expect(() => run(dir, 'pending')).toThrow(
-      '.changeset/blank.md has a bump but no text; write the note or use bun run changeset -- --empty',
+      '.changeset/blank.md has a bump but no text; write the note in the file or delete it and run bun run changeset -- --empty',
     );
   });
 });
