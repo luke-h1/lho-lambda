@@ -22,6 +22,8 @@ Write one or two sentences for the person who uses the API, and pick the bump ty
 bun run changeset -- --empty
 ```
 
+A note with text and no bump, or a bump and no text, fails the check.
+
 Every merge to `main` deploys live. The release workflow then writes the waiting notes into `CHANGELOG.md` under that release's `live.<sha>` version, deletes the files and puts the same notes in the GitHub release. Preview the notes that are waiting:
 
 ```bash

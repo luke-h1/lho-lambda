@@ -28,6 +28,8 @@ release's `live.<sha>` version and deletes the files. The bump type only picks
 the heading. Releases are named after the commit, not a semver number, so no
 changeset changes a version.
 
+A note with text and no bump, or a bump and no text, fails the check and the release.
+
 Preview the notes that are waiting:
 
 ```sh
