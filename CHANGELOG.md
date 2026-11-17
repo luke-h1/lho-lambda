@@ -1,5 +1,9 @@
 # Changelog
 
+## live.d2afbd8 - 2026-11-17
+
+This release has no user-facing changes.
+
 ## live.c480282 - 2026-11-17
 
 This release has no user-facing changes.
